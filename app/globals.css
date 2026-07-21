@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+:root {
+  /* Slate & Ember palette */
+  --color-navy: #1c2530;
+  --color-navy-light: #2a3644;
+  --color-ember: #b84f26;
+  --color-ember-dark: #96401e;
+  --color-ember-light: #f3dccb;
+  --color-cream: #f7f4ef;
+  --color-card: #ffffff;
+  --color-muted: #6b6459;
+  --color-border: #e3ddd2;
+  --color-success: #4b7a5a;
+}
+
+@theme inline {
+  --color-navy: var(--color-navy);
+  --color-navy-light: var(--color-navy-light);
+  --color-ember: var(--color-ember);
+  --color-ember-dark: var(--color-ember-dark);
+  --color-ember-light: var(--color-ember-light);
+  --color-cream: var(--color-cream);
+  --color-card: var(--color-card);
+  --color-muted: var(--color-muted);
+  --color-border: var(--color-border);
+  --color-success: var(--color-success);
+
+  --font-display: var(--font-archivo);
+  --font-sans: var(--font-inter);
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-navy);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display), system-ui, sans-serif;
+}
+
+/* Visible focus states everywhere, incl. custom components (WCAG 2.1 AA) */
+:focus-visible {
+  outline: 3px solid var(--color-ember);
+  outline-offset: 2px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
