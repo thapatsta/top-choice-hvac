@@ -27,12 +27,8 @@ export default function ServiceAreaPage() {
 
       <section className="py-14 sm:py-20">
         <Container className="max-w-3xl">
-          <p className="rounded-xl border border-dashed border-ember bg-ember-light p-4 text-sm text-ember-dark">
-            [PLACEHOLDER: confirm the complete, accurate list of cities/regions
-            actually served before launch — the list below is a starting
-            point.]
-          </p>
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
+          {/* TODO: confirm the complete, accurate list of cities/regions actually served before launch — the list below is a plausible starting point */}
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             {site.serviceAreas.map((city) => (
               <div
                 key={city}

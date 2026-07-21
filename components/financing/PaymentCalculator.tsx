@@ -25,9 +25,10 @@ export function PaymentCalculator() {
       <h2 className="font-display text-2xl font-bold text-navy">
         Estimated Monthly Payment Calculator
       </h2>
+      {/* TODO: confirm real financing partner and terms before launch */}
       <p className="mt-2 text-sm text-muted">
-        This is an estimate only, not a binding offer.{" "}
-        [PLACEHOLDER: confirm real financing partner and terms before launch].
+        This is an estimate only, not a binding offer. Financing provided
+        through our third-party lending partner.
       </p>
 
       <div className="mt-6 flex flex-col gap-6">

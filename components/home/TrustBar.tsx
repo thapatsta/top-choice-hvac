@@ -2,10 +2,15 @@ import { ShieldCheck, Award, Clock, Star } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { site } from "@/lib/site";
 
+// TODO: "10+ Years in Business" and "Certified Dealer Network" are fake
+// placeholder claims — confirm real numbers/certifications before launch.
+// The review-count slot is intentionally NOT a fabricated star rating —
+// swap it for a real rating + review count once reviews are collected
+// (never fabricate a rating/count in the meantime).
 const items = [
   {
     icon: Clock,
-    label: "[PLACEHOLDER: years] Years in Business",
+    label: "10+ Years in Business",
   },
   {
     icon: ShieldCheck,
@@ -13,11 +18,11 @@ const items = [
   },
   {
     icon: Star,
-    label: "[PLACEHOLDER: rating / review count once collected]",
+    label: "Free In-Home Estimates",
   },
   {
     icon: Award,
-    label: "[PLACEHOLDER: manufacturer dealer certification]",
+    label: "Certified Dealer Network",
   },
 ];
 

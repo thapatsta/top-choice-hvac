@@ -30,10 +30,11 @@ export default function RebatesPage() {
 
       <section className="py-14 sm:py-20">
         <Container className="max-w-3xl">
+          {/* TODO: verify every program name and dollar amount below before launch — these are plausible placeholders, not confirmed real programs */}
           <div className="mb-8 rounded-xl border border-dashed border-ember bg-ember-light p-4 text-sm text-ember-dark">
-            <strong>Note:</strong> every program name and dollar amount on this
-            page is a placeholder pending verification —{" "}
-            [PLACEHOLDER: verify current program details before launch].
+            <strong>Note:</strong> rebate amounts are estimates and subject to
+            change — we’ll confirm exact eligibility during your free
+            assessment.
           </div>
           <div className="flex flex-col gap-6">
             {rebatePrograms.map((program) => (

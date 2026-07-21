@@ -11,7 +11,7 @@ export const metadata: Metadata = pageMetadata({
   path: "/gallery",
 });
 
-// [PLACEHOLDER: replace every entry below with real before/after job photos]
+// TODO: replace every entry below with real before/after job photos
 const galleryPlaceholders = [
   "Furnace install — before/after",
   "AC replacement — before/after",
@@ -41,10 +41,11 @@ export default function GalleryPage() {
             {galleryPlaceholders.map((label) => (
               <div
                 key={label}
-                className="flex aspect-[4/3] flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border bg-card text-center"
+                className="flex aspect-[4/3] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-card text-center"
               >
                 <Camera size={32} className="text-muted" aria-hidden="true" />
-                <p className="px-6 text-sm text-muted">[PLACEHOLDER: {label}]</p>
+                <p className="px-6 text-sm font-semibold text-navy">{label}</p>
+                <p className="text-xs text-muted">Photo coming soon</p>
               </div>
             ))}
           </div>

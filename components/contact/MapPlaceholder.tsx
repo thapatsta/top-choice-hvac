@@ -12,12 +12,10 @@ export function MapPlaceholder() {
         }}
         aria-hidden="true"
       />
+      {/* TODO: embed a real Google Maps location once the business address is confirmed */}
       <div className="relative flex flex-col items-center gap-2 px-6 text-center text-white">
         <MapPin size={32} className="text-ember" aria-hidden="true" />
-        <p className="text-sm text-white/70">
-          [PLACEHOLDER: embed a real Google Maps location once the business
-          address is confirmed]
-        </p>
+        <p className="text-sm text-white/70">Map coming soon</p>
       </div>
     </div>
   );

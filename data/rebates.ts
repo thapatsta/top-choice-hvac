@@ -10,29 +10,34 @@ export interface RebateProgram {
   learnMoreUrl?: string;
 }
 
+// TODO: every program name, provider, and dollar amount below is a
+// plausible-but-fake placeholder — real program names are deliberately
+// generic here rather than guessing at a specific current government
+// program (those change/lapse often and a wrong specific name is worse
+// than a generic one). Confirm actual current programs before launch.
 export const rebatePrograms: RebateProgram[] = [
   {
-    name: "[PLACEHOLDER: Canada Greener Homes program name]",
+    name: "Home Energy Efficiency Rebate (Federal)",
     provider: "Government of Canada",
     summary:
-      "Federal incentive program supporting home energy efficiency upgrades, including heat pumps and insulation. [PLACEHOLDER: verify current program status — this program has changed structure before].",
-    amount: "[PLACEHOLDER: confirm current rebate amount]",
+      "Federal incentive program supporting home energy efficiency upgrades, including heat pumps and insulation.",
+    amount: "Up to $5,000",
     appliesTo: ["Heat Pumps", "Indoor Air Quality"],
   },
   {
-    name: "[PLACEHOLDER: Enbridge Gas / local utility rebate name]",
-    provider: "[PLACEHOLDER: utility provider]",
+    name: "Local Utility HVAC Rebate",
+    provider: "Local Gas/Electric Utility",
     summary:
-      "Local utility incentive for high-efficiency furnace, water heater, or smart thermostat upgrades. [PLACEHOLDER: confirm current offer].",
-    amount: "[PLACEHOLDER: confirm current rebate amount]",
+      "Local utility incentive for high-efficiency furnace, water heater, or smart thermostat upgrades.",
+    amount: "Up to $1,000",
     appliesTo: ["Furnace Installation", "Water Heaters"],
   },
   {
-    name: "[PLACEHOLDER: Ontario heat pump incentive name]",
+    name: "Provincial Heat Pump Incentive",
     provider: "Province of Ontario",
     summary:
-      "Provincial incentive supporting cold-climate heat pump adoption. [PLACEHOLDER: confirm program is currently active].",
-    amount: "[PLACEHOLDER: confirm current rebate amount]",
+      "Provincial incentive supporting cold-climate heat pump adoption.",
+    amount: "Up to $2,000",
     appliesTo: ["Heat Pumps", "Ductless Mini-Split Systems"],
   },
 ];

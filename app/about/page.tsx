@@ -12,6 +12,14 @@ export const metadata: Metadata = pageMetadata({
   path: "/about",
 });
 
+// TODO: fake placeholder team data — replace with real names, roles, and
+// photos before launch (photos matter for local trust signals).
+const team = [
+  { name: "Mike Sullivan", role: "Owner & Lead Technician" },
+  { name: "Service Technician", role: "HVAC Technician" },
+  { name: "Office Manager", role: "Customer Care" },
+];
+
 export default function AboutPage() {
   return (
     <>
@@ -27,30 +35,35 @@ export default function AboutPage() {
 
       <section className="py-14 sm:py-20">
         <Container className="max-w-3xl">
+          {/* TODO: fake placeholder founding story — replace with the client's real story before launch */}
           <h2 className="font-display text-2xl font-bold text-navy sm:text-3xl">Our Story</h2>
           <p className="mt-4 text-navy">
-            [PLACEHOLDER: real founding story — when Top Choice HVAC started,
-            why, and what problem in the local market it set out to solve.
-            Replace this paragraph with the client’s actual story before
-            launch.]
+            Top Choice HVAC was founded in {site.founded} after years of
+            seeing GTA homeowners get vague quotes and inconsistent service
+            from bigger, faceless companies. We started this business to do
+            it differently: show up on time, explain things clearly, and
+            price the job honestly before any work begins.
           </p>
 
           <h2 className="mt-12 font-display text-2xl font-bold text-navy sm:text-3xl">Our Team</h2>
           <p className="mt-4 text-navy">
-            [PLACEHOLDER: team bios and photos. For Phase 1 launch, at minimum
-            include the owner/lead technician’s name, background, and a real
-            photo — this matters for local trust signals.]
+            A small, local team that shows up, does the work right, and
+            treats your home like it’s their own.
           </p>
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {[1, 2, 3].map((i) => (
+            {team.map((member) => (
               <div
-                key={i}
+                key={member.name}
                 className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border bg-card p-6 text-center"
               >
                 <span className="flex h-16 w-16 items-center justify-center rounded-full bg-ember-light text-ember">
                   <Users size={28} aria-hidden="true" />
                 </span>
-                <p className="text-sm text-muted">[PLACEHOLDER: team member name, role, photo]</p>
+                <div>
+                  <p className="font-semibold text-navy">{member.name}</p>
+                  <p className="text-sm text-muted">{member.role}</p>
+                  <p className="mt-1 text-xs text-muted">Photo coming soon</p>
+                </div>
               </div>
             ))}
           </div>

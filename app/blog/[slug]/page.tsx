@@ -65,9 +65,9 @@ export default async function BlogPostPage({
       <section className="py-14 sm:py-20">
         <Container className="max-w-2xl">
           <div className="rounded-xl border border-dashed border-ember bg-ember-light p-4 text-sm text-ember-dark">
-            [PLACEHOLDER: this is a starter outline, not a finished article.
-            Target keyword: <strong>{post.targetKeyword}</strong>. Full copy
-            should come from the client or a follow-up content phase.]
+            This is a starter outline, not a finished article. Target
+            keyword: <strong>{post.targetKeyword}</strong>. Full copy should
+            come from the client or a follow-up content phase.
           </div>
 
           <h2 className="mt-8 font-display text-xl font-bold text-navy">Planned Outline</h2>

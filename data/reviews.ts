@@ -5,35 +5,13 @@
 
 export interface Review {
   placeholder: true;
-  author: string;
-  rating: number;
-  text: string;
-  source: string;
 }
 
-export const reviews: Review[] = [
-  {
-    placeholder: true,
-    author: "[Customer name pending]",
-    rating: 5,
-    text: "[PLACEHOLDER: real customer review text will go here, with permission to display]",
-    source: "Google",
-  },
-  {
-    placeholder: true,
-    author: "[Customer name pending]",
-    rating: 5,
-    text: "[PLACEHOLDER: real customer review text will go here, with permission to display]",
-    source: "Google",
-  },
-  {
-    placeholder: true,
-    author: "[Customer name pending]",
-    rating: 5,
-    text: "[PLACEHOLDER: real customer review text will go here, with permission to display]",
-    source: "Google",
-  },
-];
+// Intentionally just empty placeholder slots — no fake name, quote, or star
+// rating is attached to any of them. A rendered 5-star rating next to a
+// "[name pending]" label would still visually read as a real testimonial,
+// which is exactly what must not be faked here.
+export const reviews: Review[] = [{ placeholder: true }, { placeholder: true }, { placeholder: true }];
 
 // aggregateRating is intentionally left undefined until real review data
 // exists — never fabricate this for AggregateRating structured data.

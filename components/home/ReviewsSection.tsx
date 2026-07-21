@@ -1,5 +1,5 @@
+import { MessageSquareText } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { ReviewStars } from "@/components/ui/ReviewStars";
 import { reviews } from "@/data/reviews";
 
 export function ReviewsSection() {
@@ -11,7 +11,7 @@ export function ReviewsSection() {
             What Customers Are Saying
           </h2>
           <p className="max-w-lg text-muted">
-            Real reviews are pending collection and display permission — see{" "}
+            Real reviews are coming soon — see{" "}
             <a href="/reviews" className="font-semibold text-ember hover:underline">
               our Reviews page
             </a>{" "}
@@ -19,15 +19,13 @@ export function ReviewsSection() {
           </p>
         </div>
         <div className="mt-10 flex snap-x gap-5 overflow-x-auto pb-4 sm:grid sm:grid-cols-3 sm:overflow-visible">
-          {reviews.map((review, i) => (
+          {reviews.map((_, i) => (
             <div
               key={i}
-              className="w-[85%] shrink-0 snap-start rounded-2xl border border-dashed border-border bg-cream p-6 sm:w-auto"
+              className="flex w-[85%] shrink-0 snap-start flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-cream p-6 text-center sm:w-auto"
             >
-              <ReviewStars rating={review.rating} />
-              <p className="mt-4 text-sm italic text-muted">&ldquo;{review.text}&rdquo;</p>
-              <p className="mt-4 text-sm font-semibold text-navy">{review.author}</p>
-              <p className="text-xs text-muted">via {review.source}</p>
+              <MessageSquareText size={28} className="text-muted" aria-hidden="true" />
+              <p className="text-sm text-muted">Review coming soon</p>
             </div>
           ))}
         </div>

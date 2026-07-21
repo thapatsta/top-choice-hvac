@@ -79,6 +79,9 @@ function formatUSD(n: number): string {
   return `$${n.toLocaleString("en-CA")}`;
 }
 
+// TODO: every dollar figure returned by this function is a placeholder —
+// confirm real pricing ranges with the client before launch (see
+// installedRanges/repairRanges above).
 export function getEstimateFraming(need: QuoteNeed, systemType: QuoteSystemType): string {
   const systemLabel =
     systemTypeOptions.find((s) => s.value === systemType)?.label.toLowerCase() ?? "system";
@@ -91,7 +94,7 @@ export function getEstimateFraming(need: QuoteNeed, systemType: QuoteSystemType)
     const r = repairRanges[systemType];
     return `Most ${systemLabel} repairs like yours run between ${formatUSD(r.low)}–${formatUSD(
       r.high
-    )}. [PLACEHOLDER: confirm real pricing ranges with client before launch]`;
+    )}.`;
   }
 
   const r = installedRanges[systemType];
@@ -99,5 +102,5 @@ export function getEstimateFraming(need: QuoteNeed, systemType: QuoteSystemType)
     need === "new-install" ? "installs" : "replacements"
   } like yours run between ${formatUSD(r.low)}–${formatUSD(
     r.high
-  )} installed — we'll confirm your exact price after a quick, free in-home assessment. [PLACEHOLDER: confirm real pricing ranges with client before launch]`;
+  )} installed — we'll confirm your exact price after a quick, free in-home assessment.`;
 }

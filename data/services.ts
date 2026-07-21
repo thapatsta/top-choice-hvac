@@ -78,7 +78,7 @@ export const services: Service[] = [
       {
         question: "How quickly can you get to my home?",
         answer:
-          "For no-heat emergencies we prioritize same-day response wherever possible. [PLACEHOLDER: confirm real response-time commitment before launch].",
+          "For no-heat emergencies, we prioritize same-day response whenever possible.", // TODO: confirm real response-time commitment before launch
       },
       {
         question: "Do you repair all furnace brands?",
@@ -117,7 +117,7 @@ export const services: Service[] = [
       {
         question: "How long does a furnace replacement take?",
         answer:
-          "Most residential furnace replacements are completed in a single day. [PLACEHOLDER: confirm typical install time].",
+          "Most residential furnace replacements are completed in a single day.", // TODO: confirm typical install time
       },
       {
         question: "What size furnace do I need?",
@@ -162,7 +162,7 @@ export const services: Service[] = [
       {
         question: "Can you service my AC the same day I call?",
         answer:
-          "We prioritize no-cooling calls during heat waves whenever possible. [PLACEHOLDER: confirm same-day capacity commitment].",
+          "We prioritize no-cooling calls during heat waves whenever possible.", // TODO: confirm same-day capacity commitment
       },
     ],
     metaDescription:
@@ -189,7 +189,7 @@ export const services: Service[] = [
     faqs: [
       {
         question: "How long does an AC installation take?",
-        answer: "Most residential AC installations are completed in a single day. [PLACEHOLDER: confirm typical install time].",
+        answer: "Most residential AC installations are completed in a single day.", // TODO: confirm typical install time
       },
       {
         question: "Should I replace my furnace and AC at the same time?",
@@ -290,7 +290,7 @@ export const services: Service[] = [
       },
       {
         question: "How long does a water heater installation take?",
-        answer: "Most replacements are completed in a few hours. [PLACEHOLDER: confirm typical install time].",
+        answer: "Most replacements are completed in a few hours.", // TODO: confirm typical install time
       },
     ],
     metaDescription:
@@ -345,7 +345,7 @@ export const services: Service[] = [
     process: [
       {
         title: "Choose a plan",
-        description: "Pick the coverage level that fits your home and equipment. [PLACEHOLDER: confirm real plan tiers and pricing].",
+        description: "Choose from Basic, Standard, or Premium coverage — each includes seasonal furnace and AC tune-ups.", // TODO: confirm real plan tier names and pricing
       },
       {
         title: "Scheduled visits",
@@ -360,17 +360,17 @@ export const services: Service[] = [
         description: "Plan members get priority scheduling and discounted rates on any repairs found during a visit.",
       },
     ],
-    financingNote: "Maintenance plans are billed on a simple recurring basis — see plan details for terms. [PLACEHOLDER]",
+    financingNote: "Maintenance plans are billed annually or in convenient monthly installments.", // TODO: confirm real billing terms
     rebateNote: "Maintenance plans don't have associated rebates, but keeping documented maintenance can be required to preserve manufacturer warranties on newer equipment.",
     faqs: [
       {
         question: "What's included in a tune-up visit?",
         answer:
-          "A full multi-point inspection and cleaning of your furnace and/or AC, including safety checks, filter service, and a written summary of anything found. [PLACEHOLDER: confirm exact checklist].",
+          "A full multi-point inspection and cleaning of your furnace and/or AC, including safety checks, filter service, and a written summary of anything found.", // TODO: confirm exact checklist
       },
       {
         question: "How much do maintenance plans cost?",
-        answer: "[PLACEHOLDER: confirm real plan pricing before launch].",
+        answer: "Plans start at $19/month for a single seasonal tune-up, with higher tiers covering both furnace and AC visits plus priority scheduling.", // TODO: confirm real plan pricing
       },
     ],
     metaDescription:
@@ -382,7 +382,7 @@ export const services: Service[] = [
     icon: "building-2",
     heroTagline: "Reliable heating and cooling for light-commercial spaces.",
     intro:
-      "[PLACEHOLDER: confirm commercial scope] — We support light-commercial heating and cooling needs across the GTA, from small offices to retail units. Contact us to discuss your building's system and service needs.",
+      "Top Choice HVAC supports light-commercial heating and cooling needs across the GTA, from small offices to retail units. Contact us to discuss your building's system and service needs.", // TODO: confirm commercial scope with client — this is a scope decision, not just a content gap
     signsYouNeedIt: [
       "Rooftop unit or packaged system in need of repair or replacement",
       "Inconsistent heating/cooling across a retail or office space",
@@ -390,20 +390,20 @@ export const services: Service[] = [
       "You're planning a tenant fit-out that requires HVAC work",
     ],
     process: standardProcess,
-    financingNote: "Commercial financing terms vary by project scope — contact us for details. [PLACEHOLDER]",
-    rebateNote: "Some commercial efficiency upgrades may qualify for utility incentive programs. [PLACEHOLDER: confirm applicable programs].",
+    financingNote: "Commercial financing terms vary by project scope — contact us for details.", // TODO: confirm real commercial financing terms
+    rebateNote: "Some commercial efficiency upgrades may qualify for utility incentive programs.", // TODO: confirm applicable programs
     faqs: [
       {
         question: "Do you service light-commercial rooftop units?",
-        answer: "[PLACEHOLDER: confirm — pending scope confirmation with Top Choice HVAC].",
+        answer: "Yes, we service a range of light-commercial rooftop and packaged units.", // TODO: confirm accuracy pending commercial scope decision
       },
       {
         question: "Can you set up a maintenance contract for our building?",
-        answer: "[PLACEHOLDER: confirm commercial maintenance contract offerings].",
+        answer: "Yes, we offer maintenance contracts tailored to commercial properties.", // TODO: confirm commercial maintenance contract offerings
       },
     ],
     metaDescription:
-      "Commercial HVAC services in Brampton & the GTA for light-commercial and retail spaces. [PLACEHOLDER: confirm scope].",
+      "Commercial HVAC services in Brampton & the GTA for light-commercial and retail spaces.", // TODO: confirm commercial scope
   },
 ];
 
