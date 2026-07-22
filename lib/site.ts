@@ -10,7 +10,7 @@ export const site = {
   tagline: "Brampton & GTA Heating and Cooling, Done Right",
   // TODO: real domain once purchased — currently a placeholder
   domain: "topchoicehvac.ca",
-  url: "https://topchoicehvac.ca",
+  url: "https://patrickdes.ca/topchoice",
 
   phone: {
     // TODO: real phone number — this is a fake placeholder number

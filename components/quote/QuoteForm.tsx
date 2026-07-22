@@ -4,6 +4,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Phone, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { site } from "@/lib/site";
+import { BASE_PATH } from "@/lib/basePath";
 import {
   needOptions,
   systemTypeOptions,
@@ -157,7 +158,7 @@ export function QuoteForm({
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const res = await fetch("/api/leads", {
+      const res = await fetch(`${BASE_PATH}/api/leads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
