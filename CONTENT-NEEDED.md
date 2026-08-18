@@ -18,9 +18,8 @@ groups them by topic for a client handoff.
   (used in the footer NAP block, `/contact`, and LocalBusiness JSON-LD on
   Home + Contact — must match the Google Business Profile exactly once one
   exists)
-- **Domain name** — `lib/site.ts` → `site.url` / `site.domain` (currently
-  `topchoicehvac.example`; update before launch, including in
-  `metadataBase`)
+- ~~**Domain name** — `lib/site.ts` → `site.url` / `site.domain`~~ **Done:**
+  domain is now `https://topchoicehvac.ca`.
 - **Year founded** — `lib/site.ts` → `site.founded`
 - **License / TSSA number** — `lib/site.ts` → `site.license` (shown in
   footer, `/about`, `/faq`)

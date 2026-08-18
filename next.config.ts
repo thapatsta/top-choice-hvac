@@ -3,7 +3,7 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 import { BASE_PATH } from "./lib/basePath";
 
 const nextConfig: NextConfig = {
-  basePath: BASE_PATH,
+  ...(BASE_PATH ? { basePath: BASE_PATH } : {}),
 };
 
 initOpenNextCloudflareForDev();
