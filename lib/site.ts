@@ -8,9 +8,8 @@ export const site = {
   // TODO: confirm legal business name before launch
   legalName: "Top Choice HVAC Inc.",
   tagline: "Brampton & GTA Heating and Cooling, Done Right",
-  // TODO: real domain once purchased — currently a placeholder
   domain: "topchoicehvac.ca",
-  url: "https://patrickdes.ca/topchoice",
+  url: "https://topchoicehvac.ca",
 
   phone: {
     // TODO: real phone number — this is a fake placeholder number
