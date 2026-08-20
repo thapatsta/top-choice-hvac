@@ -9,7 +9,7 @@ export const generalFaqs: FAQ[] = [
   {
     question: "Is Top Choice HVAC licensed and insured?",
     answer:
-      "Yes. We are fully licensed and insured.", // TODO: confirm exact license/TSSA number and insurance details before launch — see CONTENT-NEEDED.md
+      "Yes. We are fully licensed and insured.", // TODO: confirm exact insurance details before launch — see CONTENT-NEEDED.md
   },
   {
     question: "What areas do you serve?",

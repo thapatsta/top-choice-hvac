@@ -22,7 +22,6 @@ export function Footer() {
             Brampton and serving the greater GTA.
           </p>
           <p className="mt-4 text-sm">{site.insurance}</p>
-          <p className="mt-1 text-sm">License: {site.license}</p>
         </div>
 
         <div>
