@@ -84,16 +84,16 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-cream/95 backdrop-blur">
-      <Container className="flex h-16 items-center justify-between gap-4 sm:h-20">
+      <Container className="flex h-16 items-center justify-between gap-3 sm:h-20">
         <Link
           href="/"
-          className="flex items-center gap-2 font-display text-xl font-bold tracking-tight text-navy sm:text-2xl"
+          className="flex shrink-0 items-center gap-2 font-display text-xl font-bold tracking-tight text-navy sm:text-2xl"
           onClick={() => setOpen(false)}
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-navy text-ember">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-navy text-ember">
             <Flame size={20} aria-hidden="true" />
           </span>
-          <span>
+          <span className="whitespace-nowrap">
             Top Choice <span className="text-ember">HVAC</span>
           </span>
         </Link>
@@ -114,15 +114,19 @@ export function Header() {
           )}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3">
           <a
             href={site.phone.href}
-            className="hidden items-center gap-2 font-display text-lg font-bold text-navy hover:text-ember sm:flex"
+            className="hidden items-center gap-2 font-display text-base font-bold text-navy hover:text-ember sm:flex"
           >
             <Phone size={18} aria-hidden="true" />
-            {site.phone.display}
+            Call Now
           </a>
-          <Button href="/get-quote" size="md" className="hidden sm:inline-flex">
+          <Button
+            href="/get-quote"
+            size="md"
+            className="max-sm:hidden whitespace-nowrap"
+          >
             Get a Free Quote
           </Button>
           <a
