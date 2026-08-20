@@ -71,14 +71,10 @@ export default function AboutPage() {
           <h2 className="mt-12 font-display text-2xl font-bold text-navy sm:text-3xl">
             Licensed, Insured, Local
           </h2>
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-5">
               <ShieldCheck size={22} className="text-ember" aria-hidden="true" />
               <span className="text-sm font-semibold text-navy">{site.insurance}</span>
-            </div>
-            <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-5">
-              <ShieldCheck size={22} className="text-ember" aria-hidden="true" />
-              <span className="text-sm font-semibold text-navy">License: {site.license}</span>
             </div>
             <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-5">
               <MapPin size={22} className="text-ember" aria-hidden="true" />
