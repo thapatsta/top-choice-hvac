@@ -9,26 +9,37 @@ groups them by topic for a client handoff.
 
 ## 1. Core business identity (highest priority)
 
-- **Legal business name** — `lib/site.ts` → `site.legalName`
-- **Real phone number** — `lib/site.ts` → `site.phone` (currently a fake
-  placeholder number, used in `tel:` links sitewide, the sticky mobile call
-  bar, and JSON-LD)
+- ~~**Legal business name**~~ **Confirmed:** `site.legalName` is
+  "Top Choice HVAC Inc." — this is intentionally different from the Google
+  Business Profile listing name ("Top choice air system inc"); see the
+  open NAP name-mismatch item below.
+- ~~**Real phone number**~~ **Done:** `site.phone` is now
+  `(647) 763-2970`.
 - **Real email address** — `lib/site.ts` → `site.email`
-- **Physical street address, postal code** — `lib/site.ts` → `site.address`
-  (used in the footer NAP block, `/contact`, and LocalBusiness JSON-LD on
-  Home + Contact — must match the Google Business Profile exactly once one
-  exists)
+- ~~**Physical street address, postal code**~~ **Done:** `site.address` is
+  now 3 Lloyd Cres, Brampton, ON L7A 0G4, matching the Google Business
+  Profile.
 - ~~**Domain name** — `lib/site.ts` → `site.url` / `site.domain`~~ **Done:**
   domain is now `https://topchoicehvac.ca`.
-- **Year founded** — `lib/site.ts` → `site.founded`
+- ~~**Year founded**~~ **Done:** `site.founded` is now `"2021"`.
 - **License / TSSA number** — `lib/site.ts` → `site.license` (shown in
-  footer, `/about`, `/faq`)
+  footer, `/about`, `/faq`) — still a fake placeholder, real number not yet
+  provided.
 - **Insurance wording** — `lib/site.ts` → `site.insurance`
 - **Hours of operation & real emergency response commitment** —
   `lib/site.ts` → `site.hours` (currently plausible placeholders)
-- **Social media handles** — `lib/site.ts` → `site.social` (not yet linked
-  anywhere in the UI — add once handles exist)
+- ~~**Social media handles**~~ **Partially done:** `site.social.instagram`
+  is now real (`https://instagram.com/topchoiceairsystem`). Confirmed no
+  Facebook page exists (`site.social.facebook` is `null`).
+  `site.social.google` is still a placeholder — GBP URL not yet provided.
 - **Google Business Profile URL** — `lib/site.ts` → `site.social.google`
+  (still a placeholder)
+- **NAP name mismatch (open, flagged 2026-08-20):** the Google Business
+  Profile is listed as "Top choice air system inc", which does not match
+  `site.name` ("Top Choice HVAC") used in `NAP_JSON_LD`. Decision: keep the
+  site's branding and rename the Google Business Profile listing to match
+  instead — see the `TODO` above `NAP_JSON_LD` in `lib/site.ts`. This is a
+  live NAP inconsistency until the GBP name is changed.
 
 ## 2. Service area
 
@@ -43,21 +54,26 @@ groups them by topic for a client handoff.
   currently uses a plausible-but-generic starting set ("fast response",
   "upfront pricing", "local team", "we explain, don't upsell"). Confirm
   which of these are actually true and swap in anything more specific.
-- **Years in business, star rating, review count, manufacturer
-  certifications** — `components/home/TrustBar.tsx` (all placeholders)
+- ~~**Years in business, star rating, review count**~~ **Done:**
+  `components/home/TrustBar.tsx` now shows "5+ Years in Business" (from
+  `site.founded`) and "5.0★ (23 Google Reviews)". **Manufacturer
+  certifications** ("Certified Dealer Network") is still a placeholder.
 - **Team bios and headshots** — `/about` page (currently 3 placeholder
   cards with no names)
 - **Founding story** — `/about` page "Our Story" section
 
 ## 4. Reviews
 
-- **Real, permissioned customer reviews.** No testimonials, star ratings,
-  or review counts have been fabricated anywhere, including in structured
-  data — this was treated as a hard rule throughout the build. `/reviews`,
-  the homepage reviews section, and `data/reviews.ts` are all wired up with
-  placeholder cards ready to receive real content.
-- **Decision needed:** embed a live Google Business Profile review widget,
-  or manually curate reviews with written customer permission to display.
+- ~~**Real, permissioned customer reviews.**~~ **Done (2026-08-20):**
+  `data/reviews.ts` now holds 6 real, publicly-posted 5-star Google reviews
+  (attributed as first name + last initial, e.g. "Jasmeen D.", per standard
+  practice), and `aggregateRating` is set to the real 5.0★/23-review total
+  from the Google Business Profile. `/reviews` and the homepage reviews
+  section render these. Re-check the listing periodically for newer
+  reviews to add.
+- ~~**Decision needed:** embed a live Google Business Profile review
+  widget, or manually curate reviews with written customer permission to
+  display.~~ **Decided:** manual curation (see above), not a live widget.
 
 ## 5. Photography
 

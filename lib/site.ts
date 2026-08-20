@@ -3,29 +3,27 @@
 // once one exists. Every value marked with a TODO below is a plausible fake
 // placeholder — see CONTENT-NEEDED.md for the full list.
 
+import { aggregateRating } from "@/data/reviews";
+
 export const site = {
   name: "Top Choice HVAC",
-  // TODO: confirm legal business name before launch
   legalName: "Top Choice HVAC Inc.",
   tagline: "Brampton & GTA Heating and Cooling, Done Right",
   domain: "topchoicehvac.ca",
   url: "https://topchoicehvac.ca",
 
   phone: {
-    // TODO: real phone number — this is a fake placeholder number
-    display: "(905) 555-0142",
-    href: "tel:+19055550142",
+    display: "(647) 763-2970",
+    href: "tel:+16477632970",
   },
   // TODO: real email address
   email: "info@topchoicehvac.ca",
 
   address: {
-    // TODO: real street address — this is a fake placeholder
-    street: "123 Queen Street East",
+    street: "3 Lloyd Cres",
     city: "Brampton",
     region: "ON",
-    // TODO: real postal code
-    postalCode: "L6W 1A1",
+    postalCode: "L7A 0G4",
     country: "CA",
   },
 
@@ -38,17 +36,17 @@ export const site = {
     emergency: "24/7 emergency service",
   },
 
-  // TODO: confirm real founding year
-  founded: "2015",
+  founded: "2021",
   // TODO: real HVAC contractor license / TSSA number — this is a fake placeholder
   license: "TSSA #123456",
   // TODO: confirm exact required licensing/insurance wording
   insurance: "Fully licensed and insured",
 
-  // TODO: real social handles — these are fake placeholder URLs
   social: {
-    facebook: "https://facebook.com/topchoicehvac",
-    instagram: "https://instagram.com/topchoicehvac",
+    // Confirmed: no Facebook page exists yet.
+    facebook: null as string | null,
+    instagram: "https://instagram.com/topchoiceairsystem",
+    // TODO: real Google Business Profile URL/short link — this is a fake placeholder
     google: "https://g.page/topchoicehvac",
   },
 
@@ -72,6 +70,13 @@ export const site = {
   gtmId: "[PLACEHOLDER: GTM_ID]",
 } as const;
 
+// TODO: name mismatch pending resolution — the Google Business Profile is
+// currently listed as "Top choice air system inc", which does not match the
+// site brand name below ("Top Choice HVAC") or legalName ("Top Choice HVAC
+// Inc."). Decision (2026-08-20): keep the site's name here and update the
+// Google Business Profile listing name to match instead, rather than
+// changing the site's branding. Until the GBP name is changed, this is a
+// live NAP inconsistency that can weaken local search ranking signals.
 export const NAP_JSON_LD = {
   name: site.name,
   telephone: site.phone.href.replace("tel:", ""),
@@ -84,4 +89,15 @@ export const NAP_JSON_LD = {
     postalCode: site.address.postalCode,
     addressCountry: site.address.country,
   },
+  // Never fabricate this — only include it once data/reviews.ts has a real,
+  // verified aggregateRating from the Google Business Profile.
+  ...(aggregateRating
+    ? {
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: aggregateRating.ratingValue,
+          reviewCount: aggregateRating.reviewCount,
+        },
+      }
+    : {}),
 };
