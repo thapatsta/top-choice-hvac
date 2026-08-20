@@ -22,9 +22,11 @@ groups them by topic for a client handoff.
 - ~~**Domain name** — `lib/site.ts` → `site.url` / `site.domain`~~ **Done:**
   domain is now `https://topchoicehvac.ca`.
 - ~~**Year founded**~~ **Done:** `site.founded` is now `"2021"`.
-- **License / TSSA number** — `lib/site.ts` → `site.license` (shown in
-  footer, `/about`, `/faq`) — still a fake placeholder, real number not yet
-  provided.
+- **License / TSSA number** — the fake placeholder `site.license` value and
+  its "License: ..." display in the footer, `/about`, and `TrustBar` were
+  removed (2026-08-20) since no real number was ever confirmed. If a real
+  license number is provided later, re-add `site.license` in `lib/site.ts`
+  and restore the display in those three spots.
 - **Insurance wording** — `lib/site.ts` → `site.insurance`
 - **Hours of operation & real emergency response commitment** —
   `lib/site.ts` → `site.hours` (currently plausible placeholders)

@@ -35,9 +35,7 @@ export function TrustBar() {
         ))}
       </Container>
       <Container className="mt-3">
-        <p className="text-center text-xs text-muted">
-          {site.insurance} — License {site.license}
-        </p>
+        <p className="text-center text-xs text-muted">{site.insurance}</p>
       </Container>
     </section>
   );

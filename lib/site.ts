@@ -37,8 +37,6 @@ export const site = {
   },
 
   founded: "2021",
-  // TODO: real HVAC contractor license / TSSA number — this is a fake placeholder
-  license: "TSSA #123456",
   // TODO: confirm exact required licensing/insurance wording
   insurance: "Fully licensed and insured",
 
