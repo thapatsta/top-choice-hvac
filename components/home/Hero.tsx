@@ -19,7 +19,7 @@ export function Hero() {
         <div>
           <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-semibold text-ember-light">
             <ShieldCheck size={16} aria-hidden="true" />
-            Serving Brampton & the GTA
+            Serving the Greater Toronto Area
           </p>
           <h1 className="mt-5 font-display text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
             Heating & cooling problems, fixed by people who show up on time.
