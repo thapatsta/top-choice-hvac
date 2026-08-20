@@ -115,11 +115,14 @@ alt text — to keep Core Web Vitals green.
 
 ## 10. Analytics & tracking
 
-- **Google Analytics 4 measurement ID** — `lib/site.ts` → `site.ga4Id`
+- ~~**Google Analytics 4 measurement ID** — `lib/site.ts` → `site.ga4Id`~~
+  **Done:** live GA4 measurement ID is `G-NVWFCHZ8S3` (property "Top Choice
+  HVAC", web data stream for `https://topchoicehvac.ca`).
 - **Google Tag Manager container ID** — `lib/site.ts` → `site.gtmId`
 - Both are wired into `app/layout.tsx` behind a check that skips loading the
   scripts entirely while the IDs remain placeholders, so nothing fires
-  until real IDs are set.
+  until real IDs are set. GTM's script still won't load until a real
+  container ID replaces its placeholder.
 - **Google Search Console** — not yet set up; verify domain once live.
 
 ## 11. Lead delivery backend
