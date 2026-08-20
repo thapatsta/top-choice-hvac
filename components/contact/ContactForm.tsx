@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { BASE_PATH } from "@/lib/basePath";
 
 export function ContactForm() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
@@ -30,7 +31,7 @@ export function ContactForm() {
         setSubmitting(true);
         setError(null);
         try {
-          const res = await fetch("/api/contact", {
+          const res = await fetch(`${BASE_PATH}/api/contact`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(form),

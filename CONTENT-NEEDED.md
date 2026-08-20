@@ -18,9 +18,8 @@ groups them by topic for a client handoff.
   (used in the footer NAP block, `/contact`, and LocalBusiness JSON-LD on
   Home + Contact — must match the Google Business Profile exactly once one
   exists)
-- **Domain name** — `lib/site.ts` → `site.url` / `site.domain` (currently
-  `topchoicehvac.example`; update before launch, including in
-  `metadataBase`)
+- ~~**Domain name** — `lib/site.ts` → `site.url` / `site.domain`~~ **Done:**
+  domain is now `https://topchoicehvac.ca`.
 - **Year founded** — `lib/site.ts` → `site.founded`
 - **License / TSSA number** — `lib/site.ts` → `site.license` (shown in
   footer, `/about`, `/faq`)
@@ -116,11 +115,14 @@ alt text — to keep Core Web Vitals green.
 
 ## 10. Analytics & tracking
 
-- **Google Analytics 4 measurement ID** — `lib/site.ts` → `site.ga4Id`
+- ~~**Google Analytics 4 measurement ID** — `lib/site.ts` → `site.ga4Id`~~
+  **Done:** live GA4 measurement ID is `G-NVWFCHZ8S3` (property "Top Choice
+  HVAC", web data stream for `https://topchoicehvac.ca`).
 - **Google Tag Manager container ID** — `lib/site.ts` → `site.gtmId`
 - Both are wired into `app/layout.tsx` behind a check that skips loading the
   scripts entirely while the IDs remain placeholders, so nothing fires
-  until real IDs are set.
+  until real IDs are set. GTM's script still won't load until a real
+  container ID replaces its placeholder.
 - **Google Search Console** — not yet set up; verify domain once live.
 
 ## 11. Lead delivery backend

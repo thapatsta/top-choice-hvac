@@ -32,6 +32,38 @@ npm run build   # production build
 npm run lint    # eslint
 ```
 
+## Deployment
+
+The site is hosted on Cloudflare Workers via [OpenNext](https://opennext.js.org/cloudflare)
+(`@opennextjs/cloudflare`), at the root of `topchoicehvac.ca`.
+
+Deploys run automatically via [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml)
+on every push to the default branch (and can also be triggered manually from
+the Actions tab via `workflow_dispatch`). That workflow needs two repo
+secrets set under **Settings → Secrets and variables → Actions**:
+
+- `CLOUDFLARE_API_TOKEN` — a Cloudflare API token with permission to deploy
+  Workers. Create one at
+  [dash.cloudflare.com → My Profile → API Tokens](https://dash.cloudflare.com/profile/api-tokens)
+  (the "Edit Cloudflare Workers" template covers this).
+- `CLOUDFLARE_ACCOUNT_ID` — found on the Cloudflare dashboard's Workers &
+  Pages overview page, or in the URL when viewing the account
+  (`dash.cloudflare.com/<account-id>`).
+
+To deploy manually instead of waiting on CI:
+
+```bash
+npm run deploy   # opennextjs-cloudflare build && wrangler deploy
+```
+
+This requires being logged in locally via `wrangler login`, or having
+`CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` set in the environment.
+
+The custom domain is attached to the Worker from the Cloudflare dashboard:
+**Workers & Pages → (this worker) → Settings → Domains & Routes → Add
+Custom Domain**. This requires the `topchoicehvac.ca` zone to already be
+active on Cloudflare (DNS managed by Cloudflare) before it can be attached.
+
 ## Project structure
 
 - `app/` — routes (see the site map in the PR description / project docs)

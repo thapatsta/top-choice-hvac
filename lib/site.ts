@@ -8,7 +8,6 @@ export const site = {
   // TODO: confirm legal business name before launch
   legalName: "Top Choice HVAC Inc.",
   tagline: "Brampton & GTA Heating and Cooling, Done Right",
-  // TODO: real domain once purchased — currently a placeholder
   domain: "topchoicehvac.ca",
   url: "https://topchoicehvac.ca",
 
@@ -64,12 +63,12 @@ export const site = {
     // TODO: confirm full list of GTA cities actually served
   ],
 
-  // TODO: real GA4 measurement ID / GTM container ID. Left as literal
-  // "[PLACEHOLDER..." strings on purpose — app/layout.tsx checks for that
-  // exact prefix to decide whether to inject the GA4/GTM script tags at
-  // all, so swapping in fake IDs here would make the site start firing
-  // real requests to Google's servers referencing IDs that don't exist.
-  ga4Id: "[PLACEHOLDER: GA4_ID]",
+  // GA4 measurement ID is now live. GTM container ID is still a TODO — left
+  // as a literal "[PLACEHOLDER..." string on purpose, since app/layout.tsx
+  // checks for that exact prefix to decide whether to inject the GTM script
+  // tag, so swapping in a fake ID here would make the site start firing
+  // real requests to Google's servers referencing an ID that doesn't exist.
+  ga4Id: "G-NVWFCHZ8S3",
   gtmId: "[PLACEHOLDER: GTM_ID]",
 } as const;
 
