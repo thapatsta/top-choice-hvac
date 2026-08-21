@@ -34,7 +34,7 @@ export function Hero() {
             </Button>
             <Button href={site.phone.href} variant="outline-light" size="lg">
               <Phone size={20} aria-hidden="true" />
-              {site.phone.display}
+              Call Now
             </Button>
           </div>
         </div>
