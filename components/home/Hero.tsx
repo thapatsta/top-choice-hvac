@@ -26,7 +26,7 @@ export function Hero() {
           </h1>
           <p className="mt-5 max-w-lg text-lg text-white/80">
             No-heat and no-AC calls, honest quotes, and straight answers —
-            from a local Brampton team, not a call centre.
+            from a local team, not a call centre.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button href="/get-quote" size="lg">
@@ -34,7 +34,7 @@ export function Hero() {
             </Button>
             <Button href={site.phone.href} variant="outline-light" size="lg">
               <Phone size={20} aria-hidden="true" />
-              {site.phone.display}
+              Call Now
             </Button>
           </div>
         </div>
