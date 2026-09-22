@@ -5,6 +5,11 @@
 
 import { aggregateRating } from "@/data/reviews";
 
+// Verified 2026-09-22 against the live Google Business Profile listing.
+const googlePlaceId = "ChIJyRbRXAn8kaYRzRKD7SJFXMs";
+const googleListingName = "Top Choice Air System Inc";
+const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(googleListingName)}&query_place_id=${googlePlaceId}`;
+
 export const site = {
   name: "Top Choice HVAC",
   legalName: "Top Choice HVAC Inc.",
@@ -40,12 +45,14 @@ export const site = {
   // TODO: confirm exact required licensing/insurance wording
   insurance: "Fully licensed and insured",
 
+  googlePlaceId,
+  googleListingName,
+
   social: {
     // Confirmed: no Facebook page exists yet.
     facebook: null as string | null,
     instagram: "https://instagram.com/topchoiceairsystem",
-    // TODO: real Google Business Profile URL/short link — this is a fake placeholder
-    google: "https://g.page/topchoicehvac",
+    google: googleMapsUrl,
   },
 
   serviceAreas: [
@@ -87,6 +94,9 @@ export const NAP_JSON_LD = {
     postalCode: site.address.postalCode,
     addressCountry: site.address.country,
   },
+  sameAs: [site.social.instagram, site.social.google].filter(
+    (url): url is string => Boolean(url),
+  ),
   // Never fabricate this — only include it once data/reviews.ts has a real,
   // verified aggregateRating from the Google Business Profile.
   ...(aggregateRating

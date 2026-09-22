@@ -30,12 +30,14 @@ groups them by topic for a client handoff.
 - **Insurance wording** — `lib/site.ts` → `site.insurance`
 - **Hours of operation & real emergency response commitment** —
   `lib/site.ts` → `site.hours` (currently plausible placeholders)
-- ~~**Social media handles**~~ **Partially done:** `site.social.instagram`
-  is now real (`https://instagram.com/topchoiceairsystem`). Confirmed no
-  Facebook page exists (`site.social.facebook` is `null`).
-  `site.social.google` is still a placeholder — GBP URL not yet provided.
-- **Google Business Profile URL** — `lib/site.ts` → `site.social.google`
-  (still a placeholder)
+- ~~**Social media handles**~~ **Done:** `site.social.instagram` is real
+  (`https://instagram.com/topchoiceairsystem`). Confirmed no Facebook page
+  exists (`site.social.facebook` is `null`). `site.social.google` is now a
+  real Maps URL built from the verified place ID (see below).
+- ~~**Google Business Profile URL**~~ **Done (2026-09-22):**
+  `lib/site.ts` → `site.social.google` is a real Google Maps URL built from
+  `site.googlePlaceId` (`ChIJyRbRXAn8kaYRzRKD7SJFXMs`) and
+  `site.googleListingName` ("Top Choice Air System Inc").
 - **NAP name mismatch (open, flagged 2026-08-20):** the Google Business
   Profile is listed as "Top choice air system inc", which does not match
   `site.name` ("Top Choice HVAC") used in `NAP_JSON_LD`. Decision: keep the
