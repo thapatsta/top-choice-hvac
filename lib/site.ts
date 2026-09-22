@@ -56,6 +56,12 @@ export const site = {
     google: googleMapsUrl,
   },
 
+  // Individual Instagram POST permalinks (https://www.instagram.com/p/<id>/)
+  // shown on the homepage "See Our Recent Installs" section. Profile URLs
+  // don't work here — Instagram renders profile embeds blank. While empty,
+  // the section shows only the heading, copy, and follow button.
+  instagramPosts: [] as string[],
+
   serviceAreas: [
     "Brampton",
     "Mississauga",

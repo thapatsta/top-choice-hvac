@@ -82,11 +82,6 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/gallery" className="hover:text-ember">
-                Gallery
-              </Link>
-            </li>
-            <li>
               <Link href="/reviews" className="hover:text-ember">
                 Reviews
               </Link>
