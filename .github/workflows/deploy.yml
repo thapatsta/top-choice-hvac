@@ -3,7 +3,7 @@ name: Deploy
 on:
   push:
     branches:
-      - claude/top-choice-hvac-phase-1-2pr96s
+      - main
   workflow_dispatch: {}
 
 jobs:
