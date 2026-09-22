@@ -28,8 +28,11 @@ groups them by topic for a client handoff.
   license number is provided later, re-add `site.license` in `lib/site.ts`
   and restore the display in those three spots.
 - **Insurance wording** — `lib/site.ts` → `site.insurance`
-- **Hours of operation & real emergency response commitment** —
-  `lib/site.ts` → `site.hours` (currently plausible placeholders)
+- ~~**Hours of operation**~~ **Done (2026-09-22):** confirmed open 24/7,
+  matching the Google Business Profile. `lib/site.ts` → `site.hours.display`
+  is now "Always open"; the per-day fields were removed. **Real emergency
+  response commitment** is still outstanding — see the `TODO` above
+  `site.hours.emergency` in `lib/site.ts` and in `data/faqs.ts`.
 - ~~**Social media handles**~~ **Done:** `site.social.instagram` is real
   (`https://instagram.com/topchoiceairsystem`). Confirmed no Facebook page
   exists (`site.social.facebook` is `null`). `site.social.google` is now a
@@ -38,12 +41,15 @@ groups them by topic for a client handoff.
   `lib/site.ts` → `site.social.google` is a real Google Maps URL built from
   `site.googlePlaceId` (`ChIJyRbRXAn8kaYRzRKD7SJFXMs`) and
   `site.googleListingName` ("Top Choice Air System Inc").
-- **NAP name mismatch (open, flagged 2026-08-20):** the Google Business
-  Profile is listed as "Top choice air system inc", which does not match
-  `site.name` ("Top Choice HVAC") used in `NAP_JSON_LD`. Decision: keep the
-  site's branding and rename the Google Business Profile listing to match
-  instead — see the `TODO` above `NAP_JSON_LD` in `lib/site.ts`. This is a
-  live NAP inconsistency until the GBP name is changed.
+- **NAP name mismatch (open, flagged 2026-08-20, on hold 2026-09-22):** the
+  Google Business Profile is listed as "Top Choice Air System Inc", which
+  does not match `site.name` ("Top Choice HVAC") used in `NAP_JSON_LD`. The
+  earlier decision (2026-08-20) to rename the GBP listing to match the site
+  is on hold: the site keeps "Top Choice HVAC" for now, and the GBP stays
+  "Top Choice Air System Inc" pending confirmation of the incorporated name
+  and what's on the vehicles and invoices — see the `TODO` above
+  `NAP_JSON_LD` in `lib/site.ts`. This is a live NAP inconsistency until it's
+  resolved.
 
 ## 2. Service area
 
@@ -62,9 +68,13 @@ groups them by topic for a client handoff.
   `components/home/TrustBar.tsx` now shows "5+ Years in Business" (from
   `site.founded`) and "5.0★ (23 Google Reviews)". **Manufacturer
   certifications** ("Certified Dealer Network") is still a placeholder.
-- **Team bios and headshots** — `/about` page (currently 3 placeholder
-  cards with no names)
-- **Founding story** — `/about` page "Our Story" section
+- **Team bios and headshots** — `/about` page. **Partially done
+  (2026-09-22):** the one real team member, Robin (Owner & Lead Technician),
+  is now named on the page in place of the old fabricated/placeholder cards.
+  Still outstanding: a real headshot, and confirming whether any bio detail
+  beyond name/role should be added.
+- ~~**Founding story**~~ **Done (2026-09-22):** `/about` page "Our Story"
+  section now has Robin's real founding story.
 
 ## 4. Reviews
 

@@ -33,10 +33,11 @@ export const site = {
   },
 
   hours: {
-    // TODO: confirm real hours of operation
-    weekday: "7:00 AM – 8:00 PM",
-    saturday: "8:00 AM – 4:00 PM",
-    sunday: "Emergency calls only",
+    // Confirmed 2026-09-22: open 24/7, matching the Google Business Profile.
+    // Worded as "Always open" (rather than repeating "24/7") since the
+    // emergency line below already says "24/7" — avoids showing it twice
+    // wherever both render together.
+    display: "Always open",
     // TODO: confirm real emergency response commitment
     emergency: "24/7 emergency service",
   },
@@ -75,13 +76,14 @@ export const site = {
   gtmId: "[PLACEHOLDER: GTM_ID]",
 } as const;
 
-// TODO: name mismatch pending resolution — the Google Business Profile is
-// currently listed as "Top choice air system inc", which does not match the
+// TODO: name mismatch on hold (2026-09-22) — the Google Business Profile is
+// currently listed as "Top Choice Air System Inc", which does not match the
 // site brand name below ("Top Choice HVAC") or legalName ("Top Choice HVAC
-// Inc."). Decision (2026-08-20): keep the site's name here and update the
-// Google Business Profile listing name to match instead, rather than
-// changing the site's branding. Until the GBP name is changed, this is a
-// live NAP inconsistency that can weaken local search ranking signals.
+// Inc."). The earlier decision (2026-08-20) to rename the GBP listing to
+// match the site is on hold pending confirmation of the incorporated name
+// and what's on the vehicles and invoices. The site keeps "Top Choice HVAC"
+// for now. Until this is resolved, this is a live NAP inconsistency that can
+// weaken local search ranking signals.
 export const NAP_JSON_LD = {
   name: site.name,
   telephone: site.phone.href.replace("tel:", ""),
@@ -93,6 +95,23 @@ export const NAP_JSON_LD = {
     addressRegion: site.address.region,
     postalCode: site.address.postalCode,
     addressCountry: site.address.country,
+  },
+  // 24/7 business hours, expressed per Google's documented pattern for
+  // round-the-clock availability (dayOfWeek covering every day, midnight to
+  // 23:59).
+  openingHoursSpecification: {
+    "@type": "OpeningHoursSpecification",
+    dayOfWeek: [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday",
+    ],
+    opens: "00:00",
+    closes: "23:59",
   },
   sameAs: [site.social.instagram, site.social.google].filter(
     (url): url is string => Boolean(url),

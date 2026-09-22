@@ -19,7 +19,6 @@ export default function ContactPage() {
     "@type": "HVACBusiness",
     ...NAP_JSON_LD,
     url: site.url,
-    openingHours: [`Mo-Fr ${site.hours.weekday}`, `Sa ${site.hours.saturday}`],
   };
 
   return (
@@ -64,11 +63,9 @@ export default function ContactPage() {
                 <li className="flex items-start gap-3">
                   <Clock size={20} className="mt-0.5 shrink-0 text-ember" aria-hidden="true" />
                   <span className="text-navy">
-                    Mon–Fri: {site.hours.weekday}
+                    {site.hours.display}
                     <br />
-                    Sat: {site.hours.saturday}
-                    <br />
-                    Sun: {site.hours.sunday}
+                    <span className="font-semibold">{site.hours.emergency}</span>
                   </span>
                 </li>
               </ul>
