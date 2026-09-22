@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { ContactForm } from "@/components/contact/ContactForm";
-import { MapPlaceholder } from "@/components/contact/MapPlaceholder";
+import { GoogleMapEmbed } from "@/components/GoogleMapEmbed";
 import { site, NAP_JSON_LD } from "@/lib/site";
 import { pageMetadata } from "@/lib/metadata";
 
@@ -73,7 +73,7 @@ export default function ContactPage() {
                 </li>
               </ul>
             </div>
-            <MapPlaceholder />
+            <GoogleMapEmbed />
           </div>
           <ContactForm />
         </Container>

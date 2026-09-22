@@ -6,6 +6,7 @@ import { WhyUs } from "@/components/home/WhyUs";
 import { ServiceAreaStrip } from "@/components/home/ServiceAreaStrip";
 import { QuoteTeaser } from "@/components/home/QuoteTeaser";
 import { ReviewsSection } from "@/components/home/ReviewsSection";
+import { InstagramSection } from "@/components/home/InstagramSection";
 import { RebatesPromoTeaser } from "@/components/home/RebatesPromoTeaser";
 import { BlogTeaser } from "@/components/home/BlogTeaser";
 import { CTABand } from "@/components/CTABand";
@@ -44,6 +45,7 @@ export default function HomePage() {
       <ServiceAreaStrip />
       <QuoteTeaser />
       <ReviewsSection />
+      <InstagramSection />
       <RebatesPromoTeaser />
       <BlogTeaser />
       <CTABand />

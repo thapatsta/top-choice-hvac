@@ -1,9 +1,12 @@
 import { ShieldCheck, Award, Clock, Star } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { site } from "@/lib/site";
+import { aggregateRating } from "@/data/reviews";
 
 // TODO: "Certified Dealer Network" is still a fake placeholder claim —
 // confirm real certifications before launch.
+// Rating label reads from data/reviews.ts's aggregateRating (last checked
+// 2026-09-22) instead of a separate hardcoded string, so it can't drift.
 const items = [
   {
     icon: Clock,
@@ -15,7 +18,9 @@ const items = [
   },
   {
     icon: Star,
-    label: "5.0★ (23 Google Reviews)",
+    label: aggregateRating
+      ? `${aggregateRating.ratingValue}★ (${aggregateRating.reviewCount} Google Reviews)`
+      : "See our Google Reviews",
   },
   {
     icon: Award,

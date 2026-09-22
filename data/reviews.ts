@@ -50,10 +50,10 @@ export const reviews: Review[] = [
   },
 ];
 
-// Matches the Google Business Profile's overall rating as of 2026-08-20 —
-// re-verify against the live listing periodically, since it will drift as
-// new reviews come in.
+// Matches the Google Business Profile's overall rating. Last checked
+// 2026-09-22 — re-verify against the live listing periodically, since it
+// will drift as new reviews come in.
 export const aggregateRating: { ratingValue: number; reviewCount: number } | undefined = {
-  ratingValue: 5.0,
-  reviewCount: 23,
+  ratingValue: 4.9,
+  reviewCount: 60,
 };
