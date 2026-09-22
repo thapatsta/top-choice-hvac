@@ -12,13 +12,8 @@ export const metadata: Metadata = pageMetadata({
   path: "/about",
 });
 
-// TODO: fake placeholder team data — replace with real names, roles, and
-// photos before launch (photos matter for local trust signals).
-const team = [
-  { name: "Mike Sullivan", role: "Owner & Lead Technician" },
-  { name: "Service Technician", role: "HVAC Technician" },
-  { name: "Office Manager", role: "Customer Care" },
-];
+// TODO: real headshot for Robin still needed — see CONTENT-NEEDED.md.
+const team = [{ name: "Robin", role: "Owner & Lead Technician" }];
 
 export default function AboutPage() {
   return (
@@ -35,34 +30,43 @@ export default function AboutPage() {
 
       <section className="py-14 sm:py-20">
         <Container className="max-w-3xl">
-          {/* TODO: fake placeholder founding story — replace with the client's real story before launch */}
           <h2 className="font-display text-2xl font-bold text-navy sm:text-3xl">Our Story</h2>
           <p className="mt-4 text-navy">
-            Top Choice HVAC was founded in {site.founded} after years of
-            seeing GTA homeowners get vague quotes and inconsistent service
-            from bigger, faceless companies. We started this business to do
-            it differently: show up on time, explain things clearly, and
-            price the job honestly before any work begins.
+            Robin has been tinkering with mechanical things for as long as he
+            can remember — taking apart anything he could get his hands on to
+            figure out how it worked, and putting it back together.
+          </p>
+          <p className="mt-4 text-navy">
+            What turned that curiosity into a career was watching his dad get
+            taken advantage of by a water heater company. It was a hard
+            lesson in how easy it is for homeowners to get pushed into bad
+            deals when nobody takes the time to explain what they’re
+            actually paying for.
+          </p>
+          <p className="mt-4 text-navy">
+            Robin started Top Choice HVAC in {site.founded} to make sure
+            other families don’t go through the same thing: clear pricing
+            before any work begins, straight answers about what your system
+            really needs, and no pressure to buy what you don’t.
           </p>
 
           <h2 className="mt-12 font-display text-2xl font-bold text-navy sm:text-3xl">Our Team</h2>
           <p className="mt-4 text-navy">
-            A small, local team that shows up, does the work right, and
-            treats your home like it’s their own.
+            A small, local business — Robin shows up, does the work right,
+            and treats your home like it’s his own.
           </p>
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="mt-6 flex justify-center">
             {team.map((member) => (
               <div
                 key={member.name}
-                className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border bg-card p-6 text-center"
+                className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-6 text-center sm:flex-row sm:text-left"
               >
-                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-ember-light text-ember">
+                <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-ember-light text-ember">
                   <Users size={28} aria-hidden="true" />
                 </span>
                 <div>
                   <p className="font-semibold text-navy">{member.name}</p>
                   <p className="text-sm text-muted">{member.role}</p>
-                  <p className="mt-1 text-xs text-muted">Photo coming soon</p>
                 </div>
               </div>
             ))}

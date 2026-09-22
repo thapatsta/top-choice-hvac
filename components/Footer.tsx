@@ -172,9 +172,7 @@ export function Footer() {
             </li>
           </ul>
           <div className="mt-4 text-sm">
-            <p>Mon–Fri: {site.hours.weekday}</p>
-            <p>Sat: {site.hours.saturday}</p>
-            <p>Sun: {site.hours.sunday}</p>
+            <p>{site.hours.display}</p>
             <p className="mt-1 font-semibold text-ember">{site.hours.emergency}</p>
           </div>
         </div>
