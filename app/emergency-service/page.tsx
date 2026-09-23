@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Phone, AlertTriangle } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
-import { QuoteForm } from "@/components/quote/QuoteForm";
+import { EmergencyForm } from "@/components/emergency/EmergencyForm";
 import { site } from "@/lib/site";
 import { pageMetadata } from "@/lib/metadata";
 
@@ -29,8 +29,8 @@ export default function EmergencyServicePage() {
             submit an emergency request below and we’ll call you back right
             away.
           </p>
-          <div className="mt-6">
-            <Button href={site.phone.href} size="lg" className="text-xl">
+          <div className="mt-6 w-full sm:w-auto">
+            <Button href={site.phone.href} size="lg" className="w-full text-xl sm:w-auto">
               <Phone size={24} aria-hidden="true" />
               Call Now: {site.phone.display}
             </Button>
@@ -38,7 +38,7 @@ export default function EmergencyServicePage() {
         </div>
 
         <div className="mt-12">
-          <QuoteForm initialUrgency="emergency" source="emergency-service" />
+          <EmergencyForm source="emergency" />
         </div>
       </Container>
     </section>
