@@ -48,6 +48,14 @@ export const site = {
 
   googlePlaceId,
   googleListingName,
+  // Same GBP Maps link used for "Read our N Google reviews" elsewhere
+  // (e.g. GoogleMapEmbed) — named separately here for reviews-context use.
+  googleReviewsUrl: googleMapsUrl,
+
+  // Sourced from data/reviews.ts's aggregateRating rather than duplicated
+  // here, so the rating/count can't drift between the two files.
+  rating: aggregateRating?.ratingValue,
+  reviewCount: aggregateRating?.reviewCount,
 
   social: {
     // Confirmed: no Facebook page exists yet.
@@ -55,6 +63,11 @@ export const site = {
     instagram: "https://instagram.com/topchoiceairsystem",
     google: googleMapsUrl,
   },
+
+  // Optional hero photo for the homepage hero's right-hand slot. While
+  // unset, the hero shows the decorative flame/snowflake illustration
+  // instead. See CONTENT-NEEDED.md — no real hero photography exists yet.
+  heroImage: undefined as { src: string; alt: string } | undefined,
 
   // Individual Instagram POST permalinks (https://www.instagram.com/p/<id>/)
   // shown on the homepage "See Our Recent Installs" section. Profile URLs
