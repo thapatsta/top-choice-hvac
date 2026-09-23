@@ -7,7 +7,7 @@ import { ChoiceCard } from "@/components/ui/ChoiceCard";
 import { StepShell } from "@/components/ui/StepShell";
 import { site } from "@/lib/site";
 import { BASE_PATH } from "@/lib/basePath";
-import { issueOptions, type EmergencyIssue } from "@/lib/emergency";
+import { gasEmergencyContact, issueOptions, type EmergencyIssue } from "@/lib/emergency";
 
 interface FormState {
   issue: EmergencyIssue | null;
@@ -62,11 +62,6 @@ export function EmergencyForm({ source = "emergency" }: { source?: string }) {
     }
   }
 
-  // TODO: confirm the exact gas utility emergency line number for this
-  // service area (e.g. Enbridge Gas) before adding a second, specific
-  // number to this screen. Until that's confirmed, this intentionally
-  // stays generic ("your gas utility's emergency line") rather than
-  // hardcoding a guessed number.
   if (form.issue === "smell-gas") {
     return (
       <div className="w-full rounded-2xl border-2 border-ember bg-ember-light p-6 sm:p-8">
@@ -79,10 +74,14 @@ export function EmergencyForm({ source = "emergency" }: { source?: string }) {
             Don&apos;t use switches or phones inside. Once outside, call your gas
             utility&apos;s emergency line or 911.
           </p>
-          <div className="mt-6 w-full">
+          <div className="mt-6 flex w-full flex-col gap-3">
             <Button href="tel:911" size="lg" className="w-full text-xl">
               <Phone size={24} aria-hidden="true" />
               Call 911
+            </Button>
+            <Button href={gasEmergencyContact.href} size="lg" variant="secondary" className="w-full text-xl">
+              <Phone size={24} aria-hidden="true" />
+              Call {gasEmergencyContact.name}: {gasEmergencyContact.display}
             </Button>
           </div>
           <button
