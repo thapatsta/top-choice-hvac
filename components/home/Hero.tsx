@@ -1,6 +1,9 @@
-import { Phone, ShieldCheck, Flame, Snowflake } from "lucide-react";
+import Link from "next/link";
+import { Phone, ShieldCheck } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
+import { GoogleGIcon } from "@/components/icons/GoogleGIcon";
+import { HeroVisual } from "@/components/home/HeroVisual";
 import { site } from "@/lib/site";
 
 export function Hero() {
@@ -37,23 +40,43 @@ export function Hero() {
               Call Now
             </Button>
           </div>
+
+          <div className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-2 text-sm">
+            {typeof site.rating === "number" && typeof site.reviewCount === "number" && (
+              <a
+                href={site.googleReviewsUrl}
+                target="_blank"
+                rel="noopener"
+                className="flex items-center gap-2 font-semibold text-white hover:text-ember-light"
+              >
+                <GoogleGIcon size={18} />
+                {site.rating}★ · {site.reviewCount} Google reviews
+              </a>
+            )}
+            <span className="flex items-center gap-2">
+              <span className="text-white/30" aria-hidden="true">
+                ·
+              </span>
+              <Link
+                href="/emergency-service"
+                className="font-semibold text-white hover:text-ember-light"
+              >
+                {site.hours.emergency}
+              </Link>
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="text-white/30" aria-hidden="true">
+                ·
+              </span>
+              <span className="flex items-center gap-1.5 font-semibold text-white/80">
+                <ShieldCheck size={16} aria-hidden="true" />
+                Licensed &amp; insured
+              </span>
+            </span>
+          </div>
         </div>
 
-        <div className="relative mx-auto flex h-64 w-64 items-center justify-center sm:h-80 sm:w-80">
-          <div className="absolute inset-0 rounded-full bg-white/5" />
-          <div className="absolute inset-6 rounded-full border border-white/15" />
-          <div className="absolute inset-14 rounded-full bg-ember/15" />
-          <Flame
-            size={72}
-            className="absolute left-[22%] top-[24%] -translate-x-1/2 -translate-y-1/2 text-ember"
-            aria-hidden="true"
-          />
-          <Snowflake
-            size={72}
-            className="absolute right-[20%] bottom-[22%] translate-x-1/2 translate-y-1/2 text-white/70"
-            aria-hidden="true"
-          />
-        </div>
+        <HeroVisual heroImage={site.heroImage} />
       </Container>
     </section>
   );

@@ -3,8 +3,9 @@ import { Container } from "@/components/ui/Container";
 import { site } from "@/lib/site";
 import { aggregateRating } from "@/data/reviews";
 
-// TODO: "Certified Dealer Network" is still a fake placeholder claim —
-// confirm real certifications before launch.
+// "Certified Dealer Network" was a fake placeholder claim — swapped for
+// "Since <founded year>" until real certifications are confirmed, at which
+// point it can be restored (see CONTENT-NEEDED.md).
 // Rating label reads from data/reviews.ts's aggregateRating (last checked
 // 2026-09-22) instead of a separate hardcoded string, so it can't drift.
 const items = [
@@ -24,7 +25,7 @@ const items = [
   },
   {
     icon: Award,
-    label: "Certified Dealer Network",
+    label: `Since ${site.founded}`,
   },
 ];
 
@@ -38,9 +39,6 @@ export function TrustBar() {
             <span className="text-sm font-semibold text-navy">{label}</span>
           </div>
         ))}
-      </Container>
-      <Container className="mt-3">
-        <p className="text-center text-xs text-muted">{site.insurance}</p>
       </Container>
     </section>
   );

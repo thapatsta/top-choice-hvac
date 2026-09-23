@@ -65,9 +65,11 @@ groups them by topic for a client handoff.
   "upfront pricing", "local team", "we explain, don't upsell"). Confirm
   which of these are actually true and swap in anything more specific.
 - ~~**Years in business, star rating, review count**~~ **Done:**
-  `components/home/TrustBar.tsx` now shows "5+ Years in Business" (from
-  `site.founded`) and "5.0★ (23 Google Reviews)". **Manufacturer
-  certifications** ("Certified Dealer Network") is still a placeholder.
+  `components/home/TrustBar.tsx` now shows "5+ Years in Business" and the
+  live rating/review count from `data/reviews.ts`. **Manufacturer
+  certifications** ("Certified Dealer Network") is still unconfirmed — the
+  fourth trust-bar item currently reads "Since 2021" (`site.founded`) in
+  its place until a real dealer/certification claim is confirmed.
 - **Team bios and headshots** — `/about` page. **Partially done
   (2026-09-22):** the one real team member, Robin (Owner & Lead Technician),
   is now named on the page in place of the old fabricated/placeholder cards.
