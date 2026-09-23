@@ -75,7 +75,19 @@ export function EmergencyForm({ source = "emergency" }: { source?: string }) {
             utility&apos;s emergency line or 911.
           </p>
           <div className="mt-6 flex w-full flex-col gap-3">
-            <Button href="tel:911" size="lg" className="w-full text-xl">
+            {/* Deliberately not a tel: link — 911 is too consequential to
+                dial from an accidental tap, so this asks for confirmation
+                first. */}
+            <Button
+              type="button"
+              size="lg"
+              className="w-full text-xl"
+              onClick={() => {
+                if (window.confirm("Call 911 now?")) {
+                  window.location.href = "tel:911";
+                }
+              }}
+            >
               <Phone size={24} aria-hidden="true" />
               Call 911
             </Button>
