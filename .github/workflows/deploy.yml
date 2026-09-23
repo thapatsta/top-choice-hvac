@@ -75,23 +75,14 @@ jobs:
       - name: Build for Cloudflare Workers
         run: npx opennextjs-cloudflare build
 
-      # `secrets:` uploads each listed secret to the Worker (values from the
-      # env block below) as part of every deploy, so the Worker's secrets can
-      # never drift from what's configured in GitHub.
-      - name: Deploy to Cloudflare Workers
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy
-          # TODO: real value required — see README Lead Delivery Pipeline section
-          secrets: |
-            RESEND_API_KEY
-            LEAD_NOTIFY_EMAIL
-            TWILIO_ACCOUNT_SID
-            TWILIO_AUTH_TOKEN
-            TWILIO_FROM_NUMBER
-            LEAD_NOTIFY_PHONE
+      # Secrets go up WITH the deploy (`--secrets-file`), in the same Worker
+      # version. Don't use wrangler-action's `secrets:` input: it runs
+      # `wrangler secret bulk` first, which Cloudflare rejects (error 10215)
+      # whenever the latest Worker version isn't the deployed one, e.g. after
+      # Workers Builds uploads a preview version for a PR branch.
+      # The file is written to the runner's temp dir, never the repo.
+      # TODO: real value required — see README Lead Delivery Pipeline section
+      - name: Write lead-pipeline secrets file
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           LEAD_NOTIFY_EMAIL: ${{ secrets.LEAD_NOTIFY_EMAIL }}
@@ -99,3 +90,21 @@ jobs:
           TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
           TWILIO_FROM_NUMBER: ${{ secrets.TWILIO_FROM_NUMBER }}
           LEAD_NOTIFY_PHONE: ${{ secrets.LEAD_NOTIFY_PHONE }}
+          SECRETS_FILE: ${{ runner.temp }}/lead-secrets.json
+        run: |
+          node -e '
+            const names = ["RESEND_API_KEY","LEAD_NOTIFY_EMAIL","TWILIO_ACCOUNT_SID","TWILIO_AUTH_TOKEN","TWILIO_FROM_NUMBER","LEAD_NOTIFY_PHONE"];
+            const out = Object.fromEntries(names.map((n) => [n, process.env[n]]));
+            require("fs").writeFileSync(process.env.SECRETS_FILE, JSON.stringify(out), { mode: 0o600 });
+          '
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --secrets-file ${{ runner.temp }}/lead-secrets.json
+
+      - name: Remove secrets file
+        if: always()
+        run: rm -f "${{ runner.temp }}/lead-secrets.json"
