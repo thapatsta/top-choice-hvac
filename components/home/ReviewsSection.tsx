@@ -1,9 +1,10 @@
 import { Star } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { reviews, aggregateRating } from "@/data/reviews";
+import { site } from "@/lib/site";
 
 export function ReviewsSection() {
-  const featured = reviews.slice(0, 3);
+  const featured = reviews.filter((review) => review.featured).slice(0, 3);
 
   return (
     <section className="bg-card py-16 sm:py-20">
@@ -45,6 +46,16 @@ export function ReviewsSection() {
             </div>
           ))}
         </div>
+        <p className="mt-8 text-center text-sm text-muted">
+          <a
+            href={site.googleReviewsUrl}
+            target="_blank"
+            rel="noopener"
+            className="font-semibold text-ember hover:underline"
+          >
+            Read all {aggregateRating?.reviewCount} reviews on Google
+          </a>
+        </p>
       </Container>
     </section>
   );

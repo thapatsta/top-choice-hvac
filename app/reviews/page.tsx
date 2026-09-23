@@ -4,6 +4,7 @@ import { Container } from "@/components/ui/Container";
 import { CTABand } from "@/components/CTABand";
 import { reviews, aggregateRating } from "@/data/reviews";
 import { pageMetadata } from "@/lib/metadata";
+import { site } from "@/lib/site";
 
 export const metadata: Metadata = pageMetadata({
   title: "Customer Reviews",
@@ -12,6 +13,10 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default function ReviewsPage() {
+  const sortedReviews = [...reviews].sort(
+    (a, b) => Number(b.featured) - Number(a.featured),
+  );
+
   return (
     <>
       <section className="bg-navy py-14 text-white sm:py-20">
@@ -24,13 +29,23 @@ export default function ReviewsPage() {
               Google reviews
             </p>
           )}
+          <p className="mt-4">
+            <a
+              href={site.googleReviewsUrl}
+              target="_blank"
+              rel="noopener"
+              className="font-semibold text-ember hover:underline"
+            >
+              Read all {aggregateRating?.reviewCount} reviews on Google
+            </a>
+          </p>
         </Container>
       </section>
 
       <section className="py-14 sm:py-20">
         <Container className="max-w-3xl">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            {reviews.map((review) => (
+            {sortedReviews.map((review) => (
               <div
                 key={review.author}
                 className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-6"
