@@ -40,13 +40,14 @@ export default function HomePage() {
       />
       <Hero />
       <TrustBar />
-      <ServicesGrid />
-      <WhyUs />
-      <ServiceAreaStrip />
-      <QuoteTeaser />
       <ReviewsSection />
+      <WhyUs />
+      <QuoteTeaser />
       <InstagramSection />
+      <ServicesGrid />
+      {/* <MeetRobin /> — slots in after Services once ready */}
       <RebatesPromoTeaser />
+      <ServiceAreaStrip />
       <BlogTeaser />
       <CTABand />
     </>
