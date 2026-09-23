@@ -1,61 +1,41 @@
 import { NextResponse } from "next/server";
-import { submitLead, type LeadPayload } from "@/lib/leadAdapter";
+import {
+  findMissingField,
+  normalizeLead,
+  resolveLeadSource,
+  type RawLeadInput,
+} from "@/lib/leadAdapter";
+import { sendLeadNotification } from "@/lib/notify";
 
-const COMMON_REQUIRED_FIELDS: (keyof LeadPayload)[] = ["name", "phone", "source"];
-const QUOTE_REQUIRED_FIELDS: (keyof LeadPayload)[] = [
-  "need",
-  "systemType",
-  "homeSize",
-  "systemAge",
-  "urgency",
-  "postalCode",
-  "preferredContact",
-];
-const EMERGENCY_REQUIRED_FIELDS: (keyof LeadPayload)[] = ["issue"];
-
+// Receives both the /get-quote wizard and the /emergency-service form.
 export async function POST(request: Request) {
-  let body: Partial<LeadPayload>;
+  let body: RawLeadInput;
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 });
   }
-
-  const requiredFields =
-    body.source === "emergency"
-      ? [...COMMON_REQUIRED_FIELDS, ...EMERGENCY_REQUIRED_FIELDS]
-      : [...COMMON_REQUIRED_FIELDS, ...QUOTE_REQUIRED_FIELDS];
-
-  for (const field of requiredFields) {
-    if (!body[field] || typeof body[field] !== "string") {
-      return NextResponse.json(
-        { ok: false, error: `Missing or invalid field: ${field}` },
-        { status: 400 }
-      );
-    }
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const lead: LeadPayload = {
-    name: body.name!,
-    phone: body.phone!,
-    email: body.email ?? "",
-    source: body.source!,
-    submittedAt: new Date().toISOString(),
-    need: body.need,
-    systemType: body.systemType,
-    homeSize: body.homeSize,
-    systemAge: body.systemAge,
-    urgency: body.urgency,
-    postalCode: body.postalCode,
-    preferredContact: body.preferredContact,
-    issue: body.issue,
-    note: body.note,
-  };
+  // Anything that isn't an emergency is a quote request (matches the
+  // pre-pipeline behaviour of this route).
+  const source =
+    resolveLeadSource(body.source) === "emergency-service" ? "emergency-service" : "get-quote";
+  const lead = normalizeLead(source, body);
 
-  try {
-    await submitLead(lead);
-  } catch (err) {
-    console.error("[lead:error]", err);
+  const missing = findMissingField(lead);
+  if (missing) {
+    return NextResponse.json(
+      { ok: false, error: `Missing or invalid field: ${missing}` },
+      { status: 400 }
+    );
+  }
+
+  const result = await sendLeadNotification(lead);
+  if (!result.delivered) {
+    // Never tell the customer "got it" when the lead went nowhere.
     return NextResponse.json({ ok: false, error: "Failed to submit lead" }, { status: 500 });
   }
 

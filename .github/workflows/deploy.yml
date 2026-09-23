@@ -7,7 +7,9 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  deploy:
+  # Lint + the lead-pipeline test suite. `deploy` below `needs` this job, so a
+  # broken lead pipeline blocks deployment instead of shipping silently.
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -25,12 +27,75 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Test (lead pipeline)
+        run: npm test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Lead-pipeline secrets are read by lib/notify.ts. Fail loudly if any
+      # GitHub secret is missing rather than deploying a Worker that can't
+      # deliver leads. REPLACE_ME_* placeholder values pass this check on
+      # purpose (so deploys aren't blocked while vendor accounts are being set
+      # up) — notify.ts refuses to use them and logs a loud error per lead.
+      # TODO: real value required — see README Lead Delivery Pipeline section
+      - name: Check lead-pipeline secrets are set
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          LEAD_NOTIFY_EMAIL: ${{ secrets.LEAD_NOTIFY_EMAIL }}
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_FROM_NUMBER: ${{ secrets.TWILIO_FROM_NUMBER }}
+          LEAD_NOTIFY_PHONE: ${{ secrets.LEAD_NOTIFY_PHONE }}
+        run: |
+          missing=0
+          for name in RESEND_API_KEY LEAD_NOTIFY_EMAIL TWILIO_ACCOUNT_SID TWILIO_AUTH_TOKEN TWILIO_FROM_NUMBER LEAD_NOTIFY_PHONE; do
+            if [ -z "${!name}" ]; then
+              echo "::error::GitHub secret $name is not set (Settings → Secrets and variables → Actions). See README 'Lead Delivery Pipeline'."
+              missing=1
+            elif [[ "${!name}" == REPLACE_ME* ]]; then
+              echo "::warning::$name is still a REPLACE_ME placeholder — leads will NOT be delivered on this channel until it is replaced."
+            fi
+          done
+          exit $missing
+
       - name: Build for Cloudflare Workers
         run: npx opennextjs-cloudflare build
 
+      # `secrets:` uploads each listed secret to the Worker (values from the
+      # env block below) as part of every deploy, so the Worker's secrets can
+      # never drift from what's configured in GitHub.
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
+          # TODO: real value required — see README Lead Delivery Pipeline section
+          secrets: |
+            RESEND_API_KEY
+            LEAD_NOTIFY_EMAIL
+            TWILIO_ACCOUNT_SID
+            TWILIO_AUTH_TOKEN
+            TWILIO_FROM_NUMBER
+            LEAD_NOTIFY_PHONE
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          LEAD_NOTIFY_EMAIL: ${{ secrets.LEAD_NOTIFY_EMAIL }}
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_FROM_NUMBER: ${{ secrets.TWILIO_FROM_NUMBER }}
+          LEAD_NOTIFY_PHONE: ${{ secrets.LEAD_NOTIFY_PHONE }}

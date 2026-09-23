@@ -159,14 +159,16 @@ alt text — to keep Core Web Vitals green.
 
 ## 11. Lead delivery backend
 
-- Leads from `/get-quote`, `/emergency-service`, and the `/contact` form
-  currently only log server-side (see `app/api/leads/route.ts`,
-  `app/api/contact/route.ts`, and `lib/leadAdapter.ts`). Nothing is lost,
-  but nothing reaches a human automatically yet either.
-- **Decide on a backend**: transactional email (Resend/SendGrid), a CRM
-  webhook, or a spreadsheet/Zapier webhook. `lib/leadAdapter.ts` is the
-  single integration point — see `.env.example` for the relevant
-  environment variables to add once a provider is chosen.
+- The pipeline is built (KV log + Resend email + Twilio SMS for
+  emergencies; see README "Lead Delivery Pipeline"). Leads are captured in
+  KV today. **Email and SMS won't send until these real values replace the
+  `REPLACE_ME` placeholders**, set with `wrangler secret put` AND as GitHub
+  Actions secrets:
+  - `RESEND_API_KEY`: create a Resend account → API Keys
+  - `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`: create
+    a Twilio account, then buy an SMS-capable number
+  - `LEAD_NOTIFY_EMAIL`: the monitored inbox that should receive leads
+    (not yet confirmed)
 
 ## 12. Hosting & domain
 
