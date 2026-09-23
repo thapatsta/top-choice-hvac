@@ -1,17 +1,24 @@
 import type { QuoteNeed, QuoteSystemType, QuoteUrgency } from "@/lib/estimate";
+import type { EmergencyIssue } from "@/lib/emergency";
 
 export interface LeadPayload {
-  need: QuoteNeed;
-  systemType: QuoteSystemType;
-  homeSize: string;
-  systemAge: string;
-  urgency: QuoteUrgency;
+  // Quote-flow fields (source: "get-quote"). Optional here so other lead
+  // sources, like the emergency form below, can go through this same
+  // pipeline without carrying fields that don't apply to them.
+  need?: QuoteNeed;
+  systemType?: QuoteSystemType;
+  homeSize?: string;
+  systemAge?: string;
+  urgency?: QuoteUrgency;
+  postalCode?: string;
+  preferredContact?: "phone" | "email" | "text";
+  // Emergency-flow fields (source: "emergency").
+  issue?: EmergencyIssue;
+  note?: string;
   name: string;
   phone: string;
   email: string;
-  postalCode: string;
-  preferredContact: "phone" | "email" | "text";
-  source: string; // e.g. "get-quote" or "emergency-service"
+  source: string; // e.g. "get-quote" or "emergency"
   submittedAt: string;
 }
 

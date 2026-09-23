@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { Phone, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { ChoiceCard } from "@/components/ui/ChoiceCard";
+import { StepShell } from "@/components/ui/StepShell";
 import { site } from "@/lib/site";
 import { BASE_PATH } from "@/lib/basePath";
 import {
@@ -42,84 +44,6 @@ const emptyState: FormState = {
   postalCode: "",
   preferredContact: "phone",
 };
-
-function ChoiceCard({
-  name,
-  value,
-  label,
-  description,
-  checked,
-  onSelect,
-}: {
-  name: string;
-  value: string;
-  label: string;
-  description?: string;
-  checked: boolean;
-  onSelect: () => void;
-}) {
-  return (
-    <label
-      className={`flex min-h-[64px] cursor-pointer items-center gap-4 rounded-xl border-2 p-4 transition-colors ${
-        checked
-          ? "border-ember bg-ember-light"
-          : "border-border bg-card hover:border-ember/50"
-      }`}
-    >
-      <input
-        type="radio"
-        name={name}
-        value={value}
-        checked={checked}
-        onChange={onSelect}
-        className="h-5 w-5 accent-ember"
-      />
-      <span>
-        <span className="block font-display font-bold text-navy">{label}</span>
-        {description && <span className="block text-sm text-muted">{description}</span>}
-      </span>
-    </label>
-  );
-}
-
-function StepShell({
-  stepNumber,
-  totalSteps,
-  title,
-  children,
-  onBack,
-}: {
-  stepNumber: number;
-  totalSteps: number;
-  title: string;
-  children: ReactNode;
-  onBack?: () => void;
-}) {
-  return (
-    <div>
-      <div className="mb-6">
-        <div className="mb-2 flex items-center justify-between text-sm font-semibold text-muted">
-          <span>
-            Step {stepNumber} of {totalSteps}
-          </span>
-          {onBack && (
-            <button type="button" onClick={onBack} className="font-semibold text-ember hover:underline">
-              ← Back
-            </button>
-          )}
-        </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-border">
-          <div
-            className="h-full rounded-full bg-ember transition-all duration-300"
-            style={{ width: `${(stepNumber / totalSteps) * 100}%` }}
-          />
-        </div>
-      </div>
-      <h2 className="font-display text-2xl font-bold text-navy sm:text-3xl">{title}</h2>
-      <div className="mt-6 flex flex-col gap-3">{children}</div>
-    </div>
-  );
-}
 
 export function QuoteForm({
   initialUrgency,

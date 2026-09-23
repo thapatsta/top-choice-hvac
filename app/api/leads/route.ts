@@ -1,18 +1,17 @@
 import { NextResponse } from "next/server";
 import { submitLead, type LeadPayload } from "@/lib/leadAdapter";
 
-const REQUIRED_STRING_FIELDS: (keyof LeadPayload)[] = [
+const COMMON_REQUIRED_FIELDS: (keyof LeadPayload)[] = ["name", "phone", "source"];
+const QUOTE_REQUIRED_FIELDS: (keyof LeadPayload)[] = [
   "need",
   "systemType",
   "homeSize",
   "systemAge",
   "urgency",
-  "name",
-  "phone",
   "postalCode",
   "preferredContact",
-  "source",
 ];
+const EMERGENCY_REQUIRED_FIELDS: (keyof LeadPayload)[] = ["issue"];
 
 export async function POST(request: Request) {
   let body: Partial<LeadPayload>;
@@ -22,7 +21,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 });
   }
 
-  for (const field of REQUIRED_STRING_FIELDS) {
+  const requiredFields =
+    body.source === "emergency"
+      ? [...COMMON_REQUIRED_FIELDS, ...EMERGENCY_REQUIRED_FIELDS]
+      : [...COMMON_REQUIRED_FIELDS, ...QUOTE_REQUIRED_FIELDS];
+
+  for (const field of requiredFields) {
     if (!body[field] || typeof body[field] !== "string") {
       return NextResponse.json(
         { ok: false, error: `Missing or invalid field: ${field}` },
@@ -32,18 +36,20 @@ export async function POST(request: Request) {
   }
 
   const lead: LeadPayload = {
-    need: body.need!,
-    systemType: body.systemType!,
-    homeSize: body.homeSize!,
-    systemAge: body.systemAge!,
-    urgency: body.urgency!,
     name: body.name!,
     phone: body.phone!,
     email: body.email ?? "",
-    postalCode: body.postalCode!,
-    preferredContact: body.preferredContact!,
     source: body.source!,
     submittedAt: new Date().toISOString(),
+    need: body.need,
+    systemType: body.systemType,
+    homeSize: body.homeSize,
+    systemAge: body.systemAge,
+    urgency: body.urgency,
+    postalCode: body.postalCode,
+    preferredContact: body.preferredContact,
+    issue: body.issue,
+    note: body.note,
   };
 
   try {
