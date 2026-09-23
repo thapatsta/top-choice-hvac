@@ -101,7 +101,7 @@ the customer is told to call instead.
   and `smsLead(lead)`. Each takes an optional `{ env, fetch }` second
   argument, which tests use to inject mocks. Any value starting with
   `REPLACE_ME` is refused and logged as an error rather than sent to the vendor.
-- **`wrangler.jsonc`**: the `LEADS_KV` KV namespace binding, plus
+- **`wrangler.jsonc`**: the `LEADS_KV` KV namespace binding (with its pinned id), plus
   `LEAD_FROM_EMAIL` under `vars` (the sender address, which isn't a secret).
 - Call sites: `app/api/leads/route.ts` (quote + emergency) and
   `app/api/contact/route.ts`.
@@ -159,24 +159,11 @@ npx wrangler kv key get "leads:2026-09-23T14:05:00.000Z:abc123def456" --binding=
 
 Use `--local` instead of `--remote` to read what `wrangler dev` wrote locally.
 
-#### Pinning the KV namespace id
+#### KV namespace
 
-The `LEADS_KV` binding has no `id` in `wrangler.jsonc` yet. The first
-`wrangler deploy` auto-provisions the namespace. After that, pin its id so
-every tool (including the `kv key` commands above) points at the same
-namespace:
-
-```bash
-npx wrangler kv namespace list          # find the LEADS_KV namespace id
-# or, to create it yourself before the first deploy:
-npx wrangler kv namespace create LEADS_KV
-npx wrangler kv namespace create LEADS_KV --preview
-```
-
-Then set `"id"` (and `"preview_id"` if you created one) on the `LEADS_KV`
-entry in `wrangler.jsonc`. If the binding-based commands can't find the
-namespace before then, pass `--namespace-id=<id>` instead of
-`--binding=LEADS_KV`.
+`LEADS_KV` points at namespace `5e0fad8618184248b03f26b3b9b66408` (set as
+`id` in `wrangler.jsonc`). If it's ever recreated, update that `id`
+(`npx wrangler kv namespace list` shows it).
 
 ### Tests
 

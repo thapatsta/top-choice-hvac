@@ -5,11 +5,9 @@
   "compatibility_flags": ["nodejs_compat"],
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
   // Lead log — every form submission is written here by lib/notify.ts
-  // (logLeadToKV). No "id" yet: `wrangler deploy` auto-provisions the
-  // namespace on first deploy, and `wrangler dev` uses a local simulated
-  // namespace. Once created, pin its id here — see README "Lead Delivery
-  // Pipeline" → "Pinning the KV namespace id".
-  "kv_namespaces": [{ "binding": "LEADS_KV" }],
+  // (logLeadToKV). `wrangler dev` uses a local simulated copy; deploys and
+  // `wrangler kv ... --remote` use the real namespace below.
+  "kv_namespaces": [{ "binding": "LEADS_KV", "id": "5e0fad8618184248b03f26b3b9b66408" }],
   // Non-secret lead-pipeline config (secrets go through `wrangler secret put`
   // + deploy.yml). onboarding@resend.dev is Resend's shared test sender: it
   // only delivers to the Resend account owner's own address. Switch to an
