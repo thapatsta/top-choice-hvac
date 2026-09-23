@@ -27,7 +27,7 @@ const emptyState: FormState = {
 
 const TOTAL_STEPS = 2;
 
-export function EmergencyForm({ source = "emergency" }: { source?: string }) {
+export function EmergencyForm({ source = "emergency-service" }: { source?: string }) {
   const [form, setForm] = useState<FormState>(emptyState);
   const [stepIndex, setStepIndex] = useState(0);
   const [submitting, setSubmitting] = useState(false);

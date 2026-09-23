@@ -38,7 +38,7 @@ export default function EmergencyServicePage() {
         </div>
 
         <div className="mt-12">
-          <EmergencyForm source="emergency" />
+          <EmergencyForm source="emergency-service" />
         </div>
       </Container>
     </section>
