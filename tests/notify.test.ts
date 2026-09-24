@@ -37,7 +37,7 @@ function makeLead(source: LeadSource): Lead {
 
 function setup(overrides: Partial<NotifyEnv> = {}) {
   const kvPut = vi.fn(async () => {});
-  const fetchMock = vi.fn(async () => new Response("{}", { status: 200 }));
+  const fetchMock = vi.fn<typeof fetch>(async () => new Response("{}", { status: 200 }));
   const env: NotifyEnv = { LEADS_KV: { put: kvPut }, ...REAL_LOOKING_ENV, ...overrides };
   const deps = { env, fetch: fetchMock as unknown as typeof fetch };
   const resendCalls = () =>
@@ -162,8 +162,7 @@ describe("sendLeadNotification", () => {
       expect(resendCalls()).toHaveLength(1);
       expect(console.error).toHaveBeenCalledWith(
         expect.stringContaining("[lead:sms:FAILED] key=leads:2026-09-23T14:05:00.000Z:abc123"),
-        "Twilio is down",
-        expect.any(String)
+        "Twilio is down"
       );
     });
 
@@ -207,9 +206,40 @@ describe("sendLeadNotification", () => {
       const result = await sendLeadNotification(makeLead("emergency-service"), deps);
       expect(result.delivered).toBe(false);
       expect(console.error).toHaveBeenCalledWith(
-        expect.stringContaining("[lead:UNDELIVERED]"),
-        expect.any(String)
+        expect.stringContaining(
+          "[lead:UNDELIVERED] key=leads:2026-09-23T14:05:00.000Z:abc123 source=emergency-service"
+        )
       );
     });
+  });
+
+  describe("logs carry no customer PII", () => {
+    // Workers Logs are retained, so failure logs identify a lead by key only.
+    const PII = ["Jane Doe", "647-555-0100", "jane@example.com", "No heat since last night"];
+
+    function loggedText(): string {
+      const calls = [
+        ...vi.mocked(console.error).mock.calls,
+        ...vi.mocked(console.log).mock.calls,
+      ];
+      return calls
+        .flat()
+        .map((a) => (a instanceof Error ? a.message : typeof a === "string" ? a : JSON.stringify(a)))
+        .join("\n");
+    }
+
+    it.each(["get-quote", "contact", "emergency-service"] as const)(
+      "%s: every channel failing logs the key but not name/phone/email/message",
+      async (source) => {
+        const { deps, kvPut, fetchMock } = setup();
+        kvPut.mockRejectedValue(new Error("KV unavailable"));
+        fetchMock.mockRejectedValue(new Error("network down"));
+        await sendLeadNotification(makeLead(source), deps);
+        const text = loggedText();
+        expect(text).toContain("key=leads:2026-09-23T14:05:00.000Z:abc123");
+        expect(text).toContain("[lead:UNDELIVERED]");
+        for (const value of PII) expect(text).not.toContain(value);
+      }
+    );
   });
 });

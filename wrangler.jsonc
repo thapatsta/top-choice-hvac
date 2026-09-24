@@ -8,6 +8,16 @@
   // (logLeadToKV). `wrangler dev` uses a local simulated copy; deploys and
   // `wrangler kv ... --remote` use the real namespace below.
   "kv_namespaces": [{ "binding": "LEADS_KV", "id": "5e0fad8618184248b03f26b3b9b66408" }],
+  // Lead-form abuse protection — /api/leads and /api/contact call
+  // lib/rateLimit.ts (checkLeadRateLimit) before notifying, keyed on the
+  // CF-Connecting-IP header and shared across both routes. 5 POSTs per 60s
+  // per IP (period must be 10 or 60). Counters are per Cloudflare location and
+  // eventually consistent. namespace_id must be unique within the Cloudflare
+  // account. `wrangler dev` simulates the limiter in memory (resets on
+  // restart); deploys use the real one.
+  "ratelimits": [
+    { "name": "LEAD_RATE_LIMITER", "namespace_id": "1001", "simple": { "limit": 5, "period": 60 } }
+  ],
   // Non-secret lead-pipeline config (secrets go through `wrangler secret put`
   // + deploy.yml). onboarding@resend.dev is Resend's shared test sender: it
   // only delivers to the Resend account owner's own address. Switch to an

@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { findMissingField, normalizeLead, type RawLeadInput } from "@/lib/leadAdapter";
 import { sendLeadNotification } from "@/lib/notify";
+import { checkLeadRateLimit } from "@/lib/rateLimit";
 
 export async function POST(request: Request) {
+  const limited = await checkLeadRateLimit(request);
+  if (limited) return limited;
+
   let body: RawLeadInput;
   try {
     body = await request.json();

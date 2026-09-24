@@ -6,9 +6,13 @@ import {
   type RawLeadInput,
 } from "@/lib/leadAdapter";
 import { sendLeadNotification } from "@/lib/notify";
+import { checkLeadRateLimit } from "@/lib/rateLimit";
 
 // Receives both the /get-quote wizard and the /emergency-service form.
 export async function POST(request: Request) {
+  const limited = await checkLeadRateLimit(request);
+  if (limited) return limited;
+
   let body: RawLeadInput;
   try {
     body = await request.json();

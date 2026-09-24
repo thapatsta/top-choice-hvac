@@ -84,7 +84,9 @@ form submit → route handler → normalize (lib/leadAdapter.ts)
 
 The three channels run independently: if one fails (e.g. Twilio is down or a
 secret is still a placeholder), the others still run and the failure is logged
-as `[lead:<channel>:FAILED] key=<lead key> ...` with the full lead JSON. The
+as `[lead:<channel>:FAILED] key=<lead key> source=<source>` plus the error.
+Logs never include the lead body (name, phone, email, message) because Workers
+Logs are retained. Use the key to find the record in LEADS_KV or the email. The
 form only tells the customer "got it" if at least one channel succeeded;
 if every channel fails it returns an error (and logs `[lead:UNDELIVERED]`) so
 the customer is told to call instead.
