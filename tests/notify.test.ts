@@ -37,7 +37,7 @@ function makeLead(source: LeadSource): Lead {
 
 function setup(overrides: Partial<NotifyEnv> = {}) {
   const kvPut = vi.fn(async () => {});
-  const fetchMock = vi.fn(async () => new Response("{}", { status: 200 }));
+  const fetchMock = vi.fn<typeof fetch>(async () => new Response("{}", { status: 200 }));
   const env: NotifyEnv = { LEADS_KV: { put: kvPut }, ...REAL_LOOKING_ENV, ...overrides };
   const deps = { env, fetch: fetchMock as unknown as typeof fetch };
   const resendCalls = () =>
