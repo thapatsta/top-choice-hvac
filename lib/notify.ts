@@ -268,12 +268,12 @@ async function runChannel(
     const result = await fn();
     return result === false ? "skipped" : "sent";
   } catch (err) {
-    // Loud and traceable: which channel, which lead. The lead JSON is included
-    // so a lead is recoverable from logs even if every channel failed.
+    // Loud and traceable: which channel, which lead. Deliberately no lead
+    // body (name/phone/email/message): Workers Logs are retained, and the
+    // key is enough to find the record in LEADS_KV or the email.
     console.error(
       `[lead:${channel}:FAILED] key=${key} source=${lead.source}`,
-      err instanceof Error ? err.message : err,
-      JSON.stringify(lead)
+      err instanceof Error ? err.message : err
     );
     return "failed";
   }
@@ -309,7 +309,11 @@ export async function sendLeadNotification(
   const result: LeadNotificationResult = { key, kv, email, sms, delivered };
   console.log(`[lead:notify] key=${key} source=${lead.source} kv=${kv} email=${email} sms=${sms}`);
   if (!delivered) {
-    console.error(`[lead:UNDELIVERED] key=${key} — every channel failed`, JSON.stringify(lead));
+    // No lead body here either. The handler returns 500, so the customer
+    // sees the "please call us" error rather than a false confirmation.
+    console.error(
+      `[lead:UNDELIVERED] key=${key} source=${lead.source} — every channel failed`
+    );
   }
   return result;
 }
