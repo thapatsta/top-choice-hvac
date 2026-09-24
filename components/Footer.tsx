@@ -30,7 +30,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-border bg-navy pb-24 pt-14 text-white/80 lg:pb-14">
+    <footer data-track-location="footer" className="border-t border-border bg-navy pb-24 pt-14 text-white/80 lg:pb-14">
       <Container className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <div className="flex items-center gap-2 font-display text-xl font-bold text-white">

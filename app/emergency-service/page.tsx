@@ -29,7 +29,7 @@ export default function EmergencyServicePage() {
             submit an emergency request below and we’ll call you back right
             away.
           </p>
-          <div className="mt-6 w-full sm:w-auto">
+          <div className="mt-6 w-full sm:w-auto" data-track-location="emergency_page">
             <Button href={site.phone.href} size="lg" className="w-full text-xl sm:w-auto">
               <Phone size={24} aria-hidden="true" />
               Call Now: {site.phone.display}

@@ -36,7 +36,7 @@ export default function ContactPage() {
         </Container>
       </section>
 
-      <section className="py-14 sm:py-20">
+      <section data-track-location="contact_page" className="py-14 sm:py-20">
         <Container className="grid grid-cols-1 gap-10 lg:grid-cols-2">
           <div className="flex flex-col gap-6">
             <div className="rounded-2xl border border-border bg-card p-6">
