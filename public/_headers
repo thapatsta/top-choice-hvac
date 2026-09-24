@@ -1,0 +1,7 @@
+# Workers Static Assets custom headers. These apply ONLY to files the ASSETS
+# binding serves directly, without running the Worker (/_next/static/*,
+# favicon.ico, anything in public/). Worker responses (every HTML page, and
+# /api/*) get their headers from next.config.ts headers() instead. The full
+# CSP/framing set lives there because it only matters on documents.
+/*
+  X-Content-Type-Options: nosniff
