@@ -6,16 +6,31 @@ vi.mock("@/lib/notify", () => ({
   sendLeadNotification: vi.fn(),
 }));
 
+// The real lib/rateLimit.ts runs; only the Cloudflare env it reads is faked,
+// with an in-memory stand-in for the LEAD_RATE_LIMITER binding.
+const RATE_LIMIT = 5;
+const rateCounts = new Map<string, number>();
+const limiter = {
+  limit: vi.fn(async ({ key }: { key: string }) => {
+    const n = (rateCounts.get(key) ?? 0) + 1;
+    rateCounts.set(key, n);
+    return { success: n <= RATE_LIMIT };
+  }),
+};
+vi.mock("@opennextjs/cloudflare", () => ({
+  getCloudflareContext: vi.fn(async () => ({ env: { LEAD_RATE_LIMITER: limiter } })),
+}));
+
 import { sendLeadNotification } from "@/lib/notify";
 import { POST as leadsPOST } from "@/app/api/leads/route";
 import { POST as contactPOST } from "@/app/api/contact/route";
 
 const send = vi.mocked(sendLeadNotification);
 
-function post(body: unknown): Request {
+function post(body: unknown, ip = "203.0.113.7"): Request {
   return new Request("http://localhost/api", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "CF-Connecting-IP": ip },
     body: JSON.stringify(body),
   });
 }
@@ -61,6 +76,8 @@ const contactPayload = {
 beforeEach(() => {
   send.mockReset();
   send.mockResolvedValue({ ...deliveredResult });
+  rateCounts.clear();
+  limiter.limit.mockClear();
 });
 
 function sentLead(): Lead {
@@ -137,6 +154,46 @@ describe("invalid submissions are rejected before notifying", () => {
   ] as const)("%s with a missing field → 400, no notification", async (_name, handler, payload) => {
     const res = await handler(post(payload));
     expect(res.status).toBe(400);
+    expect(send).not.toHaveBeenCalled();
+  });
+});
+
+describe("rate limiting (per CF-Connecting-IP, shared across both routes)", () => {
+  it.each([
+    ["get-quote", leadsPOST, quotePayload],
+    ["emergency-service", leadsPOST, emergencyPayload],
+    ["contact", contactPOST, contactPayload],
+  ] as const)("%s → 429 once the IP is over the limit, no notification", async (_n, handler, payload) => {
+    for (let i = 0; i < RATE_LIMIT; i++) {
+      expect((await handler(post(payload))).status).toBe(200);
+    }
+    send.mockClear();
+    const res = await handler(post(payload));
+    expect(res.status).toBe(429);
+    const json = await res.json();
+    expect(json.ok).toBe(false);
+    expect(typeof json.error).toBe("string");
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it("counts both routes against the same per-IP budget", async () => {
+    for (let i = 0; i < RATE_LIMIT; i++) {
+      await (i % 2 ? contactPOST(post(contactPayload)) : leadsPOST(post(emergencyPayload)));
+    }
+    expect((await contactPOST(post(contactPayload))).status).toBe(429);
+    expect((await leadsPOST(post(emergencyPayload))).status).toBe(429);
+  });
+
+  it("a different IP is unaffected", async () => {
+    for (let i = 0; i < RATE_LIMIT + 1; i++) await leadsPOST(post(emergencyPayload));
+    expect((await leadsPOST(post(emergencyPayload, "198.51.100.9"))).status).toBe(200);
+  });
+
+  it("counts invalid submissions too (checked before parsing)", async () => {
+    for (let i = 0; i < RATE_LIMIT; i++) {
+      expect((await leadsPOST(post({}))).status).toBe(400);
+    }
+    expect((await leadsPOST(post(quotePayload))).status).toBe(429);
     expect(send).not.toHaveBeenCalled();
   });
 });
