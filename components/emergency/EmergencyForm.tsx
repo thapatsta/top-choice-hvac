@@ -7,6 +7,9 @@ import { ChoiceCard } from "@/components/ui/ChoiceCard";
 import { StepShell } from "@/components/ui/StepShell";
 import { site } from "@/lib/site";
 import { BASE_PATH } from "@/lib/basePath";
+import { track } from "@/lib/analytics";
+import { resolveLeadSource } from "@/lib/leadAdapter";
+import { useFormStart } from "@/lib/useFormStart";
 import { gasEmergencyContact, issueOptions, type EmergencyIssue } from "@/lib/emergency";
 
 interface FormState {
@@ -33,6 +36,8 @@ export function EmergencyForm({ source = "emergency-service" }: { source?: strin
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const leadSource = resolveLeadSource(source) ?? "emergency-service";
+  const markFormStarted = useFormStart(leadSource);
 
   async function handleSubmit() {
     if (!form.issue || !form.name || !form.phone) return;
@@ -52,8 +57,12 @@ export function EmergencyForm({ source = "emergency-service" }: { source?: strin
         }),
       });
       if (!res.ok) throw new Error("Request failed");
+      // Fired here rather than in an effect on `submitted` so it can only
+      // happen once per delivered lead.
+      track("generate_lead", { lead_source: leadSource });
       setSubmitted(true);
     } catch {
+      track("form_submit_error", { lead_source: leadSource });
       setSubmitError(
         "Something went wrong submitting your request. Please call us directly and we'll help right away."
       );
@@ -119,7 +128,7 @@ export function EmergencyForm({ source = "emergency-service" }: { source?: strin
           We&apos;ll call you back shortly. For the fastest response, call{" "}
           {site.phone.display} now.
         </p>
-        <div className="mt-6">
+        <div className="mt-6" data-track-location="emergency_form">
           <Button href={site.phone.href} size="lg" className="w-full text-xl">
             <Phone size={24} aria-hidden="true" />
             Call {site.phone.display}
@@ -130,7 +139,11 @@ export function EmergencyForm({ source = "emergency-service" }: { source?: strin
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+    <div
+      className="rounded-2xl border border-border bg-card p-6 sm:p-8"
+      onFocus={markFormStarted}
+      onChange={markFormStarted}
+    >
       {stepIndex === 0 && (
         <StepShell stepNumber={1} totalSteps={TOTAL_STEPS} title="What's happening?">
           {issueOptions.map((opt) => (

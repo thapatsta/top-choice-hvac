@@ -4,12 +4,19 @@ import { useState } from "react";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { BASE_PATH } from "@/lib/basePath";
+import { track } from "@/lib/analytics";
+import type { LeadSource } from "@/lib/leadAdapter";
+import { useFormStart } from "@/lib/useFormStart";
+
+// /api/contact always files these leads under this source.
+const LEAD_SOURCE: LeadSource = "contact";
 
 export function ContactForm() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const markFormStarted = useFormStart(LEAD_SOURCE);
 
   if (submitted) {
     return (
@@ -26,6 +33,8 @@ export function ContactForm() {
   return (
     <form
       className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 sm:p-8"
+      onFocus={markFormStarted}
+      onChange={markFormStarted}
       onSubmit={async (e) => {
         e.preventDefault();
         setSubmitting(true);
@@ -37,8 +46,12 @@ export function ContactForm() {
             body: JSON.stringify(form),
           });
           if (!res.ok) throw new Error("failed");
+          // Fired here rather than in an effect on `submitted` so it can
+          // only happen once per delivered lead.
+          track("generate_lead", { lead_source: LEAD_SOURCE });
           setSubmitted(true);
         } catch {
+          track("form_submit_error", { lead_source: LEAD_SOURCE });
           setError("Something went wrong sending your message. Please call us instead.");
         } finally {
           setSubmitting(false);

@@ -5,6 +5,8 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { StickyCallBar } from "@/components/StickyCallBar";
+import { AnalyticsListeners } from "@/components/AnalyticsListeners";
+import { PRODUCTION_HOST_RE } from "@/lib/analytics";
 import { site } from "@/lib/site";
 
 const archivo = Archivo({
@@ -57,11 +59,17 @@ export default function RootLayout({
               src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}
               strategy="afterInteractive"
             />
+            {/* gtag() is defined on every host so track() in lib/analytics.ts
+                stays safe, but only production hosts send page views. The
+                hostname regex is PRODUCTION_HOST_RE from lib/analytics.ts —
+                it must stay in sync with isProductionHost() there. */}
             <Script id="ga4" strategy="afterInteractive">
               {`window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
+if (${PRODUCTION_HOST_RE}.test(location.hostname)) {
 gtag('js', new Date());
-gtag('config', '${ga4Id}');`}
+gtag('config', '${ga4Id}');
+}`}
             </Script>
           </>
         )}
@@ -79,6 +87,7 @@ gtag('config', '${ga4Id}');`}
         </main>
         <Footer />
         <StickyCallBar />
+        <AnalyticsListeners />
       </body>
     </html>
   );

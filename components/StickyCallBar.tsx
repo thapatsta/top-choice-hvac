@@ -32,6 +32,7 @@ export function StickyCallBar() {
 
   return (
     <div
+      data-track-location="sticky_call_bar"
       aria-hidden={!visible}
       className={`fixed inset-x-0 bottom-0 z-50 flex border-t border-border bg-navy shadow-[0_-2px_10px_rgba(0,0,0,0.15)] transition-all duration-300 lg:hidden ${
         visible

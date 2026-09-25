@@ -8,7 +8,7 @@ import { site } from "@/lib/site";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-navy text-white">
+    <section data-track-location="hero" className="relative overflow-hidden bg-navy text-white">
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.06]"
         style={{
