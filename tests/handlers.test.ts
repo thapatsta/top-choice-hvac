@@ -197,3 +197,44 @@ describe("rate limiting (per CF-Connecting-IP, shared across both routes)", () =
     expect(send).not.toHaveBeenCalled();
   });
 });
+
+describe("attribution", () => {
+  it("a posted attribution object reaches the lead in normalized form", async () => {
+    const attribution = {
+      gclid: " TEST123 ",
+      utm_source: "google",
+      utm_medium: "cpc",
+      landing_path: "/",
+      first_seen: "2026-09-23T14:05:00.000Z",
+    };
+    const res = await leadsPOST(post({ ...quotePayload, attribution }));
+    expect(res.status).toBe(200);
+    expect(sentLead().attribution).toEqual({ ...attribution, gclid: "TEST123" });
+  });
+
+  it("a hostile attribution object is cleaned", async () => {
+    const res = await contactPOST(
+      post({
+        ...contactPayload,
+        attribution: {
+          gclid: "g".repeat(5000),
+          utm_source: "google\n\nBcc: x@evil.test",
+          extra: "nope",
+          utm_medium: { $ne: 1 },
+          landing_path: ["/"],
+        },
+      })
+    );
+    expect(res.status).toBe(200);
+    const { attribution } = sentLead();
+    expect(Object.keys(attribution ?? {}).sort()).toEqual(["gclid", "utm_source"]);
+    expect(attribution?.gclid).toHaveLength(200);
+    expect(attribution?.utm_source).toBe("googleBcc: x@evil.test");
+  });
+
+  it("a lead without attribution is still accepted", async () => {
+    const res = await leadsPOST(post({ ...emergencyPayload, attribution: null }));
+    expect(res.status).toBe(200);
+    expect(sentLead().attribution).toBeUndefined();
+  });
+});

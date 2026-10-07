@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { track } from "@/lib/analytics";
+import { captureAttribution } from "@/lib/attribution";
 import { site } from "@/lib/site";
 
 function phoneDigits(href: string): string {
@@ -18,9 +19,14 @@ const OUR_PHONE = phoneDigits(site.phone.href);
  *
  * click_to_call only counts our own number: third-party lines like the gas
  * utility's emergency number on the smell-gas screen are not leads.
+ *
+ * Also records first-visit lead attribution once per page load, on every
+ * host (it stays in localStorage and never goes to GA).
  */
 export function AnalyticsListeners() {
   useEffect(() => {
+    captureAttribution();
+
     function onClick(e: MouseEvent) {
       if (!(e.target instanceof Element)) return;
       const link = e.target.closest("a[href]");

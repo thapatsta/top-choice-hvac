@@ -6,9 +6,8 @@ import { Button } from "@/components/ui/Button";
 import { ChoiceCard } from "@/components/ui/ChoiceCard";
 import { StepShell } from "@/components/ui/StepShell";
 import { site } from "@/lib/site";
-import { BASE_PATH } from "@/lib/basePath";
-import { track } from "@/lib/analytics";
 import { resolveLeadSource } from "@/lib/leadAdapter";
+import { submitLead } from "@/lib/submitLead";
 import { useFormStart } from "@/lib/useFormStart";
 import { gasEmergencyContact, issueOptions, type EmergencyIssue } from "@/lib/emergency";
 
@@ -43,32 +42,26 @@ export function EmergencyForm({ source = "emergency-service" }: { source?: strin
     if (!form.issue || !form.name || !form.phone) return;
     setSubmitting(true);
     setSubmitError(null);
-    try {
-      const res = await fetch(`${BASE_PATH}/api/leads`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          issue: form.issue,
-          name: form.name,
-          phone: form.phone,
-          email: form.email,
-          note: form.note,
-          source,
-        }),
-      });
-      if (!res.ok) throw new Error("Request failed");
-      // Fired here rather than in an effect on `submitted` so it can only
-      // happen once per delivered lead.
-      track("generate_lead", { lead_source: leadSource });
+    const result = await submitLead({
+      endpoint: "/api/leads",
+      body: {
+        issue: form.issue,
+        name: form.name,
+        phone: form.phone,
+        email: form.email,
+        note: form.note,
+        source,
+      },
+      leadSource,
+    });
+    if (result.ok) {
       setSubmitted(true);
-    } catch {
-      track("form_submit_error", { lead_source: leadSource });
+    } else {
       setSubmitError(
         "Something went wrong submitting your request. Please call us directly and we'll help right away."
       );
-    } finally {
-      setSubmitting(false);
     }
+    setSubmitting(false);
   }
 
   if (form.issue === "smell-gas") {

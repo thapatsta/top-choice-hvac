@@ -146,6 +146,33 @@ variables → Actions**.
 For local dev, copy `.env.example` to `.dev.vars` (gitignored). `wrangler dev`
 and `next dev` both read it.
 
+### Lead attribution
+
+Each lead carries where the visitor came from, so a Google Ads click can be
+matched to a real lead.
+
+- **What is captured** (`lib/attribution.ts`): the Google Ads click IDs
+  (`gclid`, `gbraid`, `wbraid`), the five `utm_*` parameters, the landing
+  page path (no query string), the referrer's hostname (only when it isn't
+  our own site or localhost) and a `first_seen` timestamp. Values are
+  trimmed and capped at 200 characters.
+- **Where it lives in the browser**: `localStorage` key `tch_attribution`,
+  captured once per page load by `components/AnalyticsListeners.tsx`, kept
+  for 90 days. If storage is blocked, the lead simply has no attribution.
+- **Overwrite rule**: first touch wins. A later visit keeps the stored value,
+  unless its URL has a new `gclid` / `gbraid` / `wbraid`, which replaces it.
+  An expired value counts as nothing stored.
+- **On submit**: `lib/submitLead.ts` adds it to the POST body as
+  `attribution`. The server (`normalizeAttribution()` in
+  `lib/leadAdapter.ts`) keeps only the allowlisted string keys, strips
+  control characters and caps length. It is optional; a lead without it is
+  still valid.
+- **Where it shows up**: the KV record (`attribution` field in the lead
+  JSON; KV metadata is unchanged), an "Attribution" block at the end of the
+  notification email (with a "Came from" summary row), and a short SMS
+  suffix: ` [Google Ads]` for an ad click, else ` [<utm_source>]`.
+- It is never sent to Google Analytics.
+
 ### Reading the lead log
 
 ```bash
@@ -182,6 +209,9 @@ Tests live in `tests/`:
   per-source subject line, and that SMS goes out only for emergency-service.
   Also covers **independent failure**: any one channel throwing must not
   stop the other two.
+- `attribution.test.ts` / `submitLead.test.ts`: attribution capture and the
+  first-touch rule, and the shared form submit helper (GA events fire once,
+  attribution is posted but never tracked).
 - `handlers.test.ts`: one test per form confirming its route handler
   actually calls `sendLeadNotification()`, returns 500 instead of "ok" when
   nothing was delivered, and rejects invalid submissions.

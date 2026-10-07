@@ -1,5 +1,10 @@
 import type { QuoteNeed, QuoteSystemType, QuoteUrgency } from "@/lib/estimate";
 import type { EmergencyIssue } from "@/lib/emergency";
+import {
+  ATTRIBUTION_KEYS,
+  cleanAttributionValue,
+  type LeadAttribution,
+} from "@/lib/attribution";
 
 /**
  * Shared lead shape for every inbound lead source. Every form handler (and,
@@ -34,6 +39,9 @@ export interface Lead {
 
   // Emergency-flow fields (source: "emergency-service").
   issue?: EmergencyIssue;
+
+  /** Where the visitor came from (ad click, UTMs, landing page). Optional. */
+  attribution?: LeadAttribution;
 }
 
 /** Raw JSON body as posted by the browser. Nothing in it is trusted. */
@@ -65,6 +73,27 @@ function optStr<T extends string = string>(value: unknown): T | undefined {
   return s ? (s as T) : undefined;
 }
 
+/**
+ * Cleans the browser's `attribution` object: plain objects only, allowlisted
+ * keys only, string values only, control characters stripped, trimmed, capped
+ * at 200 characters, empties dropped. Undefined when nothing is left.
+ */
+export function normalizeAttribution(raw: unknown): LeadAttribution | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const proto = Object.getPrototypeOf(raw);
+  if (proto !== Object.prototype && proto !== null) return undefined;
+  const input = raw as Record<string, unknown>;
+  const out: LeadAttribution = {};
+  for (const key of ATTRIBUTION_KEYS) {
+    if (!Object.hasOwn(input, key)) continue;
+    const value = input[key];
+    if (typeof value !== "string") continue;
+    const clean = cleanAttributionValue(value);
+    if (clean) out[key] = clean;
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
 export function randomLeadId(): string {
   // crypto.randomUUID is available in Workers, Node 20+, and browsers.
   return crypto.randomUUID().replace(/-/g, "").slice(0, 12);
@@ -78,6 +107,7 @@ interface NormalizeOptions {
 }
 
 function base(source: LeadSource, raw: RawLeadInput, opts: NormalizeOptions) {
+  const attribution = normalizeAttribution(raw.attribution);
   return {
     source,
     name: str(raw.name),
@@ -85,6 +115,7 @@ function base(source: LeadSource, raw: RawLeadInput, opts: NormalizeOptions) {
     email: str(raw.email),
     timestamp: (opts.now ?? new Date()).toISOString(),
     id: opts.id ?? randomLeadId(),
+    ...(attribution ? { attribution } : {}),
   };
 }
 
