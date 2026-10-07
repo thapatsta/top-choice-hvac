@@ -38,9 +38,9 @@ const archivoBlack = Archivo({
 });
 
 export const metadata: Metadata = pageMetadata({
-  title: "Furnace Installation in Brampton & the GTA | Free Quote",
+  title: "Furnace Installation in the GTA | Free Quote",
   description:
-    "New furnace installation from a local Brampton team. 10-year labour warranty, satisfaction guarantee, licensed and insured. Get your free quote in minutes.",
+    "New furnace installation from a local GTA team. 10-year labour warranty, satisfaction guarantee, licensed and insured. Get your free quote in minutes.",
   path: "/lp/furnace-installation",
   noindex: true,
 });
@@ -52,7 +52,10 @@ const trustItems: { icon: LucideIcon; title: string; detail: string }[] = [
   { icon: Clock, title: "24/7 Service", detail: "call any time" },
 ];
 
-const localAreas = site.serviceAreas.slice(0, 4);
+// The page targets the whole GTA, so it names no single home city; the
+// head-office city is left out of the area lists.
+const gtaAreas = site.serviceAreas.filter((area) => area !== site.address.city);
+const localAreas = gtaAreas.slice(0, 4);
 
 // The first two are the featured cards; the rest render as compact rows.
 const reasons: { icon: LucideIcon; title: string; body: string }[] = [
@@ -68,7 +71,7 @@ const reasons: { icon: LucideIcon; title: string; body: string }[] = [
   },
   {
     icon: MapPin,
-    title: "Local to Brampton & the GTA",
+    title: "Local to the GTA",
     body: `Serving ${localAreas.slice(0, -1).join(", ")} and ${localAreas.at(-1)} since ${site.founded}.`,
   },
   {
@@ -124,7 +127,7 @@ const faqs: FAQ[] = [
   },
   {
     question: "Which areas do you serve?",
-    answer: `We're based in Brampton and serve the GTA, including ${site.serviceAreas.join(", ")}.`,
+    answer: `We serve homes across the GTA, including ${gtaAreas.join(", ")}.`,
   },
 ];
 
@@ -208,7 +211,7 @@ export default function FurnaceInstallationLandingPage() {
               Furnace Installation, Done Right. Priced Upfront.
             </h1>
             <p className="text-base text-(--lp-hero-sub) sm:text-lg">
-              Get winter-ready with a new furnace from a local Brampton team. Free quote in
+              Get winter-ready with a new furnace from a local GTA team. Free quote in
               minutes. No hidden fees, no pushy sales.
             </p>
             <div>
@@ -246,7 +249,7 @@ export default function FurnaceInstallationLandingPage() {
 
       <section className="pb-12 sm:pb-20">
         <Container>
-          <h2 className={`${sectionHeading} text-navy`}>Why Brampton homeowners choose Top Choice</h2>
+          <h2 className={`${sectionHeading} text-navy`}>Why GTA homeowners choose Top Choice</h2>
           <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-5">
             {featured.map(({ icon, title, body }) => (
               <div key={title} className="flex flex-col gap-2 rounded-xl bg-card p-4 sm:p-6">
