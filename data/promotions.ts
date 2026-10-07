@@ -1,6 +1,10 @@
 // Seasonal offers — structured so staff can swap these without a developer.
-// TODO: dates and dollar amounts below are plausible-but-fake placeholders
-// until confirmed by the client.
+// The furnace installation offer (first entry) is client-confirmed and reads
+// its price from data/offers.ts. TODO: dates and dollar amounts in every
+// other entry are plausible-but-fake placeholders until confirmed by the
+// client.
+
+import { furnaceInstallOffer } from "@/data/offers";
 
 export interface Promotion {
   slug: string;
@@ -11,6 +15,12 @@ export interface Promotion {
 }
 
 export const promotions: Promotion[] = [
+  {
+    slug: "furnace-installation-offer",
+    title: furnaceInstallOffer.headline,
+    description: `${furnaceInstallOffer.summary} ${furnaceInstallOffer.note}`,
+    validity: "Ongoing",
+  },
   {
     slug: "spring-ac-tune-up",
     title: "Spring AC Tune-Up Special",

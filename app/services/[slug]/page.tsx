@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, DollarSign, Gift } from "lucide-react";
+import { CheckCircle2, DollarSign, Gift, Phone, Tag } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { ServiceIcon } from "@/components/ui/ServiceIcon";
@@ -80,12 +80,35 @@ export default async function ServiceDetailPage({
             <h1 className="font-display text-3xl font-bold sm:text-4xl lg:text-5xl">
               {service.name} in Brampton & the GTA
             </h1>
-            <p className="mt-3 max-w-2xl text-lg text-white/80">{service.heroTagline}</p>
-            <div className="mt-6">
-              <Button href="/get-quote" size="lg">
-                Get a Free Quote
-              </Button>
-            </div>
+            {service.offer ? (
+              <>
+                <p className="mt-4 font-display text-3xl font-bold text-ember-light sm:text-4xl lg:text-5xl">
+                  {service.offer.headline}
+                </p>
+                <p className="mt-2 max-w-2xl text-lg text-white">{service.offer.summary}</p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Button href="/get-quote" size="lg">
+                    Get a Free Quote
+                  </Button>
+                  <div data-track-location="service_offer">
+                    <Button href={site.phone.href} variant="outline-light" size="lg">
+                      <Phone size={20} aria-hidden="true" />
+                      {site.phone.display}
+                    </Button>
+                  </div>
+                </div>
+                <p className="mt-6 max-w-2xl text-lg text-white/80">{service.heroTagline}</p>
+              </>
+            ) : (
+              <>
+                <p className="mt-3 max-w-2xl text-lg text-white/80">{service.heroTagline}</p>
+                <div className="mt-6">
+                  <Button href="/get-quote" size="lg">
+                    Get a Free Quote
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </Container>
       </section>
@@ -93,6 +116,22 @@ export default async function ServiceDetailPage({
       <section className="py-14 sm:py-20">
         <Container className="max-w-3xl">
           <p className="text-lg text-navy">{service.intro}</p>
+
+          {service.offer && (
+            <div className="mt-8 rounded-2xl border border-border bg-card p-6">
+              <Tag size={24} className="text-ember" aria-hidden="true" />
+              <h2 className="mt-2 font-display text-xl font-bold text-navy">
+                How our furnace pricing works
+              </h2>
+              <p className="mt-2 text-navy">
+                {service.offer.summary} {service.offer.note}{" "}
+                <Link href="/get-quote" className="font-semibold text-ember hover:underline">
+                  Book your free in-home assessment
+                </Link>{" "}
+                to get the exact price for your home.
+              </p>
+            </div>
+          )}
 
           <h2 className="mt-12 font-display text-2xl font-bold text-navy sm:text-3xl">
             Signs You Need {service.name}

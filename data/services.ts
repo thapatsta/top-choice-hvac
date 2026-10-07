@@ -1,3 +1,6 @@
+import { furnaceInstallOffer, type ServiceOffer } from "@/data/offers";
+import { formatCAD } from "@/lib/format";
+
 export interface ServiceFAQ {
   question: string;
   answer: string;
@@ -28,6 +31,8 @@ export interface Service {
   rebateNote: string;
   faqs: ServiceFAQ[];
   metaDescription: string;
+  /** Advertised price. Only set where the client has confirmed one. */
+  offer?: ServiceOffer;
 }
 
 const standardProcess: ServiceProcessStep[] = [
@@ -115,6 +120,10 @@ export const services: Service[] = [
       "High-efficiency furnace upgrades may qualify for Ontario/federal rebate programs. See /rebates for current programs (verify amounts before purchase — they change).",
     faqs: [
       {
+        question: `Is ${formatCAD(furnaceInstallOffer.priceFrom)} the final price?`,
+        answer: `No. ${furnaceInstallOffer.summary} ${furnaceInstallOffer.note}`,
+      },
+      {
         question: "How long does a furnace replacement take?",
         answer:
           "Most residential furnace replacements are completed in a single day.", // TODO: confirm typical install time
@@ -130,8 +139,10 @@ export const services: Service[] = [
           "Yes, removal and disposal of your old unit is included in every installation.",
       },
     ],
-    metaDescription:
-      "Furnace installation and replacement in Brampton, ON. Properly sized systems, upfront pricing, and rebate guidance. Get a free in-home quote.",
+    metaDescription: `Furnace installation and replacement in Brampton, ON from ${formatCAD(
+      furnaceInstallOffer.priceFrom
+    )} for a base-tier furnace, installed. Properly sized systems and rebate guidance. Get a free in-home quote.`,
+    offer: furnaceInstallOffer,
   },
   {
     slug: "ac-repair",

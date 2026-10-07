@@ -115,6 +115,8 @@ alt text — to keep Core Web Vitals green.
   `lib/estimate.ts` (`installedRanges`, `repairRanges`). These directly
   affect the "Good/Better/Best" framing shown to every `/get-quote` and
   `/emergency-service` submission.
+  Exception: furnace installs/replacements quote the client-confirmed
+  advertised starting price from `data/offers.ts` instead of a range.
 - **Pricing philosophy** — flat-rate vs. estimate-based — referenced in
   `/faq` and several service pages
 - **Financing partner and real terms** — `/financing` page; the payment

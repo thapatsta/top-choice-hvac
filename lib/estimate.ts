@@ -1,6 +1,11 @@
 // Good/Better/Best style *range framing* only — not a real-time pricing
 // engine. Every dollar figure here is a placeholder and MUST be verified
-// with the client before launch (see CONTENT-NEEDED.md).
+// with the client before launch (see CONTENT-NEEDED.md) — except the furnace
+// installation starting price, which is the client-confirmed advertised offer
+// in data/offers.ts.
+
+import { furnaceInstallOffer } from "@/data/offers";
+import { formatCAD } from "@/lib/format";
 
 export type QuoteNeed = "repair" | "replacement" | "new-install" | "maintenance";
 export type QuoteSystemType =
@@ -56,8 +61,11 @@ interface EstimateRange {
 }
 
 // [PLACEHOLDER: confirm real installed-price ranges with client before launch]
-const installedRanges: Record<QuoteSystemType, EstimateRange> = {
-  furnace: { low: 4500, high: 8500 },
+// Furnace is deliberately absent: furnace installs quote the advertised
+// starting price from data/offers.ts instead of a range, because the client
+// hasn't given an upper price. Excluding the key keeps the lookup type-safe —
+// getEstimateFraming must handle furnace before it can index this table.
+const installedRanges: Record<Exclude<QuoteSystemType, "furnace">, EstimateRange> = {
   ac: { low: 4000, high: 7500 },
   "heat-pump": { low: 7000, high: 14000 },
   ductless: { low: 3500, high: 9000 },
@@ -75,13 +83,10 @@ const repairRanges: Record<QuoteSystemType, EstimateRange> = {
   "not-sure": { low: 200, high: 900 },
 };
 
-function formatUSD(n: number): string {
-  return `$${n.toLocaleString("en-CA")}`;
-}
-
 // TODO: every dollar figure returned by this function is a placeholder —
 // confirm real pricing ranges with the client before launch (see
-// installedRanges/repairRanges above).
+// installedRanges/repairRanges above). The one exception is the furnace
+// installation starting price, which comes from data/offers.ts.
 export function getEstimateFraming(need: QuoteNeed, systemType: QuoteSystemType): string {
   const systemLabel =
     systemTypeOptions.find((s) => s.value === systemType)?.label.toLowerCase() ?? "system";
@@ -92,15 +97,21 @@ export function getEstimateFraming(need: QuoteNeed, systemType: QuoteSystemType)
 
   if (need === "repair") {
     const r = repairRanges[systemType];
-    return `Most ${systemLabel} repairs like yours run between ${formatUSD(r.low)}–${formatUSD(
+    return `Most ${systemLabel} repairs like yours run between ${formatCAD(r.low)}–${formatCAD(
       r.high
     )}.`;
+  }
+
+  if (systemType === "furnace") {
+    return `Furnace installations start from ${formatCAD(
+      furnaceInstallOffer.priceFrom
+    )} for a base-tier furnace. We'll confirm your exact price after a quick, free in-home assessment.`;
   }
 
   const r = installedRanges[systemType];
   return `Most ${systemLabel} ${
     need === "new-install" ? "installs" : "replacements"
-  } like yours run between ${formatUSD(r.low)}–${formatUSD(
+  } like yours run between ${formatCAD(r.low)}–${formatCAD(
     r.high
   )} installed — we'll confirm your exact price after a quick, free in-home assessment.`;
 }
