@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, CheckCircle2, Loader2, Phone } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { AlertTriangle, Loader2, Phone } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ChoiceCard } from "@/components/ui/ChoiceCard";
 import { StepShell } from "@/components/ui/StepShell";
-import { site } from "@/lib/site";
 import { resolveLeadSource } from "@/lib/leadAdapter";
 import { submitLead } from "@/lib/submitLead";
+import { thankYouHref } from "@/lib/thankYou";
 import { useFormStart } from "@/lib/useFormStart";
 import { gasEmergencyContact, issueOptions, type EmergencyIssue } from "@/lib/emergency";
 
@@ -34,7 +35,7 @@ export function EmergencyForm({ source = "emergency-service" }: { source?: strin
   const [stepIndex, setStepIndex] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
+  const router = useRouter();
   const leadSource = resolveLeadSource(source) ?? "emergency-service";
   const markFormStarted = useFormStart(leadSource);
 
@@ -55,12 +56,13 @@ export function EmergencyForm({ source = "emergency-service" }: { source?: strin
       leadSource,
     });
     if (result.ok) {
-      setSubmitted(true);
-    } else {
-      setSubmitError(
-        "Something went wrong submitting your request. Please call us directly and we'll help right away."
-      );
+      // Leave submitting on until the navigation unmounts the form.
+      router.replace(thankYouHref(leadSource));
+      return;
     }
+    setSubmitError(
+      "Something went wrong submitting your request. Please call us directly and we'll help right away."
+    );
     setSubmitting(false);
   }
 
@@ -105,27 +107,6 @@ export function EmergencyForm({ source = "emergency-service" }: { source?: strin
           >
             ← This isn&apos;t a gas smell, go back
           </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (submitted) {
-    return (
-      <div className="rounded-2xl border border-border bg-card p-8 text-center">
-        <CheckCircle2 size={48} className="mx-auto text-success" aria-hidden="true" />
-        <h2 className="mt-4 font-display text-2xl font-bold text-navy">
-          Got it, {form.name.split(" ")[0] || "thanks"}!
-        </h2>
-        <p className="mt-3 text-navy">
-          We&apos;ll call you back shortly. For the fastest response, call{" "}
-          {site.phone.display} now.
-        </p>
-        <div className="mt-6" data-track-location="emergency_form">
-          <Button href={site.phone.href} size="lg" className="w-full text-xl">
-            <Phone size={24} aria-hidden="true" />
-            Call {site.phone.display}
-          </Button>
         </div>
       </div>
     );
