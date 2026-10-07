@@ -17,6 +17,7 @@ describe("encodeThankYou", () => {
     expect(encodeThankYou("get-quote")).toBe("source=get-quote");
     expect(encodeThankYou("emergency-service")).toBe("source=emergency-service");
     expect(encodeThankYou("contact")).toBe("source=contact");
+    expect(encodeThankYou("landing-page")).toBe("source=landing-page");
   });
 
   it("adds quote details only when given", () => {
@@ -64,7 +65,7 @@ describe("prepareThankYou", () => {
 
 describe("parseThankYouParams", () => {
   it("accepts every lead source", () => {
-    for (const source of ["get-quote", "emergency-service", "contact"] as LeadSource[]) {
+    for (const source of ["get-quote", "emergency-service", "contact", "landing-page"] as LeadSource[]) {
       expect(parse(`source=${source}`).source).toBe(source);
     }
   });

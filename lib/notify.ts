@@ -127,6 +127,8 @@ export function emailSubject(lead: Lead): string {
       return `New Quote Request — ${who}`;
     case "contact":
       return `New Contact Form — ${who}`;
+    case "landing-page":
+      return `New Ad Landing Page Lead — ${who}`;
   }
 }
 
@@ -136,6 +138,7 @@ const FIELD_LABELS: [keyof Lead, string][] = [
   ["email", "Email"],
   ["preferredContact", "Preferred contact"],
   ["issue", "Issue"],
+  ["service", "Service wanted"],
   ["message", "Message"],
   ["need", "Need"],
   ["systemType", "System type"],

@@ -1,5 +1,6 @@
 import type { QuoteNeed, QuoteSystemType, QuoteUrgency } from "@/lib/estimate";
 import type { EmergencyIssue } from "@/lib/emergency";
+import { isLandingService, type LandingService } from "@/lib/landingPage";
 import {
   ATTRIBUTION_KEYS,
   cleanAttributionValue,
@@ -11,7 +12,7 @@ import {
  * later, the voice receptionist) normalizes its raw payload into a `Lead`
  * before handing it to `sendLeadNotification()` in `lib/notify.ts`.
  */
-export type LeadSource = "get-quote" | "contact" | "emergency-service";
+export type LeadSource = "get-quote" | "contact" | "emergency-service" | "landing-page";
 
 export interface Lead {
   source: LeadSource;
@@ -40,6 +41,10 @@ export interface Lead {
   // Emergency-flow fields (source: "emergency-service").
   issue?: EmergencyIssue;
 
+  // Ad landing page fields (source: "landing-page"). postalCode is shared
+  // with the quote flow above.
+  service?: LandingService;
+
   /** Where the visitor came from (ad click, UTMs, landing page). Optional. */
   attribution?: LeadAttribution;
 }
@@ -57,6 +62,7 @@ const SOURCE_ALIASES: Record<string, LeadSource> = {
   contact: "contact",
   "emergency-service": "emergency-service",
   emergency: "emergency-service",
+  "landing-page": "landing-page",
 };
 
 export function resolveLeadSource(raw: unknown): LeadSource | null {
@@ -153,6 +159,17 @@ export function normalizeContactLead(raw: RawLeadInput, opts: NormalizeOptions =
   };
 }
 
+export function normalizeLandingLead(raw: RawLeadInput, opts: NormalizeOptions = {}): Lead {
+  // Only a known service survives, so an unknown value reads as missing.
+  const service = isLandingService(raw.service) ? raw.service : undefined;
+  return {
+    ...base("landing-page", raw, opts),
+    message: service ?? "",
+    service,
+    postalCode: optStr(raw.postalCode),
+  };
+}
+
 /** Dispatches to the right normalizer. Never throws on missing fields. */
 export function normalizeLead(
   source: LeadSource,
@@ -167,6 +184,8 @@ export function normalizeLead(
       return normalizeEmergencyLead(input, opts);
     case "contact":
       return normalizeContactLead(input, opts);
+    case "landing-page":
+      return normalizeLandingLead(input, opts);
   }
 }
 
@@ -185,6 +204,8 @@ export const REQUIRED_FIELDS: Record<LeadSource, (keyof Lead)[]> = {
   ],
   "emergency-service": ["name", "phone", "issue"],
   contact: ["name", "phone", "message"],
+  // Email is optional on the ad landing page form.
+  "landing-page": ["name", "phone", "service", "postalCode"],
 };
 
 /** Returns the first missing required field, or null if the lead is complete. */
@@ -204,4 +225,5 @@ export const SOURCE_LABELS: Record<LeadSource, string> = {
   "get-quote": "Quote Request",
   contact: "Contact Form",
   "emergency-service": "Emergency Service",
+  "landing-page": "Ad Landing Page Quote",
 };

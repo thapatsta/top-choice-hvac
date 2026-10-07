@@ -32,6 +32,7 @@ function makeLead(source: LeadSource): Lead {
       need: "repair",
       systemType: "furnace",
       urgency: "emergency",
+      service: "heat-pump",
     },
     { now: new Date("2026-09-23T14:05:00.000Z"), id: "abc123" }
   );
@@ -56,7 +57,7 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks());
 
 describe("logLeadToKV", () => {
-  it.each(["get-quote", "contact", "emergency-service"] as const)(
+  it.each(["get-quote", "contact", "emergency-service", "landing-page"] as const)(
     "writes a %s lead as JSON under leads:<ISO timestamp>:<suffix>",
     async (source) => {
       const { kvPut, deps } = setup();
@@ -82,6 +83,7 @@ describe("emailLead", () => {
     ["emergency-service", /^🚨 Emergency Service Lead/],
     ["get-quote", /^New Quote Request/],
     ["contact", /^New Contact Form/],
+    ["landing-page", /^New Ad Landing Page Lead/],
   ] as const)("sends a %s lead to LEAD_NOTIFY_EMAIL with the source in the subject", async (source, subject) => {
     const { deps, resendCalls } = setup();
     await emailLead(makeLead(source), deps);
@@ -125,7 +127,7 @@ describe("smsLead", () => {
     expect(params.get("Body")!.length).toBeLessThan(200);
   });
 
-  it.each(["get-quote", "contact"] as const)("does NOT send for %s", async (source) => {
+  it.each(["get-quote", "contact", "landing-page"] as const)("does NOT send for %s", async (source) => {
     const { deps, fetchMock } = setup();
     expect(await smsLead(makeLead(source), deps)).toBe(false);
     expect(fetchMock).not.toHaveBeenCalled();
@@ -142,7 +144,7 @@ describe("sendLeadNotification", () => {
     expect(twilioCalls()).toHaveLength(1);
   });
 
-  it.each(["get-quote", "contact"] as const)("%s: KV + email fire, SMS is NOT called", async (source) => {
+  it.each(["get-quote", "contact", "landing-page"] as const)("%s: KV + email fire, SMS is NOT called", async (source) => {
     const { deps, kvPut, resendCalls, twilioCalls } = setup();
     const result = await sendLeadNotification(makeLead(source), deps);
     expect(result).toMatchObject({ kv: "sent", email: "sent", sms: "skipped", delivered: true });
@@ -230,7 +232,7 @@ describe("sendLeadNotification", () => {
         .join("\n");
     }
 
-    it.each(["get-quote", "contact", "emergency-service"] as const)(
+    it.each(["get-quote", "contact", "emergency-service", "landing-page"] as const)(
       "%s: every channel failing logs the key but not name/phone/email/message",
       async (source) => {
         const { deps, kvPut, fetchMock } = setup();
