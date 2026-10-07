@@ -9,7 +9,7 @@ import { StepShell } from "@/components/ui/StepShell";
 import { site } from "@/lib/site";
 import { resolveLeadSource } from "@/lib/leadAdapter";
 import { submitLead } from "@/lib/submitLead";
-import { thankYouHref } from "@/lib/thankYou";
+import { prepareThankYou } from "@/lib/thankYou";
 import { useFormStart } from "@/lib/useFormStart";
 import {
   needOptions,
@@ -107,7 +107,7 @@ export function QuoteForm({
     if (result.ok) {
       // Leave submitting on until the navigation unmounts the form.
       router.replace(
-        thankYouHref(leadSource, { need: form.need, system: form.systemType, urgency: form.urgency })
+        prepareThankYou(leadSource, { need: form.need, system: form.systemType, urgency: form.urgency })
       );
       return;
     }

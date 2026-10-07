@@ -8,7 +8,7 @@ import { ChoiceCard } from "@/components/ui/ChoiceCard";
 import { StepShell } from "@/components/ui/StepShell";
 import { resolveLeadSource } from "@/lib/leadAdapter";
 import { submitLead } from "@/lib/submitLead";
-import { thankYouHref } from "@/lib/thankYou";
+import { prepareThankYou } from "@/lib/thankYou";
 import { useFormStart } from "@/lib/useFormStart";
 import { gasEmergencyContact, issueOptions, type EmergencyIssue } from "@/lib/emergency";
 
@@ -57,7 +57,7 @@ export function EmergencyForm({ source = "emergency-service" }: { source?: strin
     });
     if (result.ok) {
       // Leave submitting on until the navigation unmounts the form.
-      router.replace(thankYouHref(leadSource));
+      router.replace(prepareThankYou(leadSource));
       return;
     }
     setSubmitError(

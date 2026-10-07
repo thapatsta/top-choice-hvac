@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import type { LeadSource } from "@/lib/leadAdapter";
 import { submitLead } from "@/lib/submitLead";
-import { thankYouHref } from "@/lib/thankYou";
+import { prepareThankYou } from "@/lib/thankYou";
 import { useFormStart } from "@/lib/useFormStart";
 
 // /api/contact always files these leads under this source.
@@ -35,7 +35,7 @@ export function ContactForm() {
         });
         if (result.ok) {
           // Leave submitting on until the navigation unmounts the form.
-          router.replace(thankYouHref(LEAD_SOURCE));
+          router.replace(prepareThankYou(LEAD_SOURCE));
           return;
         }
         setError("Something went wrong sending your message. Please call us instead.");
