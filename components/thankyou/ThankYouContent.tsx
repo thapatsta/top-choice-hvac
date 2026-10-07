@@ -1,16 +1,20 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSyncExternalStore } from "react";
 import { CheckCircle2, Phone } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { getEstimateFraming } from "@/lib/estimate";
 import { site } from "@/lib/site";
-import { parseThankYouParams, type ThankYouParams } from "@/lib/thankYou";
+import { parseThankYouParams, readStoredThankYou, type ThankYouParams } from "@/lib/thankYou";
 
-/** Reads the query string; must render inside a Suspense boundary. */
+// sessionStorage never changes while this page is open, so there is nothing
+// to subscribe to; the server snapshot (null) renders the generic card.
+const noSubscribe = () => () => {};
+
+/** Reads what the form stored in sessionStorage before navigating here. */
 export function ThankYouContent() {
-  const searchParams = useSearchParams();
-  return <ThankYouCard params={parseThankYouParams(searchParams)} />;
+  const stored = useSyncExternalStore(noSubscribe, readStoredThankYou, () => null);
+  return <ThankYouCard params={parseThankYouParams(new URLSearchParams(stored ?? ""))} />;
 }
 
 function CallButton({ location, large = false }: { location: string; large?: boolean }) {
@@ -72,7 +76,7 @@ export function ThankYouCard({ params }: { params: ThankYouParams }) {
       );
 
     default:
-      // Direct visit or unrecognised params: don't claim a request arrived.
+      // Direct visit or nothing stored: don't claim a request arrived.
       return (
         <div className={cardClass}>
           {/* A phone, not a check mark: nothing here confirms a submission. */}

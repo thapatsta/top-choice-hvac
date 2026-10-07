@@ -1,31 +1,64 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { needOptions, systemTypeOptions, urgencyOptions } from "@/lib/estimate";
 import type { LeadSource } from "@/lib/leadAdapter";
-import { parseThankYouParams, thankYouHref, type ThankYouParams } from "@/lib/thankYou";
-
-function parseHref(href: string): ThankYouParams {
-  const [path, query = ""] = href.split("?");
-  expect(path).toBe("/thank-you");
-  return parseThankYouParams(new URLSearchParams(query));
-}
+import {
+  encodeThankYou,
+  parseThankYouParams,
+  prepareThankYou,
+  readStoredThankYou,
+  THANK_YOU_STORAGE_KEY,
+  type ThankYouParams,
+} from "@/lib/thankYou";
 
 const parse = (query: string) => parseThankYouParams(new URLSearchParams(query));
 
-describe("thankYouHref", () => {
-  it("builds a source-only URL for each form", () => {
-    expect(thankYouHref("get-quote")).toBe("/thank-you?source=get-quote");
-    expect(thankYouHref("emergency-service")).toBe("/thank-you?source=emergency-service");
-    expect(thankYouHref("contact")).toBe("/thank-you?source=contact");
+describe("encodeThankYou", () => {
+  it("encodes only the source for each form", () => {
+    expect(encodeThankYou("get-quote")).toBe("source=get-quote");
+    expect(encodeThankYou("emergency-service")).toBe("source=emergency-service");
+    expect(encodeThankYou("contact")).toBe("source=contact");
   });
 
   it("adds quote details only when given", () => {
     expect(
-      thankYouHref("get-quote", { need: "repair", system: "heat-pump", urgency: "emergency" })
-    ).toBe("/thank-you?source=get-quote&need=repair&system=heat-pump&urgency=emergency");
-    expect(thankYouHref("get-quote", { need: "maintenance" })).toBe(
-      "/thank-you?source=get-quote&need=maintenance"
+      encodeThankYou("get-quote", { need: "repair", system: "heat-pump", urgency: "emergency" })
+    ).toBe("source=get-quote&need=repair&system=heat-pump&urgency=emergency");
+    expect(encodeThankYou("get-quote", { need: "maintenance" })).toBe(
+      "source=get-quote&need=maintenance"
     );
-    expect(thankYouHref("get-quote", {})).toBe("/thank-you?source=get-quote");
+    expect(encodeThankYou("get-quote", {})).toBe("source=get-quote");
+  });
+});
+
+describe("prepareThankYou", () => {
+  function stubStorage(storage: Partial<Storage>) {
+    vi.stubGlobal("sessionStorage", storage);
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("returns the plain /thank-you path and stores the details", () => {
+    const store = new Map<string, string>();
+    stubStorage({
+      setItem: (k, v) => void store.set(k, v),
+      getItem: (k) => store.get(k) ?? null,
+    });
+    expect(prepareThankYou("get-quote", { need: "repair", urgency: "emergency" })).toBe(
+      "/thank-you"
+    );
+    expect(store.get(THANK_YOU_STORAGE_KEY)).toBe("source=get-quote&need=repair&urgency=emergency");
+    expect(readStoredThankYou()).toBe("source=get-quote&need=repair&urgency=emergency");
+  });
+
+  it("still returns /thank-you when storage is blocked", () => {
+    const blocked = () => {
+      throw new Error("SecurityError");
+    };
+    stubStorage({ setItem: blocked, getItem: blocked });
+    expect(prepareThankYou("contact")).toBe("/thank-you");
+    expect(readStoredThankYou()).toBeNull();
   });
 });
 
@@ -75,7 +108,7 @@ describe("parseThankYouParams", () => {
     expect(JSON.stringify(parse("source=get-quote&need=repair&name=Robin"))).not.toMatch(/Robin/);
   });
 
-  it("round-trips thankYouHref", () => {
+  it("round-trips encodeThankYou", () => {
     const cases: [LeadSource, ThankYouParams][] = [
       ["contact", { source: "contact" }],
       ["emergency-service", { source: "emergency-service" }],
@@ -84,7 +117,7 @@ describe("parseThankYouParams", () => {
     ];
     for (const [source, expected] of cases) {
       const { need, system, urgency } = expected;
-      expect(parseHref(thankYouHref(source, { need, system, urgency }))).toEqual(expected);
+      expect(parse(encodeThankYou(source, { need, system, urgency }))).toEqual(expected);
     }
   });
 });
