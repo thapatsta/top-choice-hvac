@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Archivo } from "next/font/google";
 import {
   BadgeCheck,
   Clock,
@@ -12,7 +13,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { Button } from "@/components/ui/Button";
 import { FAQAccordion } from "@/components/FAQAccordion";
 import { LpLeadForm } from "@/components/lp/LpLeadForm";
 import { LpStickyBar } from "@/components/lp/LpStickyBar";
@@ -29,6 +29,14 @@ import { site } from "@/lib/site";
 //
 // Every claim here is a confirmed one: rating and count come from
 // data/reviews.ts via site, and there is deliberately no price.
+// The headline weight (900) is loaded here only, so the rest of the site
+// doesn't download it. Used through the .lp-black class in globals.css.
+const archivoBlack = Archivo({
+  variable: "--font-lp-black",
+  subsets: ["latin"],
+  weight: "900",
+});
+
 export const metadata: Metadata = pageMetadata({
   title: "Furnace Installation in Brampton & the GTA | Free Quote",
   description:
@@ -46,6 +54,7 @@ const trustItems: { icon: LucideIcon; title: string; detail: string }[] = [
 
 const localAreas = site.serviceAreas.slice(0, 4);
 
+// The first two are the featured cards; the rest render as compact rows.
 const reasons: { icon: LucideIcon; title: string; body: string }[] = [
   {
     icon: Tag,
@@ -58,16 +67,6 @@ const reasons: { icon: LucideIcon; title: string; body: string }[] = [
     body: "Every installation is backed by a 10-year labour warranty, on top of the manufacturer's equipment warranty.",
   },
   {
-    icon: ThumbsUp,
-    title: "Satisfaction guarantee",
-    body: "If something isn't right, tell us and we'll make it right.",
-  },
-  {
-    icon: BadgeCheck,
-    title: "Licensed & insured",
-    body: `${site.insurance}, so you can hire us with confidence.`,
-  },
-  {
     icon: MapPin,
     title: "Local to Brampton & the GTA",
     body: `Serving ${localAreas.slice(0, -1).join(", ")} and ${localAreas.at(-1)} since ${site.founded}.`,
@@ -76,6 +75,16 @@ const reasons: { icon: LucideIcon; title: string; body: string }[] = [
     icon: Clock,
     title: "Here when it matters",
     body: "No heat in January? We're open 24/7. Call and talk to a real person, not a call centre.",
+  },
+  {
+    icon: ThumbsUp,
+    title: "Satisfaction guarantee",
+    body: "If something isn't right, tell us and we'll make it right.",
+  },
+  {
+    icon: BadgeCheck,
+    title: "Licensed & insured",
+    body: `${site.insurance}, so you can hire us with confidence.`,
   },
 ];
 
@@ -119,19 +128,14 @@ const faqs: FAQ[] = [
   },
 ];
 
-function TrustGrid({ className }: { className: string }) {
+// Brand icons on the LP sit in a navy chip with a beige glyph; orange is
+// kept for action buttons and step numbers only.
+function IconChip({ icon: Icon, size = "md" }: { icon: LucideIcon; size?: "sm" | "md" }) {
+  const box = size === "sm" ? "h-8 w-8 rounded-lg" : "h-9 w-9 rounded-[10px]";
   return (
-    <ul className={`grid-cols-2 gap-3 ${className}`}>
-      {trustItems.map(({ icon: Icon, title, detail }) => (
-        <li key={title} className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
-          <Icon size={24} className="mt-0.5 shrink-0 text-ember" aria-hidden="true" />
-          <span>
-            <span className="block text-sm font-bold text-navy">{title}</span>
-            <span className="block text-sm text-muted">{detail}</span>
-          </span>
-        </li>
-      ))}
-    </ul>
+    <span className={`flex shrink-0 items-center justify-center bg-navy text-cream ${box}`}>
+      <Icon size={size === "sm" ? 16 : 18} aria-hidden="true" />
+    </span>
   );
 }
 
@@ -142,116 +146,155 @@ function RatingLine() {
       href={site.googleReviewsUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold text-navy hover:text-ember"
+      className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold text-white hover:underline"
     >
-      <span className="font-display text-lg font-bold">{site.rating.toFixed(1)}</span>
+      <span className="font-display text-lg font-extrabold">{site.rating.toFixed(1)}</span>
       <span className="flex" role="img" aria-label="5 stars">
         {Array.from({ length: 5 }).map((_, i) => (
-          <Star key={i} size={18} className="fill-ember text-ember" aria-hidden="true" />
+          <Star key={i} size={18} className="fill-(--lp-star) text-(--lp-star)" aria-hidden="true" />
         ))}
       </span>
-      <span className="text-sm text-muted">Based on {site.reviewCount} Google reviews</span>
+      <span className="text-sm text-(--lp-hero-sub)">Based on {site.reviewCount} Google reviews</span>
     </a>
   );
 }
 
+const sectionHeading = "lp-black text-2xl leading-tight tracking-[-0.02em] sm:text-4xl";
+const orangeButton =
+  "inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border-b-[3px] border-ember-dark bg-ember px-6 font-display text-lg font-extrabold text-white transition-colors duration-150 hover:bg-ember-dark";
+
 export default function FurnaceInstallationLandingPage() {
   const year = new Date().getFullYear();
+  const [featured, rows] = [reasons.slice(0, 2), reasons.slice(2)];
 
   return (
-    // -mb-16 cancels the root layout's phone-only bottom padding on <main>
-    // (room for the global sticky bar, hidden here); the footer's own pb-24
-    // keeps it clear of LpStickyBar instead.
-    <div className="-mb-16 lg:mb-0">
-      <header className="border-b border-border bg-cream" data-track-location="lp_header">
-        <Container className="flex h-16 items-center justify-between gap-3 sm:h-20">
-          <div className="flex items-center gap-2 font-display text-xl font-bold tracking-tight text-navy sm:text-2xl">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-navy text-ember">
+    // .lp scopes the landing-page palette (globals.css). -mb-16 cancels the
+    // root layout's phone-only bottom padding on <main> (room for the global
+    // sticky bar, hidden here); the footer's own pb-24 keeps it clear of
+    // LpStickyBar instead.
+    <div className={`lp ${archivoBlack.variable} -mb-16 overflow-x-clip lg:mb-0`}>
+      <header className="lp-dark bg-navy" data-track-location="lp_header">
+        <Container className="flex h-16 items-center justify-between gap-2 sm:h-20">
+          <div className="flex items-center gap-2 font-display text-lg font-extrabold tracking-tight text-white min-[400px]:text-xl sm:text-2xl">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-white/12 text-cream min-[400px]:h-9 min-[400px]:w-9">
               <Flame size={20} aria-hidden="true" />
             </span>
             <span className="whitespace-nowrap">
-              Top Choice <span className="text-ember">HVAC</span>
+              Top Choice <span className="text-(--lp-hero-sub)">HVAC</span>
             </span>
           </div>
-          <Button href={site.phone.href} size="md" className="whitespace-nowrap">
+          <a
+            href={site.phone.href}
+            aria-label={`Call now, ${site.phone.display}`}
+            className="inline-flex min-h-[44px] items-center gap-2 whitespace-nowrap rounded-full bg-ember px-3.5 font-display text-base font-extrabold text-white transition-colors duration-150 hover:bg-ember-dark min-[400px]:px-4"
+          >
             <Phone size={18} aria-hidden="true" />
-            <span className="sm:hidden">Call Now</span>
-            <span className="hidden sm:inline">{site.phone.display}</span>
-          </Button>
+            Call now
+          </a>
         </Container>
       </header>
 
-      <section className="py-6 sm:py-12 lg:py-16">
-        <Container className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-12">
-          <div className="flex flex-col gap-4 lg:gap-5">
-            <span className="self-start rounded-full bg-ember-light px-3 py-1 text-sm font-bold text-ember-dark">
-              Brampton &amp; GTA · Licensed &amp; Insured
+      {/* Phones: the headline block carries a full-bleed navy band (box-shadow
+          + clip-path, so no horizontal scroll) with extra bottom padding, and
+          the form card pulls up 34px to overlap it. Desktop: the whole
+          section is navy and the form sits in the right column. */}
+      <section className="lg:bg-navy lg:py-16">
+        <Container className="grid lg:grid-cols-2 lg:items-start lg:gap-12">
+          <div className="lp-dark flex flex-col gap-4 bg-navy pb-[58px] pt-6 shadow-[0_0_0_100vmax_var(--color-navy)] [clip-path:inset(0_-100vmax)] sm:pt-10 lg:gap-5 lg:pb-0 lg:pt-4">
+            <span className="self-start rounded-full bg-white/12 px-3 py-1 text-sm font-bold text-cream">
+              Licensed &amp; insured
             </span>
-            <h1 className="font-display text-3xl font-bold leading-tight text-navy sm:text-5xl">
+            <h1 className="lp-black text-[33px] leading-[1.02] tracking-[-0.02em] text-white sm:text-5xl lg:text-[56px]">
               Furnace Installation, Done Right. Priced Upfront.
             </h1>
-            <p className="text-base text-muted sm:text-lg">
+            <p className="text-base text-(--lp-hero-sub) sm:text-lg">
               Get winter-ready with a new furnace from a local Brampton team. Free quote in
               minutes. No hidden fees, no pushy sales.
             </p>
             <div>
               <RatingLine />
             </div>
-            <TrustGrid className="mt-2 hidden lg:grid" />
           </div>
 
           <div
             id="quote"
-            className="scroll-mt-4 rounded-2xl border border-border bg-card p-5 shadow-lg sm:p-8"
+            className="relative -mt-[34px] scroll-mt-4 rounded-[18px] bg-cream p-[18px] shadow-[0_14px_36px_rgba(21,41,63,0.22)] sm:p-8 lg:mt-0 lg:shadow-[0_18px_48px_rgba(0,0,0,0.35)]"
           >
-            <h2 className="mb-3 font-display text-2xl font-bold text-navy">Get Your Free Quote</h2>
+            <h2 className="mb-2 font-display text-2xl font-extrabold tracking-[-0.01em] text-navy">
+              Get Your Free Quote
+            </h2>
             <LpLeadForm location="hero" />
           </div>
-
-          <TrustGrid className="grid lg:hidden" />
         </Container>
       </section>
 
-      <section className="bg-card py-14 sm:py-20">
+      <section className="pb-10 pt-6 lg:py-12">
         <Container>
-          <h2 className="text-center font-display text-3xl font-bold text-navy sm:text-4xl">
-            Why Brampton homeowners choose Top Choice
-          </h2>
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {reasons.map(({ icon: Icon, title, body }) => (
-              <div key={title} className="rounded-2xl border border-border bg-cream p-6">
-                <Icon size={28} className="text-ember" aria-hidden="true" />
-                <h3 className="mt-3 font-display text-lg font-bold text-navy">{title}</h3>
-                <p className="mt-2 text-muted">{body}</p>
+          <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {trustItems.map(({ icon, title, detail }) => (
+              <li key={title} className="flex flex-col gap-2 rounded-xl bg-card p-3.5 sm:flex-row sm:items-start sm:gap-3 sm:p-4">
+                <IconChip icon={icon} />
+                <span>
+                  <span className="block text-balance text-sm font-bold leading-snug text-navy">{title}</span>
+                  <span className="block text-sm leading-snug text-muted">{detail}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Container>
+      </section>
+
+      <section className="pb-12 sm:pb-20">
+        <Container>
+          <h2 className={`${sectionHeading} text-navy`}>Why Brampton homeowners choose Top Choice</h2>
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-5">
+            {featured.map(({ icon, title, body }) => (
+              <div key={title} className="flex flex-col gap-2 rounded-xl bg-card p-4 sm:p-6">
+                <IconChip icon={icon} />
+                <h3 className="mt-1 font-display text-base font-extrabold leading-snug text-navy sm:text-lg">
+                  {title}
+                </h3>
+                <p className="text-sm text-muted sm:text-base">{body}</p>
               </div>
             ))}
           </div>
+          <ul className="mt-4 divide-y divide-border sm:mt-6 lg:grid lg:grid-cols-2 lg:gap-x-10 lg:divide-y-0">
+            {rows.map(({ icon, title, body }) => (
+              <li key={title} className="flex items-start gap-3 py-3.5 lg:border-b lg:border-border">
+                <IconChip icon={icon} size="sm" />
+                <p className="text-sm leading-snug text-muted">
+                  <span className="block font-bold text-navy">{title}</span>
+                  {body}
+                </p>
+              </li>
+            ))}
+          </ul>
         </Container>
       </section>
 
-      <section className="bg-navy py-14 text-white sm:py-20">
+      <section className="lp-dark bg-navy py-12 text-white sm:py-20">
         <Container>
-          <h2 className="text-center font-display text-3xl font-bold sm:text-4xl">How it works</h2>
-          <ol className="mt-10 grid gap-8 sm:grid-cols-3">
+          <h2 className={sectionHeading}>How it works</h2>
+          <ol className="mt-6 grid gap-6 sm:mt-10 sm:grid-cols-3 sm:gap-8">
             {steps.map((step, i) => (
-              <li key={step.title} className="flex flex-col items-center text-center">
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-ember font-display text-xl font-bold">
+              <li key={step.title} className="flex items-start gap-4 sm:flex-col">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ember font-display text-xl font-extrabold">
                   {i + 1}
                 </span>
-                <h3 className="mt-4 font-display text-xl font-bold">{step.title}</h3>
-                <p className="mt-2 text-white/80">{step.body}</p>
+                <div>
+                  <h3 className="font-display text-lg font-extrabold sm:text-xl">{step.title}</h3>
+                  <p className="mt-1 text-(--lp-hero-sub)">{step.body}</p>
+                </div>
               </li>
             ))}
           </ol>
         </Container>
       </section>
 
-      <section className="py-14 sm:py-20">
+      <section className="py-12 sm:py-20">
         <Container className="max-w-3xl">
-          <h2 className="text-center font-display text-3xl font-bold text-navy sm:text-4xl">
-            Common questions
-          </h2>
-          <div className="mt-8">
+          <h2 className={`${sectionHeading} text-navy`}>Common questions</h2>
+          <div className="lp-faq mt-6">
             <FAQAccordion items={faqs} />
           </div>
         </Container>
@@ -259,27 +302,33 @@ export default function FurnaceInstallationLandingPage() {
 
       <GoogleReviewsCollage />
 
-      <section className="bg-navy py-14 text-white sm:py-20" data-track-location="lp_closing_cta">
-        <Container className="flex flex-col items-center text-center">
-          <h2 className="font-display text-3xl font-bold sm:text-4xl">Ready for a warmer winter?</h2>
-          <p className="mt-3 max-w-xl text-lg text-white/80">
+      <section
+        className="lp-dark bg-navy py-12 text-white sm:py-20"
+        data-track-location="lp_closing_cta"
+      >
+        <Container className="flex flex-col items-start sm:items-center sm:text-center">
+          <h2 className={sectionHeading}>Ready for a warmer winter?</h2>
+          <p className="mt-3 max-w-xl text-lg text-(--lp-hero-sub)">
             Get your free quote, or call us any time, {site.hours.emergency}.
           </p>
           <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            <Button href="#quote" size="lg">
+            <a href="#quote" className={orangeButton}>
               Get My Free Quote
-            </Button>
-            <Button href={site.phone.href} size="lg" variant="outline-light">
+            </a>
+            <a
+              href={site.phone.href}
+              className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border-2 border-white/80 px-6 font-display text-lg font-extrabold text-white transition-colors duration-150 hover:bg-white hover:text-navy"
+            >
               <Phone size={20} aria-hidden="true" />
               Call {site.phone.display}
-            </Button>
+            </a>
           </div>
         </Container>
       </section>
 
       <footer
         data-track-location="lp_footer"
-        className="border-t border-white/10 bg-navy pb-24 pt-6 text-sm text-white/70 lg:pb-6"
+        className="lp-dark border-t border-white/10 bg-navy pb-24 pt-6 text-sm text-(--lp-hero-sub) lg:pb-6"
       >
         <Container className="flex flex-col gap-1 text-center">
           <p className="font-semibold text-white">{site.legalName}</p>
@@ -288,12 +337,12 @@ export default function FurnaceInstallationLandingPage() {
             {site.address.postalCode}
           </p>
           <p>
-            <a href={site.phone.href} className="hover:text-ember">
+            <a href={site.phone.href} className="hover:text-white hover:underline">
               {site.phone.display}
             </a>{" "}
             · {site.insurance}
           </p>
-          <p className="mt-2 text-xs text-white/50">
+          <p className="mt-2 text-xs text-white/60">
             &copy; {year} {site.legalName} All rights reserved.
           </p>
         </Container>
