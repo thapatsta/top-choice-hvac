@@ -4,6 +4,7 @@ import {
   leadKey,
   normalizeContactLead,
   normalizeEmergencyLead,
+  normalizeAttribution,
   normalizeLead,
   normalizeQuoteLead,
   resolveLeadSource,
@@ -136,5 +137,60 @@ describe("resolveLeadSource / leadKey", () => {
     const b = normalizeContactLead({});
     expect(a.id).toMatch(/^[0-9a-f]{12}$/);
     expect(a.id).not.toBe(b.id);
+  });
+});
+
+describe("normalizeAttribution", () => {
+  it("keeps only allowlisted string keys", () => {
+    expect(
+      normalizeAttribution({
+        gclid: "abc",
+        utm_source: "google",
+        landing_path: "/",
+        evil: "x",
+        __proto__: "x",
+        utm_medium: 5,
+        utm_campaign: ["a"],
+        utm_term: null,
+        utm_content: { nested: "x" },
+      })
+    ).toEqual({ gclid: "abc", utm_source: "google", landing_path: "/" });
+  });
+
+  it.each([null, undefined, "gclid=abc", 42, ["abc"], new Date()])(
+    "rejects non-plain-object input %s",
+    (raw) => {
+      expect(normalizeAttribution(raw)).toBeUndefined();
+    }
+  );
+
+  it("strips control characters including newlines, then trims", () => {
+    expect(normalizeAttribution({ utm_source: " goo\\r\\ngle\\u0000\\t ", utm_term: "a\\u2028b" })).toEqual({
+      utm_source: "google",
+      utm_term: "ab",
+    });
+  });
+
+  it("truncates to 200 characters", () => {
+    expect(normalizeAttribution({ gclid: "x".repeat(5000) })?.gclid).toHaveLength(200);
+  });
+
+  it("returns undefined when nothing is left", () => {
+    expect(normalizeAttribution({})).toBeUndefined();
+    expect(normalizeAttribution({ gclid: "   ", utm_source: "\\n", other: "x" })).toBeUndefined();
+  });
+
+  it("reaches every normalizer via raw.attribution, and is optional", () => {
+    for (const source of ["get-quote", "contact", "emergency-service"] as const) {
+      expect(normalizeLead(source, { attribution: { gclid: "g" } }, opts).attribution).toEqual({
+        gclid: "g",
+      });
+      expect("attribution" in normalizeLead(source, {}, opts)).toBe(false);
+    }
+    const lead = normalizeContactLead(
+      { name: "A", phone: "1", message: "m", attribution: "junk" },
+      opts
+    );
+    expect(findMissingField(lead)).toBeNull();
   });
 });
