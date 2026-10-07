@@ -66,6 +66,15 @@ const emergencyPayload = {
   source: "emergency-service",
 };
 
+const landingPayload = {
+  service: "new-furnace-install",
+  name: "Priya",
+  phone: "647-555-0142",
+  email: "",
+  postalCode: "L6P 2T4",
+  source: "landing-page",
+};
+
 const contactPayload = {
   name: "Alex",
   email: "alex@example.com",
@@ -120,6 +129,20 @@ describe("/emergency-service → POST /api/leads", () => {
   });
 });
 
+describe("/lp/* → POST /api/leads", () => {
+  it("keeps the landing-page source with its service and postal code", async () => {
+    const res = await leadsPOST(post(landingPayload));
+    expect(res.status).toBe(200);
+    expect(sentLead()).toMatchObject({
+      source: "landing-page",
+      name: "Priya",
+      phone: "647-555-0142",
+      service: "new-furnace-install",
+      postalCode: "L6P 2T4",
+    });
+  });
+});
+
 describe("/contact → POST /api/contact", () => {
   it("calls sendLeadNotification with a normalized contact Lead on success", async () => {
     const res = await contactPOST(post(contactPayload));
@@ -137,6 +160,7 @@ describe("handlers never claim success for an undelivered lead", () => {
   it.each([
     ["get-quote", leadsPOST, quotePayload],
     ["emergency-service", leadsPOST, emergencyPayload],
+    ["landing-page", leadsPOST, landingPayload],
     ["contact", contactPOST, contactPayload],
   ] as const)("%s returns 500 when no channel delivered", async (_name, handler, payload) => {
     send.mockResolvedValue({ ...deliveredResult, kv: "failed", email: "failed", delivered: false });
@@ -150,6 +174,8 @@ describe("invalid submissions are rejected before notifying", () => {
   it.each([
     ["get-quote", leadsPOST, { ...quotePayload, postalCode: "" }],
     ["emergency-service", leadsPOST, { ...emergencyPayload, issue: undefined }],
+    ["landing-page (no service)", leadsPOST, { ...landingPayload, service: undefined }],
+    ["landing-page (no postal code)", leadsPOST, { ...landingPayload, postalCode: "" }],
     ["contact", contactPOST, { ...contactPayload, message: "" }],
   ] as const)("%s with a missing field → 400, no notification", async (_name, handler, payload) => {
     const res = await handler(post(payload));

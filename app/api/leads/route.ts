@@ -8,7 +8,8 @@ import {
 import { sendLeadNotification } from "@/lib/notify";
 import { checkLeadRateLimit } from "@/lib/rateLimit";
 
-// Receives both the /get-quote wizard and the /emergency-service form.
+// Receives the /get-quote wizard, the /emergency-service form and the ad
+// landing page form (/lp/*).
 export async function POST(request: Request) {
   const limited = await checkLeadRateLimit(request);
   if (limited) return limited;
@@ -23,10 +24,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 });
   }
 
-  // Anything that isn't an emergency is a quote request (matches the
-  // pre-pipeline behaviour of this route).
+  // Emergency and landing-page leads keep their source; anything else is a
+  // quote request (matches the pre-pipeline behaviour of this route).
+  const resolved = resolveLeadSource(body.source);
   const source =
-    resolveLeadSource(body.source) === "emergency-service" ? "emergency-service" : "get-quote";
+    resolved === "emergency-service" || resolved === "landing-page" ? resolved : "get-quote";
   const lead = normalizeLead(source, body);
 
   const missing = findMissingField(lead);

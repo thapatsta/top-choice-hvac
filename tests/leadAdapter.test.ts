@@ -4,6 +4,7 @@ import {
   leadKey,
   normalizeContactLead,
   normalizeEmergencyLead,
+  normalizeLandingLead,
   normalizeAttribution,
   normalizeLead,
   normalizeQuoteLead,
@@ -96,8 +97,47 @@ describe("normalizeContactLead", () => {
   });
 });
 
+describe("normalizeLandingLead", () => {
+  const landingPayload = {
+    service: "furnace-replacement",
+    name: "Priya",
+    phone: "647-555-0142",
+    email: "",
+    postalCode: "L6P 2T4",
+    source: "landing-page",
+  };
+
+  it("maps the /lp/* form payload into a Lead with a blank email", () => {
+    const lead = normalizeLead("landing-page", landingPayload, opts);
+    expect(lead).toEqual({
+      source: "landing-page",
+      name: "Priya",
+      phone: "647-555-0142",
+      email: "",
+      message: "furnace-replacement",
+      timestamp: "2026-09-23T14:05:00.000Z",
+      id: "abc123",
+      service: "furnace-replacement",
+      postalCode: "L6P 2T4",
+    });
+    expect(findMissingField(lead)).toBeNull();
+  });
+
+  it("treats an unknown service as missing", () => {
+    const lead = normalizeLandingLead({ ...landingPayload, service: "free-ecobee" }, opts);
+    expect(lead.service).toBeUndefined();
+    expect(lead.message).toBe("");
+    expect(findMissingField(lead)).toBe("service");
+  });
+
+  it("requires a postal code", () => {
+    const lead = normalizeLandingLead({ ...landingPayload, postalCode: "  " }, opts);
+    expect(findMissingField(lead)).toBe("postalCode");
+  });
+});
+
 describe("malformed / missing-field input", () => {
-  it.each(["get-quote", "contact", "emergency-service"] as const)(
+  it.each(["get-quote", "contact", "emergency-service", "landing-page"] as const)(
     "does not crash for %s with an empty, null, or wrongly-typed body",
     (source) => {
       for (const raw of [{}, null, undefined, { name: 42, phone: null, email: ["x"], note: {} }]) {
@@ -123,6 +163,7 @@ describe("resolveLeadSource / leadKey", () => {
     expect(resolveLeadSource("emergency")).toBe("emergency-service");
     expect(resolveLeadSource("emergency-service")).toBe("emergency-service");
     expect(resolveLeadSource("get-quote")).toBe("get-quote");
+    expect(resolveLeadSource("landing-page")).toBe("landing-page");
     expect(resolveLeadSource("nonsense")).toBeNull();
     expect(resolveLeadSource(undefined)).toBeNull();
   });

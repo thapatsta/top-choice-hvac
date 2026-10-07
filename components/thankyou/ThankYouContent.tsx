@@ -4,6 +4,7 @@ import { useSyncExternalStore } from "react";
 import { CheckCircle2, Phone } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { getEstimateFraming } from "@/lib/estimate";
+import { CALLBACK_PROMISE } from "@/lib/landingPage";
 import { site } from "@/lib/site";
 import { parseThankYouParams, readStoredThankYou, type ThankYouParams } from "@/lib/thankYou";
 
@@ -60,6 +61,19 @@ export function ThankYouCard({ params }: { params: ThankYouParams }) {
             {site.phone.display} now.
           </p>
           <CallButton location="thank_you_emergency" large />
+        </div>
+      );
+
+    case "landing-page":
+      return (
+        <div className={cardClass}>
+          <CheckCircle2 size={48} className="mx-auto text-success" aria-hidden="true" />
+          <h1 className={headingClass}>Got it, thanks!</h1>
+          <p className="mt-3 text-navy">
+            A Top Choice expert will call you back, {CALLBACK_PROMISE}. Need us sooner? Call{" "}
+            {site.phone.display}, {site.hours.emergency}.
+          </p>
+          <CallButton location="thank_you_landing" />
         </div>
       );
 

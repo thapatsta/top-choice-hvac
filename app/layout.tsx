@@ -5,6 +5,7 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { StickyCallBar } from "@/components/StickyCallBar";
+import { SiteChrome } from "@/components/SiteChrome";
 import { AnalyticsListeners } from "@/components/AnalyticsListeners";
 import { PRODUCTION_HOST_RE } from "@/lib/analytics";
 import { site } from "@/lib/site";
@@ -81,12 +82,19 @@ gtag('config', '${ga4Id}');
           Skip to main content
         </a>
 
-        <Header />
+        {/* SiteChrome hides the global chrome on the /lp/* ad landing pages.
+            AnalyticsListeners stays outside it so attribution capture and
+            click_to_call tracking still run there. */}
+        <SiteChrome>
+          <Header />
+        </SiteChrome>
         <main id="main-content" className="flex-1 pb-16 lg:pb-0">
           {children}
         </main>
-        <Footer />
-        <StickyCallBar />
+        <SiteChrome>
+          <Footer />
+          <StickyCallBar />
+        </SiteChrome>
         <AnalyticsListeners />
       </body>
     </html>
