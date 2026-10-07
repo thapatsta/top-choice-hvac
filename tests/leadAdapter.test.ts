@@ -165,7 +165,7 @@ describe("normalizeAttribution", () => {
   );
 
   it("strips control characters including newlines, then trims", () => {
-    expect(normalizeAttribution({ utm_source: " goo\\r\\ngle\\u0000\\t ", utm_term: "a\\u2028b" })).toEqual({
+    expect(normalizeAttribution({ utm_source: " goo\r\ngle\u0000\t ", utm_term: "a b" })).toEqual({
       utm_source: "google",
       utm_term: "ab",
     });
@@ -177,7 +177,7 @@ describe("normalizeAttribution", () => {
 
   it("returns undefined when nothing is left", () => {
     expect(normalizeAttribution({})).toBeUndefined();
-    expect(normalizeAttribution({ gclid: "   ", utm_source: "\\n", other: "x" })).toBeUndefined();
+    expect(normalizeAttribution({ gclid: "   ", utm_source: "\n", other: "x" })).toBeUndefined();
   });
 
   it("reaches every normalizer via raw.attribution, and is optional", () => {
