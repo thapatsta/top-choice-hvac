@@ -30,9 +30,9 @@ import { site } from "@/lib/site";
 // Every claim here is a confirmed one: rating and count come from
 // data/reviews.ts via site, and there is deliberately no price.
 export const metadata: Metadata = pageMetadata({
-  title: "Furnace Installation in Brampton & the GTA | Free Quote",
+  title: "Furnace Installation in the GTA | Free Quote",
   description:
-    "New furnace installation from a local Brampton team. 10-year labour warranty, satisfaction guarantee, licensed and insured. Get your free quote in minutes.",
+    "New furnace installation from a local GTA team. 10-year labour warranty, satisfaction guarantee, licensed and insured. Get your free quote in minutes.",
   path: "/lp/furnace-installation",
   noindex: true,
 });
@@ -44,7 +44,10 @@ const trustItems: { icon: LucideIcon; title: string; detail: string }[] = [
   { icon: Clock, title: "24/7 Service", detail: "call any time" },
 ];
 
-const localAreas = site.serviceAreas.slice(0, 4);
+// The page targets the whole GTA, so it names no single home city; the
+// head-office city is left out of the area lists.
+const gtaAreas = site.serviceAreas.filter((area) => area !== site.address.city);
+const localAreas = gtaAreas.slice(0, 4);
 
 const reasons: { icon: LucideIcon; title: string; body: string }[] = [
   {
@@ -69,7 +72,7 @@ const reasons: { icon: LucideIcon; title: string; body: string }[] = [
   },
   {
     icon: MapPin,
-    title: "Local to Brampton & the GTA",
+    title: "Local to the GTA",
     body: `Serving ${localAreas.slice(0, -1).join(", ")} and ${localAreas.at(-1)} since ${site.founded}.`,
   },
   {
@@ -115,7 +118,7 @@ const faqs: FAQ[] = [
   },
   {
     question: "Which areas do you serve?",
-    answer: `We're based in Brampton and serve the GTA, including ${site.serviceAreas.join(", ")}.`,
+    answer: `We serve homes across the GTA, including ${gtaAreas.join(", ")}.`,
   },
 ];
 
@@ -185,13 +188,13 @@ export default function FurnaceInstallationLandingPage() {
         <Container className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-12">
           <div className="flex flex-col gap-4 lg:gap-5">
             <span className="self-start rounded-full bg-ember-light px-3 py-1 text-sm font-bold text-ember-dark">
-              Brampton &amp; GTA · Licensed &amp; Insured
+              Serving the GTA · Licensed &amp; Insured
             </span>
             <h1 className="font-display text-3xl font-bold leading-tight text-navy sm:text-5xl">
               Furnace Installation, Done Right. Priced Upfront.
             </h1>
             <p className="text-base text-muted sm:text-lg">
-              Get winter-ready with a new furnace from a local Brampton team. Free quote in
+              Get winter-ready with a new furnace from a local GTA team. Free quote in
               minutes. No hidden fees, no pushy sales.
             </p>
             <div>
@@ -215,7 +218,7 @@ export default function FurnaceInstallationLandingPage() {
       <section className="bg-card py-14 sm:py-20">
         <Container>
           <h2 className="text-center font-display text-3xl font-bold text-navy sm:text-4xl">
-            Why Brampton homeowners choose Top Choice
+            Why GTA homeowners choose Top Choice
           </h2>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {reasons.map(({ icon: Icon, title, body }) => (
