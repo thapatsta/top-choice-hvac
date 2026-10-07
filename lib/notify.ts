@@ -1,3 +1,4 @@
+import { hasClickId, type AttributionKey, type LeadAttribution } from "@/lib/attribution";
 import { issueOptions } from "@/lib/emergency";
 import { leadKey, SOURCE_LABELS, type Lead } from "@/lib/leadAdapter";
 
@@ -156,6 +157,38 @@ function leadRows(lead: Lead): [string, string][] {
   return rows;
 }
 
+// Not in FIELD_LABELS: `attribution` is an object, so it gets its own block.
+const ATTRIBUTION_LABELS: [AttributionKey, string][] = [
+  ["gclid", "Click ID (gclid)"],
+  ["gbraid", "Click ID (gbraid)"],
+  ["wbraid", "Click ID (wbraid)"],
+  ["utm_source", "UTM source"],
+  ["utm_medium", "UTM medium"],
+  ["utm_campaign", "Campaign"],
+  ["utm_term", "Search term"],
+  ["utm_content", "Ad content"],
+  ["landing_path", "Landing page"],
+  ["referrer_host", "Referrer"],
+  ["first_seen", "First visit"],
+];
+
+/** One plain-language line on where the lead came from. */
+export function attributionSummary(a: LeadAttribution): string {
+  if (hasClickId(a)) return "Google Ads click";
+  if (a.utm_source) return a.utm_medium ? `${a.utm_source} / ${a.utm_medium}` : a.utm_source;
+  if (a.referrer_host) return `Referral from ${a.referrer_host}`;
+  return "Direct or unknown";
+}
+
+function attributionRows(a: LeadAttribution): [string, string][] {
+  const rows: [string, string][] = [["Came from", attributionSummary(a)]];
+  for (const [field, label] of ATTRIBUTION_LABELS) {
+    const value = a[field];
+    if (value) rows.push([label, value]);
+  }
+  return rows;
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, "&amp;")
@@ -164,12 +197,8 @@ function escapeHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
-export function emailBody(lead: Lead): { text: string; html: string } {
-  const heading = `${SOURCE_LABELS[lead.source]} — submitted via the website`;
-  const rows = leadRows(lead);
-  const text = [heading, "", ...rows.map(([k, v]) => `${k}: ${v}`)].join("\n");
-  const html =
-    `<h2 style="font-family:sans-serif">${escapeHtml(heading)}</h2>` +
+function htmlTable(rows: [string, string][]): string {
+  return (
     `<table style="font-family:sans-serif;border-collapse:collapse">` +
     rows
       .map(
@@ -178,7 +207,25 @@ export function emailBody(lead: Lead): { text: string; html: string } {
           `<td style="padding:4px 0;white-space:pre-wrap">${escapeHtml(v)}</td></tr>`
       )
       .join("") +
-    `</table>`;
+    `</table>`
+  );
+}
+
+export function emailBody(lead: Lead): { text: string; html: string } {
+  const heading = `${SOURCE_LABELS[lead.source]} — submitted via the website`;
+  const rows = leadRows(lead);
+  const attribution = lead.attribution ? attributionRows(lead.attribution) : null;
+  const textLines = [heading, "", ...rows.map(([k, v]) => `${k}: ${v}`)];
+  if (attribution) {
+    textLines.push("", "Attribution", ...attribution.map(([k, v]) => `${k}: ${v}`));
+  }
+  const text = textLines.join("\n");
+  const html =
+    `<h2 style="font-family:sans-serif">${escapeHtml(heading)}</h2>` +
+    htmlTable(rows) +
+    (attribution
+      ? `<h3 style="font-family:sans-serif">Attribution</h3>` + htmlTable(attribution)
+      : "");
   return { text, html };
 }
 
@@ -222,7 +269,15 @@ export function shouldSendSms(lead: Lead): boolean {
 export function smsBody(lead: Lead): string {
   const issue = issueOptions.find((o) => o.value === lead.issue)?.label ?? lead.issue ?? "Emergency";
   const note = lead.message ? ` — ${lead.message.replace(/\s+/g, " ").slice(0, 80)}` : "";
-  return `🚨 HVAC EMERGENCY — call back now: ${lead.name || "(no name)"} ${lead.phone || "(no phone)"}. ${issue}${note}`;
+  return `🚨 HVAC EMERGENCY — call back now: ${lead.name || "(no name)"} ${lead.phone || "(no phone)"}. ${issue}${note}${smsAttributionSuffix(lead.attribution)}`;
+}
+
+/** " [Google Ads]", " [<utm_source>]" or "": the only attribution in the SMS. */
+function smsAttributionSuffix(a: LeadAttribution | undefined): string {
+  if (!a) return "";
+  if (hasClickId(a)) return " [Google Ads]";
+  if (a.utm_source) return ` [${a.utm_source.slice(0, 20)}]`;
+  return "";
 }
 
 /** Sends the SMS if (and only if) the lead is an emergency. Returns whether it sent. */

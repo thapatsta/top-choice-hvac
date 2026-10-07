@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { BASE_PATH } from "@/lib/basePath";
-import { track } from "@/lib/analytics";
 import type { LeadSource } from "@/lib/leadAdapter";
+import { submitLead } from "@/lib/submitLead";
 import { useFormStart } from "@/lib/useFormStart";
 
 // /api/contact always files these leads under this source.
@@ -39,23 +38,17 @@ export function ContactForm() {
         e.preventDefault();
         setSubmitting(true);
         setError(null);
-        try {
-          const res = await fetch(`${BASE_PATH}/api/contact`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(form),
-          });
-          if (!res.ok) throw new Error("failed");
-          // Fired here rather than in an effect on `submitted` so it can
-          // only happen once per delivered lead.
-          track("generate_lead", { lead_source: LEAD_SOURCE });
+        const result = await submitLead({
+          endpoint: "/api/contact",
+          body: form,
+          leadSource: LEAD_SOURCE,
+        });
+        if (result.ok) {
           setSubmitted(true);
-        } catch {
-          track("form_submit_error", { lead_source: LEAD_SOURCE });
+        } else {
           setError("Something went wrong sending your message. Please call us instead.");
-        } finally {
-          setSubmitting(false);
         }
+        setSubmitting(false);
       }}
     >
       <h2 className="font-display text-2xl font-bold text-navy">Send Us a Message</h2>
