@@ -60,3 +60,44 @@ html {
     transition-duration: 0.01ms !important;
   }
 }
+
+/*
+ * Ad landing page palette ("Direction A: navy hero"). Scoped to the .lp
+ * wrapper on /lp/* only: the theme tokens are re-pointed inside that subtree,
+ * so shared components rendered there (FAQAccordion) follow the LP palette
+ * while :root, and every other page, keep the Slate & Ember values above.
+ * Orange (ember) is reserved for action buttons and step numbers.
+ */
+.lp {
+  --color-navy: #15293f;
+  --color-navy-light: #1f3a57;
+  --color-ember: #e5601a;
+  --color-ember-dark: #a9430d;
+  --color-cream: #f4ede0;
+  --color-card: #ffffff;
+  --color-muted: #5d6670;
+  --color-border: #d9d1c1;
+  --lp-hero-sub: #c9d1da;
+  --lp-star: #f5a524;
+
+  background: var(--color-cream);
+}
+
+/* Archivo 900, loaded by the LP page only (--font-lp-black). */
+.lp .lp-black {
+  font-family: var(--font-lp-black), var(--font-archivo), system-ui, sans-serif;
+  font-weight: 900;
+}
+
+/* Focus rings: navy on light surfaces, beige on navy bands. */
+.lp :focus-visible {
+  outline-color: var(--color-navy);
+}
+.lp .lp-dark :focus-visible {
+  outline-color: var(--color-cream);
+}
+
+/* Icons are navy on the LP, not orange (FAQAccordion's chevron). */
+.lp .lp-faq summary svg {
+  color: var(--color-navy);
+}

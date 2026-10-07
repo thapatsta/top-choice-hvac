@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Lock } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import { CALLBACK_PROMISE, landingServiceOptions, type LandingService } from "@/lib/landingPage";
 import { submitLead } from "@/lib/submitLead";
 import { prepareThankYou } from "@/lib/thankYou";
@@ -26,8 +25,10 @@ const emptyState: FormState = {
 };
 
 const labelClass = "mb-1 block text-sm font-bold text-navy";
+// Colours come from the .lp scope in globals.css: card is white, border is
+// the LP line colour. text-base keeps iOS from zooming on focus.
 const inputClass =
-  "w-full min-h-[48px] rounded-lg border border-border bg-card px-4 py-2 text-navy";
+  "block h-11 w-full min-w-0 rounded-[10px] border-[1.5px] border-border bg-card px-3 text-base text-navy";
 
 /**
  * The ad landing page's one-screen quote form. `location` prefixes every
@@ -74,7 +75,7 @@ export function LpLeadForm({ location }: { location: string }) {
 
   return (
     <form
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-3"
       onFocus={markFormStarted}
       onChange={markFormStarted}
       onSubmit={(e) => {
@@ -82,7 +83,7 @@ export function LpLeadForm({ location }: { location: string }) {
         handleSubmit();
       }}
     >
-      <p className="text-muted">
+      <p className="text-sm text-muted">
         Tell us what you need. A Top Choice expert calls you back, {CALLBACK_PROMISE}.
       </p>
 
@@ -120,19 +121,35 @@ export function LpLeadForm({ location }: { location: string }) {
           autoComplete="name"
         />
       </div>
-      <div>
-        <label htmlFor={id("phone")} className={labelClass}>
-          Phone number
-        </label>
-        <input
-          id={id("phone")}
-          type="tel"
-          required
-          value={form.phone}
-          onChange={(e) => update("phone", e.target.value)}
-          className={inputClass}
-          autoComplete="tel"
-        />
+      {/* Phone and postal code share a row, even at 390px. */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="min-w-0">
+          <label htmlFor={id("phone")} className={labelClass}>
+            Phone number
+          </label>
+          <input
+            id={id("phone")}
+            type="tel"
+            required
+            value={form.phone}
+            onChange={(e) => update("phone", e.target.value)}
+            className={inputClass}
+            autoComplete="tel"
+          />
+        </div>
+        <div className="min-w-0">
+          <label htmlFor={id("postal-code")} className={labelClass}>
+            Postal code
+          </label>
+          <input
+            id={id("postal-code")}
+            required
+            value={form.postalCode}
+            onChange={(e) => update("postalCode", e.target.value)}
+            className={inputClass}
+            autoComplete="postal-code"
+          />
+        </div>
       </div>
       <div>
         <label htmlFor={id("email")} className={labelClass}>
@@ -147,19 +164,6 @@ export function LpLeadForm({ location }: { location: string }) {
           autoComplete="email"
         />
       </div>
-      <div>
-        <label htmlFor={id("postal-code")} className={labelClass}>
-          Postal code
-        </label>
-        <input
-          id={id("postal-code")}
-          required
-          value={form.postalCode}
-          onChange={(e) => update("postalCode", e.target.value)}
-          className={inputClass}
-          autoComplete="postal-code"
-        />
-      </div>
 
       {submitError && (
         <p role="alert" className="text-sm font-semibold text-ember-dark">
@@ -167,7 +171,11 @@ export function LpLeadForm({ location }: { location: string }) {
         </p>
       )}
 
-      <Button size="lg" className="w-full" disabled={submitting}>
+      <button
+        type="submit"
+        disabled={submitting}
+        className="mt-1 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl border-b-[3px] border-ember-dark bg-ember px-5 font-display text-lg font-extrabold text-white transition-colors duration-150 hover:bg-ember-dark disabled:opacity-80"
+      >
         {submitting ? (
           <>
             <Loader2 size={20} className="animate-spin" aria-hidden="true" />
@@ -176,7 +184,7 @@ export function LpLeadForm({ location }: { location: string }) {
         ) : (
           "Get My Free Quote"
         )}
-      </Button>
+      </button>
       <p className="flex items-center justify-center gap-2 text-center text-xs text-muted">
         <Lock size={14} className="shrink-0" aria-hidden="true" />
         No spam. No pressure. We never sell your information.
