@@ -1,9 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { normalizeLead, type Lead, type LeadSource } from "@/lib/leadAdapter";
 import {
+  emailBody,
   emailLead,
   logLeadToKV,
   sendLeadNotification,
+  smsBody,
   smsLead,
   type NotifyEnv,
 } from "@/lib/notify";
@@ -241,5 +243,86 @@ describe("sendLeadNotification", () => {
         for (const value of PII) expect(text).not.toContain(value);
       }
     );
+  });
+});
+
+describe("attribution in notifications", () => {
+  function withAttribution(source: LeadSource, attribution: Lead["attribution"]): Lead {
+    return { ...makeLead(source), attribution };
+  }
+
+  it("KV stores the attribution in the lead JSON; metadata is unchanged", async () => {
+    const { kvPut, deps } = setup();
+    const lead = withAttribution("contact", { gclid: "abc", landing_path: "/" });
+    await logLeadToKV(lead, deps);
+    const [, value, options] = kvPut.mock.calls[0] as unknown as [string, string, { metadata: unknown }];
+    expect(JSON.parse(value).attribution).toEqual({ gclid: "abc", landing_path: "/" });
+    expect(options.metadata).toEqual({ source: "contact", name: "Jane Doe", phone: "647-555-0100" });
+  });
+
+  it("email has no Attribution block without attribution", () => {
+    const { text, html } = emailBody(makeLead("contact"));
+    expect(text).not.toContain("Attribution");
+    expect(html).not.toContain("Attribution");
+  });
+
+  it.each([
+    [{ gclid: "abc", utm_source: "google", utm_medium: "cpc" }, "Google Ads click"],
+    [{ wbraid: "w" }, "Google Ads click"],
+    [{ utm_source: "facebook", utm_medium: "social" }, "facebook / social"],
+    [{ referrer_host: "www.bing.com" }, "Referral from www.bing.com"],
+    [{ landing_path: "/", first_seen: "2026-09-23T14:05:00.000Z" }, "Direct or unknown"],
+  ])("summarizes %o as %s", (attribution, summary) => {
+    const { text, html } = emailBody(withAttribution("get-quote", attribution));
+    expect(text).toContain(`\n\nAttribution\nCame from: ${summary}\n`);
+    expect(html).toContain("<h3");
+    expect(html).toContain(summary);
+  });
+
+  it("lists each attribution field with a readable label, after the lead rows", () => {
+    const { text } = emailBody(
+      withAttribution("get-quote", {
+        gclid: "abc",
+        utm_campaign: "furnace-fall",
+        landing_path: "/get-quote",
+      })
+    );
+    expect(text.indexOf("Lead key:")).toBeLessThan(text.indexOf("Attribution"));
+    expect(text).toContain("Click ID (gclid): abc");
+    expect(text).toContain("Campaign: furnace-fall");
+    expect(text).toContain("Landing page: /get-quote");
+    expect(text).not.toContain("[object Object]");
+  });
+
+  it("HTML-escapes attribution values", () => {
+    const { html } = emailBody(
+      withAttribution("contact", { utm_source: "<script>alert(1)</script>", utm_campaign: '"x"&' })
+    );
+    expect(html).not.toContain("<script>");
+    expect(html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
+    expect(html).toContain("&quot;x&quot;&amp;");
+  });
+
+  it("SMS: no suffix without attribution or without a source", () => {
+    const plain = smsBody(makeLead("emergency-service"));
+    expect(plain).not.toMatch(/\[.*\]$/);
+    expect(smsBody(withAttribution("emergency-service", { landing_path: "/" }))).toBe(plain);
+    expect(smsBody(withAttribution("emergency-service", { referrer_host: "bing.com" }))).toBe(plain);
+  });
+
+  it("SMS: [Google Ads] when a click ID is present", () => {
+    const sms = smsBody(withAttribution("emergency-service", { gbraid: "g", utm_source: "google" }));
+    expect(sms).toBe(`${smsBody(makeLead("emergency-service"))} [Google Ads]`);
+  });
+
+  it("SMS: [<utm_source>] cut to 20 characters, and nothing else from attribution", () => {
+    const sms = smsBody(
+      withAttribution("emergency-service", {
+        utm_source: "a-very-long-newsletter-source",
+        utm_campaign: "secret-campaign",
+      })
+    );
+    expect(sms).toBe(`${smsBody(makeLead("emergency-service"))} [a-very-long-newslett]`);
+    expect(sms).not.toContain("secret-campaign");
   });
 });

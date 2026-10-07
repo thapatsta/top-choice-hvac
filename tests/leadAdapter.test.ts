@@ -140,6 +140,8 @@ describe("resolveLeadSource / leadKey", () => {
   });
 });
 
+const LINE_SEPARATOR = String.fromCharCode(0x2028);
+
 describe("normalizeAttribution", () => {
   it("keeps only allowlisted string keys", () => {
     expect(
@@ -165,7 +167,7 @@ describe("normalizeAttribution", () => {
   );
 
   it("strips control characters including newlines, then trims", () => {
-    expect(normalizeAttribution({ utm_source: " goo\r\ngle\u0000\t ", utm_term: "a b" })).toEqual({
+    expect(normalizeAttribution({ utm_source: " goo\r\ngle\u0000\t ", utm_term: `a${LINE_SEPARATOR}b` })).toEqual({
       utm_source: "google",
       utm_term: "ab",
     });
