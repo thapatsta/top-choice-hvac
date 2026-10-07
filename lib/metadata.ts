@@ -5,10 +5,13 @@ export function pageMetadata({
   title,
   description,
   path,
+  noindex = false,
 }: {
   title: string;
   description: string;
   path: string;
+  /** Keep the page out of search results and stop crawlers following its links. */
+  noindex?: boolean;
 }): Metadata {
   const url = `${site.url}${path}`;
   return {
@@ -27,5 +30,6 @@ export function pageMetadata({
       title,
       description,
     },
+    ...(noindex ? { robots: { index: false, follow: false } } : {}),
   };
 }

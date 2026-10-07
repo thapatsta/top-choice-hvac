@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import type { LeadSource } from "@/lib/leadAdapter";
 import { submitLead } from "@/lib/submitLead";
+import { thankYouHref } from "@/lib/thankYou";
 import { useFormStart } from "@/lib/useFormStart";
 
 // /api/contact always files these leads under this source.
@@ -13,21 +15,9 @@ const LEAD_SOURCE: LeadSource = "contact";
 export function ContactForm() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const markFormStarted = useFormStart(LEAD_SOURCE);
-
-  if (submitted) {
-    return (
-      <div className="rounded-2xl border border-border bg-card p-8 text-center">
-        <CheckCircle2 size={40} className="mx-auto text-success" aria-hidden="true" />
-        <h2 className="mt-3 font-display text-xl font-bold text-navy">Message sent</h2>
-        <p className="mt-2 text-muted">
-          Thanks — we’ll get back to you soon. For anything urgent, please call us directly.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <form
@@ -44,10 +34,11 @@ export function ContactForm() {
           leadSource: LEAD_SOURCE,
         });
         if (result.ok) {
-          setSubmitted(true);
-        } else {
-          setError("Something went wrong sending your message. Please call us instead.");
+          // Leave submitting on until the navigation unmounts the form.
+          router.replace(thankYouHref(LEAD_SOURCE));
+          return;
         }
+        setError("Something went wrong sending your message. Please call us instead.");
         setSubmitting(false);
       }}
     >

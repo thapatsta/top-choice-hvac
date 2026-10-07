@@ -173,6 +173,26 @@ matched to a real lead.
   suffix: ` [Google Ads]` for an ad click, else ` [<utm_source>]`.
 - It is never sent to Google Analytics.
 
+### Thank-you page
+
+After a successful submit, each form calls `router.replace()` to
+`/thank-you` (`app/thank-you/page.tsx`), so Back doesn't return to a
+filled-in form.
+
+- **Query string** (`lib/thankYou.ts`): only `source`
+  (`get-quote` | `emergency-service` | `contact`) and, for the quote form,
+  `need`, `system` and `urgency`. GA4 records full page URLs, so nothing
+  personal (no name) ever goes in it. Unknown values are ignored; a direct
+  visit gets a neutral "Thanks for getting in touch" with no claim that a
+  request arrived.
+- **Analytics**: `generate_lead` still fires once, in `lib/submitLead.ts`, on
+  the form page. The thank-you page fires no event of its own, so a refresh,
+  Back or direct visit can't create a lead. In GA4, `page_view` with
+  `page_path = /thank-you` should roughly equal the `generate_lead` count.
+- **Indexing**: `noindex, nofollow`, and left out of `app/sitemap.ts`. The
+  page stays statically prerendered: the query string is read on the client
+  (`useSearchParams` under `Suspense`).
+
 ### Reading the lead log
 
 ```bash

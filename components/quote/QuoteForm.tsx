@@ -1,13 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Phone, CheckCircle2, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ChoiceCard } from "@/components/ui/ChoiceCard";
 import { StepShell } from "@/components/ui/StepShell";
 import { site } from "@/lib/site";
 import { resolveLeadSource } from "@/lib/leadAdapter";
 import { submitLead } from "@/lib/submitLead";
+import { thankYouHref } from "@/lib/thankYou";
 import { useFormStart } from "@/lib/useFormStart";
 import {
   needOptions,
@@ -15,7 +17,6 @@ import {
   homeSizeOptions,
   systemAgeOptions,
   urgencyOptions,
-  getEstimateFraming,
   type QuoteNeed,
   type QuoteSystemType,
   type QuoteUrgency,
@@ -61,7 +62,7 @@ export function QuoteForm({
   const [stepIndex, setStepIndex] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
+  const router = useRouter();
   const leadSource = resolveLeadSource(source) ?? "get-quote";
   const markFormStarted = useFormStart(leadSource);
 
@@ -104,38 +105,16 @@ export function QuoteForm({
       leadParams: { service_need: form.need, urgency: form.urgency },
     });
     if (result.ok) {
-      setSubmitted(true);
-    } else {
-      setSubmitError(
-        "Something went wrong submitting your request. Please call us directly and we'll help right away."
+      // Leave submitting on until the navigation unmounts the form.
+      router.replace(
+        thankYouHref(leadSource, { need: form.need, system: form.systemType, urgency: form.urgency })
       );
+      return;
     }
-    setSubmitting(false);
-  }
-
-  if (submitted) {
-    const framing =
-      form.need && form.systemType ? getEstimateFraming(form.need, form.systemType) : "";
-    return (
-      <div className="rounded-2xl border border-border bg-card p-8 text-center">
-        <CheckCircle2 size={48} className="mx-auto text-success" aria-hidden="true" />
-        <h2 className="mt-4 font-display text-2xl font-bold text-navy">
-          Got it, {form.name.split(" ")[0] || "thanks"}!
-        </h2>
-        <p className="mt-3 text-muted">{framing}</p>
-        <p className="mt-4 text-navy">
-          {form.urgency === "emergency"
-            ? "Since this is an emergency, please call us now for the fastest response:"
-            : "A member of our team will reach out shortly to confirm details and book your free in-home assessment."}
-        </p>
-        <div className="mt-6" data-track-location="quote_form">
-          <Button href={site.phone.href} size="lg">
-            <Phone size={20} aria-hidden="true" />
-            Call {site.phone.display}
-          </Button>
-        </div>
-      </div>
+    setSubmitError(
+      "Something went wrong submitting your request. Please call us directly and we'll help right away."
     );
+    setSubmitting(false);
   }
 
   return (
