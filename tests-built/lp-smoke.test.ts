@@ -27,10 +27,15 @@ async function waitForServer() {
 }
 
 beforeAll(async () => {
-  server = spawn("npx", ["next", "start", "-p", String(PORT), "-H", "127.0.0.1"], {
-    stdio: "ignore",
-    detached: true,
-  });
+  // Never test against a stale server left on the port by an earlier run.
+  const stale = await fetch(`${BASE}/robots.txt`).then(() => true, () => false);
+  if (stale) throw new Error(`Port ${PORT} is already in use; stop that server first.`);
+  // node directly (not npx) so the pid we kill is the server itself.
+  server = spawn(
+    process.execPath,
+    ["node_modules/next/dist/bin/next", "start", "-p", String(PORT), "-H", "127.0.0.1"],
+    { stdio: "ignore", detached: true }
+  );
   await waitForServer();
 });
 
@@ -96,6 +101,16 @@ describe("ad landing pages (production build)", () => {
         for (const re of ADDRESS_TERMS) expect(html).not.toMatch(re);
       });
 
+      it("loads no JavaScript that contains the business address", async () => {
+        const html = htmlCache.get(path) ?? (await page(path)).html;
+        const scripts = [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map((m) => m[1]);
+        expect(scripts.length).toBeGreaterThan(0);
+        for (const src of scripts) {
+          const js = await (await fetch(new URL(src, BASE))).text();
+          for (const re of ADDRESS_TERMS) expect(js, src).not.toMatch(re);
+        }
+      });
+
       it("contains no credential-type claims, 24/7 outside repair, or other banned copy", async () => {
         const html = htmlCache.get(path) ?? (await page(path)).html;
         if (!config.credentialClaims.enabled) {
@@ -105,7 +120,16 @@ describe("ad landing pages (production build)", () => {
           allowCredentials: config.credentialClaims.enabled,
           allowAlwaysOpen: config.service === "repair" && config.showEmergency247,
           noPrices: config.service === "heating-cooling",
-        }).filter((p) => !p.startsWith("unqualified same-day"));
+        })
+          // These rules are per sentence, so they can't run on a whole page
+          // (e.g. "$2,199" and the form's "Heat pump" option are unrelated).
+          // tests/lp-content.test.ts applies them to every copy unit.
+          .filter(
+            (p) =>
+              !p.startsWith("unqualified same-day") &&
+              !p.startsWith("heat pump / AC price") &&
+              !p.startsWith("rebate amount")
+          );
         expect(problems).toEqual([]);
       });
     });

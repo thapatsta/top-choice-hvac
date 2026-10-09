@@ -202,7 +202,7 @@ describe("Google reviews", () => {
       ...componentFiles,
       ...routeFiles,
       "lib/landing-pages.ts",
-      "app/reviews/page.tsx",
+      "app/(site)/reviews/page.tsx",
       "data/reviews.ts",
     ];
     for (const file of files) {
@@ -211,6 +211,6 @@ describe("Google reviews", () => {
     }
     expect(readSource("components/lp/GoogleReviewsCollage.tsx")).toContain("GOOGLE_REVIEWS.count");
     expect(readSource("components/lp/LandingPage.tsx")).toContain("GOOGLE_REVIEWS.count");
-    expect(readSource("app/reviews/page.tsx")).toContain("GOOGLE_REVIEWS.count");
+    expect(readSource("app/(site)/reviews/page.tsx")).toContain("GOOGLE_REVIEWS.count");
   });
 });

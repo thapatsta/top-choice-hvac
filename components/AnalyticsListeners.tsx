@@ -4,14 +4,12 @@ import { useEffect } from "react";
 import { track } from "@/lib/analytics";
 import { captureAttribution } from "@/lib/attribution";
 import { parseLpContext } from "@/lib/landingPage";
-import { site } from "@/lib/site";
 
 function phoneDigits(href: string): string {
   const digits = href.replace(/\D/g, "");
   return digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
 }
 
-const OUR_PHONE = phoneDigits(site.phone.href);
 
 /**
  * One delegated click listener for every tel:/mailto: link on the site, so
@@ -27,8 +25,9 @@ const OUR_PHONE = phoneDigits(site.phone.href);
  * Also records first-visit lead attribution once per page load, on every
  * host (it stays in localStorage and never goes to GA).
  */
-export function AnalyticsListeners() {
+export function AnalyticsListeners({ phoneHref }: { phoneHref: string }) {
   useEffect(() => {
+    const ourPhone = phoneDigits(phoneHref);
     captureAttribution();
 
     function onClick(e: MouseEvent) {
@@ -40,7 +39,7 @@ export function AnalyticsListeners() {
         link.closest("[data-track-location]")?.getAttribute("data-track-location") || "body";
 
       if (href.startsWith("tel:")) {
-        if (phoneDigits(href) === OUR_PHONE) {
+        if (phoneDigits(href) === ourPhone) {
           const lpRoot = link.closest<HTMLElement>("[data-lp-slug]");
           const lp = lpRoot
             ? parseLpContext({
@@ -58,7 +57,7 @@ export function AnalyticsListeners() {
 
     document.addEventListener("click", onClick, { capture: true });
     return () => document.removeEventListener("click", onClick, { capture: true });
-  }, []);
+  }, [phoneHref]);
 
   return null;
 }

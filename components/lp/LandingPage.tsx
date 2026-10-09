@@ -32,8 +32,8 @@ import { GOOGLE_REVIEWS, site } from "@/lib/site";
 // copy comes from the page's entry in lib/landing-pages.ts; the strings in
 // this file are layout labels only (tests/lp-content.test.ts scans both).
 //
-// The global header, footer and sticky bar are hidden on /lp/* by
-// SiteChrome; this template brings its own minimal versions. Pages are
+// The site header, footer and sticky bar never render on /lp/* (they live in
+// app/(site)/layout.tsx); this template brings its own minimal versions. Pages are
 // noindex (paid traffic only) but NOT disallowed in robots.ts, so Google Ads
 // can still crawl them, and they are left out of the sitemap.
 
@@ -142,12 +142,11 @@ export function LandingPage({ config }: { config: LandingPageConfig }) {
   const credentials = config.credentialClaims;
 
   return (
-    // .lp scopes the landing-page palette (globals.css). -mb-16 cancels the
-    // root layout's phone-only bottom padding on <main> (room for the global
-    // sticky bar, hidden here); the footer's own pb-24 keeps it clear of
-    // LpStickyBar instead. data-lp-* feed click_to_call (AnalyticsListeners).
+    // .lp scopes the landing-page palette (globals.css). The footer's own
+    // pb-24 keeps it clear of LpStickyBar. data-lp-* feed click_to_call
+    // (AnalyticsListeners).
     <div
-      className={`lp ${archivoBlack.variable} -mb-16 overflow-x-clip lg:mb-0`}
+      className={`lp ${archivoBlack.variable} overflow-x-clip`}
       data-lp-slug={lp.lp_slug}
       data-lp-region={lp.lp_region}
       data-lp-service={lp.lp_service}

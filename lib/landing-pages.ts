@@ -123,7 +123,8 @@ const coreNearby = site.serviceAreas.filter(
 const coreNearbyList = `${coreNearby.slice(0, -1).join(", ")} and ${coreNearby.at(-1)}`;
 
 const CORE_AREA_LINE = `Serving Brampton and Mississauga, plus ${coreNearbyList}.`;
-const OUTSKIRTS_AREA_LINE = `Brampton-based, serving Caledon, Bolton, Orangeville, Halton Hills (including Georgetown and Acton), Milton and Barrie.`;
+// No travel fee: confirmed by the owner 2026-10-09.
+const OUTSKIRTS_AREA_LINE = `Brampton-based, serving Caledon, Bolton, Orangeville, Halton Hills (including Georgetown and Acton), Milton and Barrie, with no travel fee.`;
 
 /** Shown under the hero on every page. */
 export const TRUST_ITEMS: { title: string; detail: string }[] = [
@@ -307,7 +308,7 @@ function heatingCoolingFaq(areaItem?: LpFaqItem): LpFaqItem[] {
   ];
 }
 
-const outskirtsAreaAnswer = `Yes. We're based in Brampton and serve ${OUTSKIRTS_LIST}. Enter your postal code and we'll confirm we can get to you.`;
+const outskirtsAreaAnswer = `Yes. We're based in Brampton and serve ${OUTSKIRTS_LIST}, with no travel fee. Enter your postal code and we'll confirm we can get to you.`;
 
 // ---------------------------------------------------------------------------
 // The six pages
@@ -405,7 +406,7 @@ export const LANDING_PAGES: readonly LandingPageConfig[] = [
     eyebrow: `Furnace repair · ${OUTSKIRTS_EYEBROW_TOWNS}`,
     faq: repairFaq({
       question: "Do you repair furnaces in Caledon, Orangeville, Milton and Barrie?",
-      answer: `Yes, we're based in Brampton and serve ${OUTSKIRTS_LIST}. Enter your postal code and we'll confirm we can get to you.`,
+      answer: `Yes, we're based in Brampton and serve ${OUTSKIRTS_LIST}, with no travel fee. Enter your postal code and we'll confirm we can get to you.`,
     }),
     serviceAreaLine: OUTSKIRTS_AREA_LINE,
   },
