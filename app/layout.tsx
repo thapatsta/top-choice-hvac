@@ -2,10 +2,6 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Archivo, Inter } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { StickyCallBar } from "@/components/StickyCallBar";
-import { SiteChrome } from "@/components/SiteChrome";
 import { AnalyticsListeners } from "@/components/AnalyticsListeners";
 import { PRODUCTION_HOST_RE } from "@/lib/analytics";
 import { site } from "@/lib/site";
@@ -82,20 +78,13 @@ gtag('config', '${ga4Id}');
           Skip to main content
         </a>
 
-        {/* SiteChrome hides the global chrome on the /lp/* ad landing pages.
-            AnalyticsListeners stays outside it so attribution capture and
-            click_to_call tracking still run there. */}
-        <SiteChrome>
-          <Header />
-        </SiteChrome>
-        <main id="main-content" className="flex-1 pb-16 lg:pb-0">
-          {children}
-        </main>
-        <SiteChrome>
-          <Footer />
-          <StickyCallBar />
-        </SiteChrome>
-        <AnalyticsListeners />
+        {/* The site header, footer and sticky call bar live in
+            app/(site)/layout.tsx. The /lp/* ad landing pages have their own
+            layout (app/lp/layout.tsx) and never render or ship the site
+            chrome, so its address and claims stay out of their HTML. */}
+        {children}
+        {/* Phone passed as a prop so this client component doesn't bundle lib/site.ts. */}
+        <AnalyticsListeners phoneHref={site.phone.href} />
       </body>
     </html>
   );

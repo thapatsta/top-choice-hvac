@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Lock } from "lucide-react";
-import { CALLBACK_PROMISE, landingServiceOptions, type LandingService } from "@/lib/landingPage";
+import {
+  buildLandingLeadBody,
+  CALLBACK_PROMISE,
+  landingServiceOptions,
+  type LandingService,
+  type LpContext,
+} from "@/lib/landingPage";
 import { submitLead } from "@/lib/submitLead";
 import { prepareThankYou } from "@/lib/thankYou";
 import { useFormStart } from "@/lib/useFormStart";
@@ -16,13 +22,9 @@ interface FormState {
   postalCode: string;
 }
 
-const emptyState: FormState = {
-  service: "",
-  name: "",
-  phone: "",
-  email: "",
-  postalCode: "",
-};
+function emptyState(service: LandingService | ""): FormState {
+  return { service, name: "", phone: "", email: "", postalCode: "" };
+}
 
 const labelClass = "mb-1 block text-sm font-bold text-navy";
 // Colours come from the .lp scope in globals.css: card is white, border is
@@ -32,10 +34,22 @@ const inputClass =
 
 /**
  * The ad landing page's one-screen quote form. `location` prefixes every
- * element id so the form can render more than once on a page.
+ * element id so the form can render more than once on a page. `lp` says
+ * which landing page this is; it goes into the lead (hidden fields) and onto
+ * the generate_lead event.
  */
-export function LpLeadForm({ location }: { location: string }) {
-  const [form, setForm] = useState<FormState>(emptyState);
+export function LpLeadForm({
+  location,
+  lp,
+  defaultService = "",
+  buttonLabel = "Get my free quote",
+}: {
+  location: string;
+  lp: LpContext;
+  defaultService?: LandingService | "";
+  buttonLabel?: string;
+}) {
+  const [form, setForm] = useState<FormState>(() => emptyState(defaultService));
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const router = useRouter();
@@ -52,15 +66,9 @@ export function LpLeadForm({ location }: { location: string }) {
     setSubmitError(null);
     const result = await submitLead({
       endpoint: "/api/leads",
-      body: {
-        service: form.service,
-        name: form.name,
-        phone: form.phone,
-        email: form.email,
-        postalCode: form.postalCode,
-        source: "landing-page",
-      },
+      body: buildLandingLeadBody(form, lp),
       leadSource: "landing-page",
+      leadParams: lp,
     });
     if (result.ok) {
       // Leave submitting on until the navigation unmounts the form.
@@ -83,6 +91,11 @@ export function LpLeadForm({ location }: { location: string }) {
         handleSubmit();
       }}
     >
+      {/* Which landing page sent the lead (also in the JSON body above). */}
+      <input type="hidden" name="lp_slug" value={lp.lp_slug} />
+      <input type="hidden" name="lp_region" value={lp.lp_region} />
+      <input type="hidden" name="lp_service" value={lp.lp_service} />
+
       <p className="text-sm text-muted">
         Tell us what you need. A Top Choice expert calls you back, {CALLBACK_PROMISE}.
       </p>
@@ -182,7 +195,7 @@ export function LpLeadForm({ location }: { location: string }) {
             Sending…
           </>
         ) : (
-          "Get My Free Quote"
+          buttonLabel
         )}
       </button>
       <p className="flex items-center justify-center gap-2 text-center text-xs text-muted">

@@ -1,3 +1,5 @@
+import { GOOGLE_REVIEWS } from "@/lib/site";
+
 // Real, publicly-posted Google reviews for "Top choice air system inc"
 // (3 Lloyd Cres, Brampton, ON), pulled from the Google Business Profile on
 // 2026-08-20. Attribution uses first name + last initial per standard
@@ -66,10 +68,9 @@ export const reviews: Review[] = [
   },
 ];
 
-// Matches the Google Business Profile's overall rating. Last checked
-// 2026-09-22 — re-verify against the live listing periodically, since it
-// will drift as new reviews come in.
+// The Google Business Profile's overall rating. Derived from GOOGLE_REVIEWS
+// in lib/site.ts (the single source of truth); update it there, not here.
 export const aggregateRating: { ratingValue: number; reviewCount: number } | undefined = {
-  ratingValue: 4.9,
-  reviewCount: 60,
+  ratingValue: GOOGLE_REVIEWS.rating,
+  reviewCount: GOOGLE_REVIEWS.count,
 };
