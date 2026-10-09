@@ -8,6 +8,7 @@
 
 import type { LeadSource } from "@/lib/leadAdapter";
 import type { QuoteNeed, QuoteUrgency } from "@/lib/estimate";
+import type { LpContext, LpSlug } from "@/lib/landingPage";
 
 declare global {
   interface Window {
@@ -36,11 +37,15 @@ interface LinkParams {
  * never the query string), so callers don't pass it.
  */
 export interface AnalyticsEventParams {
-  generate_lead: FormParams & { service_need?: QuoteNeed; urgency?: QuoteUrgency };
+  // lp_slug / lp_region / lp_service: which /lp/* ad landing page, when the
+  // event comes from one.
+  generate_lead: FormParams & { service_need?: QuoteNeed; urgency?: QuoteUrgency } & Partial<LpContext>;
   form_start: FormParams;
   form_submit_error: FormParams;
-  click_to_call: LinkParams;
+  click_to_call: LinkParams & Partial<LpContext>;
   click_email: LinkParams;
+  /** A link from one landing page to another (e.g. repair → install). */
+  lp_crosslink: LinkParams & LpContext & { lp_destination: LpSlug };
 }
 
 export type AnalyticsEvent = keyof AnalyticsEventParams;

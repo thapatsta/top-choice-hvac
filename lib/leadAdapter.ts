@@ -1,6 +1,13 @@
 import type { QuoteNeed, QuoteSystemType, QuoteUrgency } from "@/lib/estimate";
 import type { EmergencyIssue } from "@/lib/emergency";
-import { isLandingService, type LandingService } from "@/lib/landingPage";
+import {
+  isLandingService,
+  parseLpContext,
+  type LandingService,
+  type LpRegion,
+  type LpService,
+  type LpSlug,
+} from "@/lib/landingPage";
 import {
   ATTRIBUTION_KEYS,
   cleanAttributionValue,
@@ -44,6 +51,10 @@ export interface Lead {
   // Ad landing page fields (source: "landing-page"). postalCode is shared
   // with the quote flow above.
   service?: LandingService;
+  /** Which /lp/* page the lead came from (hidden form fields). */
+  lp_slug?: LpSlug;
+  lp_region?: LpRegion;
+  lp_service?: LpService;
 
   /** Where the visitor came from (ad click, UTMs, landing page). Optional. */
   attribution?: LeadAttribution;
@@ -167,6 +178,8 @@ export function normalizeLandingLead(raw: RawLeadInput, opts: NormalizeOptions =
     message: service ?? "",
     service,
     postalCode: optStr(raw.postalCode),
+    // Allowlisted values only; anything else is dropped.
+    ...parseLpContext(raw),
   };
 }
 

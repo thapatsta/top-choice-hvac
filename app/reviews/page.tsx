@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { Star } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { CTABand } from "@/components/CTABand";
-import { reviews, aggregateRating } from "@/data/reviews";
+import { reviews } from "@/data/reviews";
 import { pageMetadata } from "@/lib/metadata";
-import { site } from "@/lib/site";
+import { GOOGLE_REVIEWS, site } from "@/lib/site";
 
 export const metadata: Metadata = pageMetadata({
   title: "Customer Reviews",
@@ -22,13 +22,10 @@ export default function ReviewsPage() {
       <section className="bg-navy py-14 text-white sm:py-20">
         <Container className="max-w-2xl text-center">
           <h1 className="font-display text-4xl font-bold sm:text-5xl">Customer Reviews</h1>
-          {aggregateRating && (
-            <p className="mt-4 flex items-center justify-center gap-1 text-lg text-white/80">
-              <Star size={20} className="fill-ember text-ember" aria-hidden="true" />
-              {aggregateRating.ratingValue.toFixed(1)} stars from {aggregateRating.reviewCount}{" "}
-              Google reviews
-            </p>
-          )}
+          <p className="mt-4 flex items-center justify-center gap-1 text-lg text-white/80">
+            <Star size={20} className="fill-ember text-ember" aria-hidden="true" />
+            {GOOGLE_REVIEWS.rating.toFixed(1)} stars from {GOOGLE_REVIEWS.count} Google reviews
+          </p>
           <p className="mt-4">
             <a
               href={site.googleReviewsUrl}
@@ -36,7 +33,7 @@ export default function ReviewsPage() {
               rel="noopener"
               className="font-semibold text-ember hover:underline"
             >
-              Read all {aggregateRating?.reviewCount} reviews on Google
+              Read all {GOOGLE_REVIEWS.count} reviews on Google
             </a>
           </p>
         </Container>

@@ -3,7 +3,20 @@
 // once one exists. Every value marked with a TODO below is a plausible fake
 // placeholder — see CONTENT-NEEDED.md for the full list.
 
-import { aggregateRating } from "@/data/reviews";
+/**
+ * Google review rating and count: the single source of truth for every page
+ * that shows them (the /lp/* ad landing pages, /reviews, and everything that
+ * reads data/reviews.ts's aggregateRating, which is derived from this).
+ *
+ * Update these from the live Google Business Profile, and bump `asOf` when
+ * you do. Never hardcode the rating or count anywhere else;
+ * tests/lp-content.test.ts fails the build if a landing page does.
+ */
+export const GOOGLE_REVIEWS = {
+  rating: 4.9,
+  count: 66,
+  asOf: "2026-10-08",
+} as const;
 
 // Verified 2026-09-22 against the live Google Business Profile listing.
 const googlePlaceId = "ChIJyRbRXAn8kaYRzRKD7SJFXMs";
@@ -52,10 +65,9 @@ export const site = {
   // (e.g. GoogleMapEmbed) — named separately here for reviews-context use.
   googleReviewsUrl: googleMapsUrl,
 
-  // Sourced from data/reviews.ts's aggregateRating rather than duplicated
-  // here, so the rating/count can't drift between the two files.
-  rating: aggregateRating?.ratingValue,
-  reviewCount: aggregateRating?.reviewCount,
+  // Sourced from GOOGLE_REVIEWS above, so the rating/count can't drift.
+  rating: GOOGLE_REVIEWS.rating as number | undefined,
+  reviewCount: GOOGLE_REVIEWS.count as number | undefined,
 
   social: {
     // Confirmed: no Facebook page exists yet.
@@ -135,15 +147,11 @@ export const NAP_JSON_LD = {
   sameAs: [site.social.instagram, site.social.google].filter(
     (url): url is string => Boolean(url),
   ),
-  // Never fabricate this — only include it once data/reviews.ts has a real,
-  // verified aggregateRating from the Google Business Profile.
-  ...(aggregateRating
-    ? {
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: aggregateRating.ratingValue,
-          reviewCount: aggregateRating.reviewCount,
-        },
-      }
-    : {}),
+  // Never fabricate this: it comes from GOOGLE_REVIEWS, which is copied
+  // from the Google Business Profile.
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: GOOGLE_REVIEWS.rating,
+    reviewCount: GOOGLE_REVIEWS.count,
+  },
 };

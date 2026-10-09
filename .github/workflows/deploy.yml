@@ -7,7 +7,7 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  # Lint + the lead-pipeline test suite. `deploy` below `needs` this job, so a
+  # Lint, typecheck, the test suites and the landing-page smoke test. `deploy` below `needs` this job, so a
   # broken lead pipeline blocks deployment instead of shipping silently.
   test:
     runs-on: ubuntu-latest
@@ -27,8 +27,19 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Test (lead pipeline)
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test (lead pipeline + landing page content rules)
         run: npm test
+
+      # Builds the site and checks the real HTML of the /lp/* ad landing
+      # pages: all six return 200, no business address, no banned claims.
+      - name: Build
+        run: npm run build
+
+      - name: Test (landing pages, production build)
+        run: npm run test:built
 
   deploy:
     needs: test

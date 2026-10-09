@@ -2,35 +2,30 @@ import { Star } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { GoogleGIcon } from "@/components/icons/GoogleGIcon";
 import { reviews } from "@/data/reviews";
-import { site } from "@/lib/site";
+import { GOOGLE_REVIEWS, site } from "@/lib/site";
 
 // Longest reviews first so the one-liners sit at the end of the wall.
 const reviewsByLength = [...reviews].sort((a, b) => b.text.length - a.text.length);
 
 /**
  * Every review in data/reviews.ts as a masonry wall: the landing page's
- * brand proof. Review text is shown exactly as posted on Google.
+ * brand proof. Review text is shown exactly as posted on Google; the rating
+ * and count come from GOOGLE_REVIEWS only.
  */
 export function GoogleReviewsCollage() {
   return (
     <section className="border-t border-border py-12 sm:py-20">
       <Container>
         <div className="flex flex-col gap-3">
-          <h2 className="lp-black text-2xl leading-tight tracking-[-0.02em] text-navy sm:text-4xl">
-            Don&apos;t take our word for it
+          <h2 className="lp-black flex flex-wrap items-center gap-x-3 gap-y-2 text-2xl leading-tight tracking-[-0.02em] text-navy sm:text-4xl">
+            <GoogleGIcon size={28} />
+            {GOOGLE_REVIEWS.rating.toFixed(1)} from {GOOGLE_REVIEWS.count} Google reviews
           </h2>
-          {site.rating !== undefined && site.reviewCount !== undefined && (
-            <p className="flex flex-wrap items-center gap-2 font-semibold text-navy">
-              <GoogleGIcon size={20} />
-              {site.rating.toFixed(1)}
-              <span className="flex" aria-hidden="true">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} size={16} className="fill-(--lp-star) text-(--lp-star)" />
-                ))}
-              </span>
-              <span className="text-sm text-muted">Based on {site.reviewCount} Google reviews</span>
-            </p>
-          )}
+          <span className="flex" role="img" aria-label="5 stars">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star key={i} size={20} className="fill-(--lp-star) text-(--lp-star)" aria-hidden="true" />
+            ))}
+          </span>
         </div>
 
         <div className="mt-8 columns-1 gap-4 sm:columns-2 lg:columns-3">
@@ -56,18 +51,16 @@ export function GoogleReviewsCollage() {
           ))}
         </div>
 
-        {site.reviewCount !== undefined && (
-          <p className="mt-4">
-            <a
-              href={site.googleReviewsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-navy underline underline-offset-4 hover:no-underline"
-            >
-              Read all {site.reviewCount} reviews on Google →
-            </a>
-          </p>
-        )}
+        <p className="mt-4">
+          <a
+            href={site.googleReviewsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-[44px] items-center font-semibold text-navy underline underline-offset-4 hover:no-underline"
+          >
+            Read all {GOOGLE_REVIEWS.count} reviews on Google →
+          </a>
+        </p>
       </Container>
     </section>
   );
