@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { installCallTracking, type CallTrackingDeps } from "@/lib/callTracking";
+import { EARLY_TAP_QUEUE_JS, installCallTracking, type CallTrackingDeps } from "@/lib/callTracking";
 import { LEAD_SENT_STORAGE_KEY } from "@/lib/callIntent";
 import { gasEmergencyContact } from "@/lib/emergency";
 import { PHONE } from "@/lib/phone";
@@ -219,5 +219,61 @@ describe("mailto", () => {
     page(`<footer data-track-location="footer"><a id="m" href="mailto:info@topchoicehvac.ca">mail</a></footer>`);
     click("#m");
     expect(deps.track).toHaveBeenCalledWith("click_email", { link_location: "footer" });
+  });
+});
+
+describe("emergency intent", () => {
+  it("every tap on /emergency-service is emergency (header and sticky bar too)", () => {
+    setPath("/emergency-service");
+    page(`<header data-track-location="header"><a id="h" data-call-link href="${PHONE.href}">x</a></header>
+      <div data-track-location="sticky_call_bar"><a id="s" data-call-link href="${PHONE.href}">y</a></div>`);
+    click("#h");
+    click("#s");
+    expect(clickToCall().map((p) => p.intent)).toEqual(["emergency", "emergency"]);
+  });
+
+  it("is general elsewhere", () => {
+    page(`<header data-track-location="header"><a id="h" data-call-link href="${PHONE.href}">x</a></header>`);
+    click("#h");
+    expect(clickToCall()[0].intent).toBe("general");
+  });
+});
+
+describe("taps before hydration (early queue)", () => {
+  it("a tap queued by the inline head script is replayed once when tracking installs", () => {
+    // The queue stamps Date.now(); keep the injected clock on the same scale.
+    clock = Date.now();
+    cleanup();
+    window.__tchCallTrackingReady = false;
+    new Function(EARLY_TAP_QUEUE_JS)();
+    page(`<div data-lp-slug="furnace-repair" data-lp-region="core" data-lp-service="repair">
+      <header data-track-location="lp_header"><a id="c" data-call-link href="${PHONE.href}">Call</a></header></div>`);
+    setPath("/lp/furnace-repair");
+    click("#c");
+    expect(window.__tchEarlyTaps).toHaveLength(1);
+    expect(deps.track).not.toHaveBeenCalled();
+
+    cleanup = installCallTracking(document, deps as unknown as CallTrackingDeps);
+    expect(clickToCall()).toHaveLength(1);
+    expect(clickToCall()[0]).toMatchObject({ link_location: "lp_header", lp_slug: "furnace-repair" });
+    expect(deps.trackAdsConversion).toHaveBeenCalledWith("callTap");
+    expect(deps.sendCallIntent).toHaveBeenCalledOnce();
+    expect(window.__tchEarlyTaps).toEqual([]);
+
+    // Once installed, the early queue stops collecting: no double count.
+    clock += 10_000;
+    click("#c");
+    expect(window.__tchEarlyTaps).toEqual([]);
+    expect(clickToCall()).toHaveLength(2);
+  });
+
+  it("ignores third-party numbers in the queue", () => {
+    cleanup();
+    window.__tchCallTrackingReady = false;
+    new Function(EARLY_TAP_QUEUE_JS)();
+    page(`<a id="gas" href="${gasEmergencyContact.href}">gas</a>`);
+    click("#gas");
+    cleanup = installCallTracking(document, deps as unknown as CallTrackingDeps);
+    expect(deps.track).not.toHaveBeenCalled();
   });
 });

@@ -17,16 +17,27 @@ import { checkRateLimit } from "@/lib/rateLimit";
 
 const noContent = () => new NextResponse(null, { status: 204 });
 
-/** The Origin must be this site (or the production domain); sendBeacon always sends one. */
-function isSameSite(request: Request): boolean {
-  const origin = request.headers.get("origin");
-  if (!origin) return false;
+function isOurHost(url: string, requestUrl: string): boolean {
   try {
-    const originHost = new URL(origin).host;
-    return originHost === new URL(request.url).host || PRODUCTION_HOST_RE.test(new URL(origin).hostname);
+    const u = new URL(url);
+    return u.host === new URL(requestUrl).host || PRODUCTION_HOST_RE.test(u.hostname);
   } catch {
     return false;
   }
+}
+
+/**
+ * The request must come from this site. Browsers send Origin on a beacon
+ * POST; if one ever doesn't, Sec-Fetch-Site: same-origin or a same-site
+ * Referer is accepted instead. (All spoofable by a script: this filters
+ * drive-by cross-site posts, the rate limit and caps handle the rest.)
+ */
+function isSameSite(request: Request): boolean {
+  const origin = request.headers.get("origin");
+  if (origin) return isOurHost(origin, request.url);
+  if (request.headers.get("sec-fetch-site") === "same-origin") return true;
+  const referer = request.headers.get("referer");
+  return referer ? isOurHost(referer, request.url) : false;
 }
 
 export async function POST(request: Request) {

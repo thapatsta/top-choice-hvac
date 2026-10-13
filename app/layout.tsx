@@ -5,6 +5,7 @@ import "./globals.css";
 import { AnalyticsListeners } from "@/components/AnalyticsListeners";
 import { PageViewTracker } from "@/components/PageViewTracker";
 import { PRODUCTION_HOST_RE } from "@/lib/analytics";
+import { EARLY_TAP_QUEUE_JS } from "@/lib/callTracking";
 import { isRealTagValue } from "@/lib/googleTag";
 import { PHONE_CONVERSION_CALLBACK_JS } from "@/lib/phoneSwap";
 import { site } from "@/lib/site";
@@ -28,6 +29,10 @@ export const metadata: Metadata = {
   },
   description:
     "Licensed HVAC contractor serving Brampton and the greater GTA. Furnace and AC repair, installation, heat pumps, and more. Upfront pricing, fast response.",
+  // iOS would otherwise turn plain-text numbers into its own tel: links,
+  // which bypass <PhoneLink> (untracked, never swapped) and mutate DOM that
+  // React owns. Every number we want tappable is already a <PhoneLink>.
+  formatDetection: { telephone: false },
 };
 
 /**
@@ -49,6 +54,8 @@ export const metadata: Metadata = {
 function googleTagSnippet(): string {
   const { adsId, adsConversionLabels: labels, ga4Id } = site;
   const lines = [
+    // Queues call taps made before hydration (lib/callTracking.ts drains it).
+    EARLY_TAP_QUEUE_JS,
     "window.dataLayer = window.dataLayer || [];",
     "function gtag(){dataLayer.push(arguments);}",
     `if (${PRODUCTION_HOST_RE}.test(location.hostname)) {`,

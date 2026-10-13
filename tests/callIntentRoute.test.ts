@@ -34,7 +34,13 @@ vi.mock("@opennextjs/cloudflare", () => ({
 
 import { POST as callPOST } from "@/app/api/call-intent/route";
 import { POST as leadsPOST } from "@/app/api/leads/route";
-import { CALL_INTENT_CAPS, CALL_INTENT_TTL_SECONDS, callIntentSubject, logCallIntent } from "@/lib/notify";
+import {
+  CALL_INTENT_CAPS,
+  CALL_INTENT_TTL_SECONDS,
+  callIntentSubject,
+  logCallIntent,
+  resetCallIntentIsolateCounts,
+} from "@/lib/notify";
 import type { CallIntentPayload } from "@/lib/callIntent";
 
 const UA =
@@ -73,6 +79,7 @@ const callRecords = () => [...kvData.keys()].filter((k) => k.startsWith("calls:"
 const emails = () => resend.mock.calls.filter(([url]) => String(url).includes("resend"));
 
 beforeEach(() => {
+  resetCallIntentIsolateCounts();
   kvData.clear();
   kv.put.mockClear();
   callLimiter = makeLimiter(10);
@@ -178,6 +185,27 @@ describe("POST /api/call-intent", () => {
     expect(callRecords()).toHaveLength(1);
     expect(emails()).toHaveLength(0);
   });
+
+  it("the kill switch fails closed on a typo (\"false\", \"0\", \"of\")", async () => {
+    for (const value of ["false", "0", "of"]) {
+      env.CALL_INTENT_NOTIFY = value;
+      await callPOST(beacon(tap, { ip: `198.51.100.${value.length}` }));
+    }
+    expect(callRecords()).toHaveLength(3);
+    expect(emails()).toHaveLength(0);
+  });
+
+  it("without Origin, accepts Sec-Fetch-Site: same-origin or a same-site Referer", async () => {
+    const withHeaders = (h: Record<string, string>) => {
+      const req = beacon(tap, { origin: null });
+      for (const [k, v] of Object.entries(h)) req.headers.set(k, v);
+      return req;
+    };
+    expect((await callPOST(withHeaders({ "Sec-Fetch-Site": "same-origin" }))).status).toBe(204);
+    expect((await callPOST(withHeaders({ Referer: "https://topchoicehvac.ca/lp/furnace-repair" }))).status).toBe(204);
+    expect((await callPOST(withHeaders({ "Sec-Fetch-Site": "cross-site" }))).status).toBe(403);
+    expect((await callPOST(withHeaders({ Referer: "https://evil.example/" }))).status).toBe(403);
+  });
 });
 
 describe("logCallIntent caps", () => {
@@ -212,14 +240,36 @@ describe("logCallIntent caps", () => {
     expect(callRecords()).toHaveLength(0);
   });
 
-  it("fails closed: no email if the cap counter can't be written", async () => {
+  it("fails closed: no email and no record if the cap counter can't be written", async () => {
     kv.put.mockImplementationOnce(async () => {
       throw new Error("KV write limit");
     });
     const result = await logCallIntent(tap, at("2026-10-13T20:00:00.000Z"));
-    expect(result.email).toBe("skipped");
+    expect(result).toMatchObject({ kv: "skipped", email: "skipped" });
     expect(emails()).toHaveLength(0);
-    expect(result.kv).toBe("sent");
+    expect(callRecords()).toHaveLength(0);
+  });
+
+  it("fails closed when the cap counter can't be read", async () => {
+    kv.get.mockImplementationOnce(async () => {
+      throw new Error("KV down");
+    });
+    const result = await logCallIntent(tap, at("2026-10-13T20:00:00.000Z"));
+    expect(result).toMatchObject({ kv: "skipped", email: "skipped" });
+  });
+
+  it("a stale KV counter can't push one isolate past its own hourly ceilings", async () => {
+    // Simulate KV always returning an old, low count (eventual consistency).
+    kv.get.mockImplementation(async () => JSON.stringify({ records: 0, emails: 0, hours: {} }));
+    try {
+      for (let i = 0; i < 70; i++) {
+        await logCallIntent(tap, { ...at(`2026-10-13T15:${String(i % 60).padStart(2, "0")}:00.000Z`), id: `s${i}` });
+      }
+      expect(emails()).toHaveLength(CALL_INTENT_CAPS.isolateEmailsPerHour);
+      expect(callRecords()).toHaveLength(CALL_INTENT_CAPS.isolateRecordsPerHour);
+    } finally {
+      kv.get.mockImplementation(async (key: string) => kvData.get(key)?.value ?? null);
+    }
   });
 
   it("a failing Resend never throws and the KV record is kept", async () => {

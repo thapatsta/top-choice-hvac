@@ -279,16 +279,22 @@ not a connected call**: the visitor can cancel the dialer.
   number's digits), so taps still count after the number swap.
 - **Per tap** it sends GA4 `click_to_call` with `link_location`, `lp_slug` /
   `lp_region` / `lp_service` on `/lp/*`, `device_class` (`touch` = coarse
-  primary pointer, or `pointer`), `intent` (`emergency` inside a
-  `data-call-intent="emergency"` container: the emergency page and the
-  emergency thank-you button; else `general`), `post_lead` (on `/thank-you`, or
-  after a lead was sent from this tab) and `swapped` (the link showed a
-  forwarding number).
+  primary pointer, or `pointer`), `intent` (`emergency` for every tap on
+  `/emergency-service` and inside a `data-call-intent="emergency"` container,
+  i.e. the emergency thank-you button; else `general`), `post_lead` (on
+  `/thank-you`, or anywhere after a lead was sent from this tab: broader than
+  "thank-you only" on purpose) and `swapped` (the link showed a forwarding
+  number).
+- **Taps before hydration** (a slow phone tapping "Call now" before React
+  loads) are queued by a tiny listener in the inline head script and replayed
+  once tracking starts. A long-press "Call" / "Copy" menu or a middle-click
+  fires no click and is not counted.
 - **Google Ads "Call tap"** fires only when `device_class` is `touch`, `post_lead`
   is false and the browser isn't automated. It is **secondary (observation
   only)** in Google Ads, so a person who taps and then calls isn't counted
   twice.
-- **De-dupe**: a second tap on the same location within 5 s does nothing.
+- **De-dupe**: a second tap on the same location within 5 s does nothing (per
+  tab; it also holds across a client-side navigation).
 - **Server log**: the tap is also sent with `navigator.sendBeacon` (text/plain
   JSON, fetch keepalive fallback) to `POST /api/call-intent`, so it survives ad
   blockers and the hand-off to the dialer. Only from the production host and
@@ -305,13 +311,20 @@ not a connected call**: the visitor can cancel the dialer.
   for post-lead taps). Never SMS (SMS stays for emergency form leads).
 - **Caps** (`CALL_INTENT_CAPS` in `lib/notify.ts`, counted in KV doc
   `callcap:<UTC date>`): at most 20 emails per hour, 40 per day and 300 KV
-  records per day. These are for the free plans: Resend allows 100
-  emails/day and KV 1,000 writes/day, and form leads share both, so call taps
-  can never use up the form leads' room. Over a cap, the tap is KV-only (or
-  Worker-log only past 300). If the counter can't be read or written, no email
-  is sent.
+  records per day, sized for the free plans (Resend 100 emails/day, KV 1,000
+  writes/day, both shared with form leads). Over a cap the tap is KV-only (or
+  Worker-log only past 300). If the counter can't be read or written, nothing
+  is stored or emailed (fail closed). **Limit:** KV is eventually consistent
+  across Cloudflare locations, so these caps are best-effort, not exact. A
+  per-isolate ceiling (20 emails and 60 records per hour) is a second guard. A
+  truly global hard cap needs a Durable Object, which means a custom worker
+  entry (see the cron note below); revisit if abuse ever shows up.
+- **Source labels are unverified**: anyone can POST a fake `gclid` or
+  `utm_*`, so "[Google Ads]" in a call-tap email or the report is what the
+  browser claimed. Google Ads' own numbers are the source of truth for ads.
 - **Kill switch**: `CALL_INTENT_NOTIFY` under `vars` in `wrangler.jsonc`,
-  `email` (default) or `off` (KV only). It ships with every deploy; a
+  `email` (default) or `off` (KV only). Any other value (a typo) also sends no
+  email and logs `[call:notify:CONFIG]`. It ships with every deploy; a
   dashboard edit is overwritten by the next deploy, so change it in the file.
 - Form leads (`sendLeadNotification()`) are untouched: call taps use their own
   `logCallIntent()` and only share read-only formatting helpers.
@@ -330,6 +343,12 @@ not a connected call**: the visitor can cancel the dialer.
   change: JSON-LD, metadata and `NAP_JSON_LD` keep the real number, and the
   footer and contact-page NAP blocks are `swap={false}`. The server HTML always
   has the real number, for crawlers and organic visitors.
+- **No swap after a lead**: on `/thank-you`, and anywhere after a lead was sent
+  from this tab, every number shows the real line. Otherwise a form lead who
+  then calls the forwarding number would count as two primary conversions.
+  Those calls aren't measured by Google (the form lead already was).
+- `formatDetection: { telephone: false }` stops iOS turning plain-text numbers
+  into its own untracked, unswapped links.
 - We don't use `phone_conversion_css_class` (Google rewriting the DOM React owns
   breaks on hydration and client navigation) or `phone_conversion_options`
   (Google's defaults; its keys couldn't be checked against Google's docs).
@@ -367,6 +386,23 @@ not a connected call**: the visitor can cancel the dialer.
   sends violations to `/api/csp-report`, which logs
   `[csp:BLOCKED] directive=… blocked=<origin>` in Workers Logs. After a deploy,
   search the logs for `csp:BLOCKED` to find any host still missing.
+
+### Launch checklist (account side)
+
+- **Google Ads → Goals → Conversions**: "Form lead" Primary, Count One.
+  "Calls from website" Primary, Count One, minimum call length **30 s**. "Call
+  tap" **Secondary**, Count One (header then sticky bar on one page is two
+  taps, so Count One matters).
+- Don't import GA4 key events (`generate_lead`, `click_to_call`) into Google
+  Ads as primary conversions.
+- **Enhanced conversions / "user-provided data"** on the Google tag
+  (GT-WKRL9HS5) must stay **off**: with it on, Google reads the form's email and
+  phone (hashed) and sends them to Ads, which breaks the no-PII rule.
+- **GA4 → Admin → Data streams → Enhanced measurement**: turn off "Page
+  changes based on browser history events" (see above).
+- After the first deploy: open an `/lp/*` page from a test ad click (or Tag
+  Assistant) and confirm the forwarding number shows; then search Workers Logs
+  for `csp:BLOCKED`.
 
 ### End-of-day report
 
