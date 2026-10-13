@@ -1,5 +1,6 @@
 import { Container } from "@/components/ui/Container";
 import { site } from "@/lib/site";
+import { PhoneLink, PhoneText } from "@/components/Phone";
 
 /**
  * The only footer on /lp/*: business name, phone and copyright. No address
@@ -15,12 +16,9 @@ export function LpFooter() {
       <Container className="flex flex-col gap-1 text-center">
         <p className="font-semibold text-white">{site.legalName}</p>
         <p>
-          <a
-            href={site.phone.href}
-            className="inline-flex min-h-[44px] items-center hover:text-white hover:underline"
-          >
-            {site.phone.display}
-          </a>
+          <PhoneLink className="inline-flex min-h-[44px] items-center hover:text-white hover:underline">
+            <PhoneText />
+          </PhoneLink>
         </p>
         <p className="text-xs text-white/60">
           &copy; {year} {site.legalName} All rights reserved.

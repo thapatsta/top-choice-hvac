@@ -1,63 +1,28 @@
 "use client";
 
 import { useEffect } from "react";
-import { track } from "@/lib/analytics";
 import { captureAttribution } from "@/lib/attribution";
-import { parseLpContext } from "@/lib/landingPage";
-
-function phoneDigits(href: string): string {
-  const digits = href.replace(/\D/g, "");
-  return digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
-}
-
+import { installCallTracking } from "@/lib/callTracking";
 
 /**
  * One delegated click listener for every tel:/mailto: link on the site, so
- * individual links don't need onClick handlers. `link_location` comes from
- * the nearest ancestor `data-track-location` attribute.
+ * individual links don't need onClick handlers (logic: lib/callTracking.ts).
+ * `link_location` comes from the nearest ancestor `data-track-location`
+ * attribute; on the /lp/* ad landing pages click_to_call also carries
+ * lp_slug, lp_region and lp_service from the page's data-lp-* attributes.
  *
- * On the /lp/* ad landing pages click_to_call also carries lp_slug,
- * lp_region and lp_service, read from the page's data-lp-* attributes.
- *
- * click_to_call only counts our own number: third-party lines like the gas
- * utility's emergency number on the smell-gas screen are not leads.
+ * Our call links are found by their data-call-link marker (<PhoneLink>), so a
+ * tap still counts after the Google forwarding-number swap. Third-party lines
+ * like the gas utility's emergency number are not leads and never count.
  *
  * Also records first-visit lead attribution once per page load, on every
  * host (it stays in localStorage and never goes to GA).
  */
-export function AnalyticsListeners({ phoneHref }: { phoneHref: string }) {
+export function AnalyticsListeners() {
   useEffect(() => {
-    const ourPhone = phoneDigits(phoneHref);
     captureAttribution();
-
-    function onClick(e: MouseEvent) {
-      if (!(e.target instanceof Element)) return;
-      const link = e.target.closest("a[href]");
-      if (!link) return;
-      const href = link.getAttribute("href") ?? "";
-      const linkLocation =
-        link.closest("[data-track-location]")?.getAttribute("data-track-location") || "body";
-
-      if (href.startsWith("tel:")) {
-        if (phoneDigits(href) === ourPhone) {
-          const lpRoot = link.closest<HTMLElement>("[data-lp-slug]");
-          const lp = lpRoot
-            ? parseLpContext({
-                lp_slug: lpRoot.dataset.lpSlug,
-                lp_region: lpRoot.dataset.lpRegion,
-                lp_service: lpRoot.dataset.lpService,
-              })
-            : {};
-          track("click_to_call", { link_location: linkLocation, ...lp });
-        }
-      } else if (href.startsWith("mailto:")) {
-        track("click_email", { link_location: linkLocation });
-      }
-    }
-
-    document.addEventListener("click", onClick, { capture: true });
-    return () => document.removeEventListener("click", onClick, { capture: true });
-  }, [phoneHref]);
+    return installCallTracking(document);
+  }, []);
 
   return null;
 }

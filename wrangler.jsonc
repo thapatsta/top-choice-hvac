@@ -16,13 +16,23 @@
   // account. `wrangler dev` simulates the limiter in memory (resets on
   // restart); deploys use the real one.
   "ratelimits": [
-    { "name": "LEAD_RATE_LIMITER", "namespace_id": "1001", "simple": { "limit": 5, "period": 60 } }
+    { "name": "LEAD_RATE_LIMITER", "namespace_id": "1001", "simple": { "limit": 5, "period": 60 } },
+    // Call-tap log (POST /api/call-intent, lib/callIntent.ts). Its own
+    // namespace so taps never use up the lead forms' budget. 10 taps per 60s
+    // per IP; the daily KV/email caps in lib/notify.ts sit behind it.
+    { "name": "CALL_RATE_LIMITER", "namespace_id": "1002", "simple": { "limit": 10, "period": 60 } }
   ],
   // Non-secret lead-pipeline config (secrets go through `wrangler secret put`
   // + deploy.yml). onboarding@resend.dev is Resend's shared test sender: it
   // only delivers to the Resend account owner's own address. Switch to an
   // address on a domain verified in Resend to send to any inbox.
+  //
+  // CALL_INTENT_NOTIFY: "email" (default) sends a capped email per call tap
+  // to LEAD_NOTIFY_EMAIL; "off" is the kill switch (KV log only). A var, not
+  // a secret, so it ships with every deploy and can't be silently dropped.
+  // A dashboard edit is overwritten by the next deploy: change it here.
   "vars": {
-    "LEAD_FROM_EMAIL": "Top Choice HVAC Leads <onboarding@resend.dev>"
+    "LEAD_FROM_EMAIL": "Top Choice HVAC Leads <onboarding@resend.dev>",
+    "CALL_INTENT_NOTIFY": "email"
   }
 }

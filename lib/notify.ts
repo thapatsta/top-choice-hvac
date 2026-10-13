@@ -1,6 +1,7 @@
 import { hasClickId, type AttributionKey, type LeadAttribution } from "@/lib/attribution";
 import { issueOptions } from "@/lib/emergency";
-import { leadKey, SOURCE_LABELS, type Lead } from "@/lib/leadAdapter";
+import type { CallIntentPayload } from "@/lib/callIntent";
+import { leadKey, randomLeadId, SOURCE_LABELS, type Lead } from "@/lib/leadAdapter";
 
 /**
  * Lead delivery pipeline. `sendLeadNotification()` is the single entrypoint
@@ -17,7 +18,13 @@ import { leadKey, SOURCE_LABELS, type Lead } from "@/lib/leadAdapter";
 
 /** Minimal slice of the Workers KV API this module needs. */
 export interface LeadsKV {
-  put(key: string, value: string, options?: { metadata?: unknown }): Promise<void>;
+  put(
+    key: string,
+    value: string,
+    options?: { metadata?: unknown; expirationTtl?: number }
+  ): Promise<void>;
+  /** Only the call-intent caps read KV; lead logging never does. */
+  get?(key: string): Promise<string | null>;
 }
 
 export interface NotifyEnv {
@@ -35,6 +42,11 @@ export interface NotifyEnv {
   // TODO: real value required — see README Lead Delivery Pipeline section
   TWILIO_FROM_NUMBER?: string;
   LEAD_NOTIFY_PHONE?: string;
+  /**
+   * Call-tap email switch, a plain var in wrangler.jsonc: "email" (default,
+   * also when unset) or "off" (kill switch: KV log only). Never SMS.
+   */
+  CALL_INTENT_NOTIFY?: string;
 }
 
 export interface NotifyDeps {
@@ -176,6 +188,8 @@ const ATTRIBUTION_LABELS: [AttributionKey, string][] = [
   ["landing_path", "Landing page"],
   ["referrer_host", "Referrer"],
   ["first_seen", "First visit"],
+  ["ga_client_id", "GA4 client ID"],
+  ["ga_session_id", "GA4 session ID"],
 ];
 
 /** One plain-language line on where the lead came from. */
@@ -376,5 +390,225 @@ export async function sendLeadNotification(
       `[lead:UNDELIVERED] key=${key} source=${lead.source} — every channel failed`
     );
   }
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// Call intent (tap on a "Call" link): KV log + capped email. Never SMS.
+// ---------------------------------------------------------------------------
+//
+// Deliberately separate from sendLeadNotification(): it shares only the
+// read-only formatting helpers above (escapeHtml, htmlTable, attributionRows),
+// so nothing here can change how form leads are delivered. It does share the
+// Resend account and the LEADS_KV namespace, which is why it is capped: on
+// the free plans Resend allows 100 emails/day and KV 1,000 writes/day, and
+// form leads must always have room.
+
+export const CALL_INTENT_TTL_SECONDS = 90 * 24 * 60 * 60;
+
+export const CALL_INTENT_CAPS = {
+  /** Call-tap records written to KV per UTC day; beyond it, Worker log only. */
+  recordsPerDay: 300,
+  emailsPerHour: 20,
+  /** Leaves at least 60 of Resend's 100/day for form leads. */
+  emailsPerDay: 40,
+} as const;
+
+export interface CallIntentRecord extends CallIntentPayload {
+  timestamp: string;
+  id: string;
+}
+
+export interface CallIntentResult {
+  key: string;
+  kv: ChannelStatus;
+  email: ChannelStatus;
+}
+
+interface CallCapState {
+  records: number;
+  emails: number;
+  /** Emails per UTC hour, "00".."23". */
+  hours: Record<string, number>;
+}
+
+/** KV key: sorts chronologically, same scheme as leads:. */
+export function callIntentKey(record: Pick<CallIntentRecord, "timestamp" | "id">): string {
+  return `calls:${record.timestamp}:${record.id}`;
+}
+
+/** Cap counters live outside the calls: prefix so the report never lists them. */
+export function callCapKey(timestamp: string): string {
+  return `callcap:${timestamp.slice(0, 10)}`;
+}
+
+/** "Google Ads", the utm_source, or "organic" (direct, referral or search). */
+export function callSourceLabel(a: LeadAttribution | undefined): string {
+  if (!a) return "organic";
+  if (hasClickId(a)) return "Google Ads";
+  if (a.utm_source) return a.utm_source.slice(0, 40);
+  return "organic";
+}
+
+export function callIntentSubject(r: CallIntentPayload): string {
+  const where = r.lp_slug ?? r.link_location;
+  const device = r.device_class === "touch" ? "mobile" : "desktop";
+  const prefix = r.intent === "emergency" ? "🚨 " : "";
+  const after = r.post_lead ? " (after a form lead)" : "";
+  return `${prefix}Call tap: ${where} (${device}) [${callSourceLabel(r.attribution)}]${after}`;
+}
+
+const TORONTO_TIME = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Toronto",
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+
+export function callIntentEmailBody(r: CallIntentRecord): { text: string; html: string } {
+  const heading = "Someone tapped a Call button on the website";
+  const note =
+    "This is a tap, not a confirmed call: they may have cancelled the dialer. " +
+    "Google Ads counts connected calls separately.";
+  const rows: [string, string][] = [
+    ["When", `${TORONTO_TIME.format(new Date(r.timestamp))} (Toronto)`],
+    ["Button", r.link_location],
+    ["Page", r.page_path],
+  ];
+  if (r.lp_slug) rows.push(["Ad landing page", r.lp_slug]);
+  rows.push(
+    ["Device", r.device_class === "touch" ? "Mobile / touch" : "Desktop (mouse)"],
+    ["Intent", r.intent === "emergency" ? "Emergency" : "General"],
+    ["After a form lead", r.post_lead ? "Yes" : "No"],
+    ["Showed Google forwarding number", r.swapped ? "Yes" : "No"],
+    ["Record key", callIntentKey(r)]
+  );
+  const attribution = r.attribution ? attributionRows(r.attribution) : null;
+  const textLines = [heading, note, "", ...rows.map(([k, v]) => `${k}: ${v}`)];
+  if (attribution) textLines.push("", "Attribution", ...attribution.map(([k, v]) => `${k}: ${v}`));
+  const html =
+    `<h2 style="font-family:sans-serif">${escapeHtml(heading)}</h2>` +
+    `<p style="font-family:sans-serif">${escapeHtml(note)}</p>` +
+    htmlTable(rows) +
+    (attribution ? `<h3 style="font-family:sans-serif">Attribution</h3>` + htmlTable(attribution) : "");
+  return { text: textLines.join("\n"), html };
+}
+
+async function readCaps(kv: LeadsKV, key: string): Promise<CallCapState> {
+  const empty: CallCapState = { records: 0, emails: 0, hours: {} };
+  if (typeof kv.get !== "function") return empty;
+  const raw = await kv.get(key);
+  if (!raw) return empty;
+  const parsed = JSON.parse(raw) as Partial<CallCapState>;
+  return {
+    records: Number(parsed.records) || 0,
+    emails: Number(parsed.emails) || 0,
+    hours: parsed.hours && typeof parsed.hours === "object" ? parsed.hours : {},
+  };
+}
+
+async function emailCallIntent(r: CallIntentRecord, env: NotifyEnv, fetchFn: typeof fetch): Promise<void> {
+  const apiKey = requireConfig(env, "RESEND_API_KEY");
+  const to = requireConfig(env, "LEAD_NOTIFY_EMAIL");
+  const from = env.LEAD_FROM_EMAIL?.trim() || DEFAULT_FROM_EMAIL;
+  const { text, html } = callIntentEmailBody(r);
+  const res = await fetchFn("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ from, to: [to], subject: callIntentSubject(r), text, html }),
+  });
+  if (!res.ok) {
+    throw new Error(`Resend responded ${res.status}: ${await res.text().catch(() => "")}`);
+  }
+}
+
+/**
+ * Logs one validated call tap: a KV record (90-day TTL) and, unless switched
+ * off or over the caps, an email to LEAD_NOTIFY_EMAIL. Never throws, never
+ * SMS. Caps are counted in one KV doc per UTC day (best effort: KV is
+ * eventually consistent, so a burst can overshoot slightly). If the counter
+ * can't be read or written, no email is sent (fail closed).
+ */
+export async function logCallIntent(
+  payload: CallIntentPayload,
+  deps: NotifyDeps & { now?: Date; id?: string } = {}
+): Promise<CallIntentResult> {
+  const now = deps.now ?? new Date();
+  const record: CallIntentRecord = {
+    ...payload,
+    timestamp: now.toISOString(),
+    id: deps.id ?? randomLeadId(),
+  };
+  const key = callIntentKey(record);
+  const result: CallIntentResult = { key, kv: "skipped", email: "skipped" };
+
+  let env: NotifyEnv;
+  try {
+    env = await resolveEnv(deps);
+  } catch (err) {
+    console.error(`[call:env:FAILED] key=${key}`, err instanceof Error ? err.message : err);
+    return { ...result, kv: "failed", email: "failed" };
+  }
+  const kv = env.LEADS_KV;
+  if (!kv || typeof kv.put !== "function") {
+    console.error(`[call:kv:FAILED] key=${key} LEADS_KV binding is not configured`);
+    return { ...result, kv: "failed" };
+  }
+
+  const emailOn = (env.CALL_INTENT_NOTIFY ?? "email").trim().toLowerCase() !== "off";
+  const capKey = callCapKey(record.timestamp);
+  const hour = record.timestamp.slice(11, 13);
+  let emailAllowed = false;
+  try {
+    const caps = await readCaps(kv, capKey);
+    if (caps.records >= CALL_INTENT_CAPS.recordsPerDay) {
+      console.warn(`[call:CAPPED] key=${key} daily record cap reached; not stored`);
+      return result;
+    }
+    emailAllowed =
+      emailOn &&
+      typeof kv.get === "function" &&
+      caps.emails < CALL_INTENT_CAPS.emailsPerDay &&
+      (caps.hours[hour] ?? 0) < CALL_INTENT_CAPS.emailsPerHour;
+    const next: CallCapState = {
+      records: caps.records + 1,
+      emails: caps.emails + (emailAllowed ? 1 : 0),
+      hours: emailAllowed ? { ...caps.hours, [hour]: (caps.hours[hour] ?? 0) + 1 } : caps.hours,
+    };
+    await kv.put(capKey, JSON.stringify(next), { expirationTtl: 3 * 24 * 60 * 60 });
+  } catch (err) {
+    emailAllowed = false;
+    console.error(`[call:cap:FAILED] key=${key} — no email`, err instanceof Error ? err.message : err);
+  }
+
+  try {
+    await kv.put(key, JSON.stringify(record), {
+      expirationTtl: CALL_INTENT_TTL_SECONDS,
+      // Everything the end-of-day report needs, so it can run on `kv key list` alone.
+      metadata: {
+        loc: record.link_location,
+        lp: record.lp_slug ?? null,
+        dev: record.device_class,
+        intent: record.intent,
+        post: record.post_lead,
+        swap: record.swapped,
+        src: callSourceLabel(record.attribution),
+      },
+    });
+    result.kv = "sent";
+  } catch (err) {
+    result.kv = "failed";
+    console.error(`[call:kv:FAILED] key=${key}`, err instanceof Error ? err.message : err);
+  }
+
+  if (emailAllowed) {
+    try {
+      await emailCallIntent(record, env, deps.fetch ?? fetch);
+      result.email = "sent";
+    } catch (err) {
+      result.email = "failed";
+      console.error(`[call:email:FAILED] key=${key}`, err instanceof Error ? err.message : err);
+    }
+  }
+  console.log(`[call:notify] key=${key} kv=${result.kv} email=${result.email}`);
   return result;
 }

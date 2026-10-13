@@ -6,6 +6,7 @@ import {
   parseAttribution,
   readAttribution,
 } from "@/lib/attribution";
+import { normalizeAttribution } from "@/lib/leadAdapter";
 
 const now = new Date("2026-09-23T14:05:00.000Z");
 
@@ -160,5 +161,43 @@ describe("captureAttribution / readAttribution", () => {
   it("is a no-op on the server", () => {
     expect(() => captureAttribution()).not.toThrow();
     expect(readAttribution()).toBeUndefined();
+  });
+});
+
+describe("GA4 join keys (ga_client_id / ga_session_id)", () => {
+  it("the server keeps well-formed IDs", () => {
+    expect(
+      normalizeAttribution({ gclid: "abc", ga_client_id: "123456789.1700000000", ga_session_id: "1700000999" })
+    ).toEqual({ gclid: "abc", ga_client_id: "123456789.1700000000", ga_session_id: "1700000999" });
+  });
+
+  it("the server drops anything that isn't a plain numeric ID (no PII smuggled in)", () => {
+    expect(
+      normalizeAttribution({
+        ga_client_id: "jane@example.com",
+        ga_session_id: "647-555-0100",
+      })
+    ).toBeUndefined();
+    expect(normalizeAttribution({ ga_client_id: "123.456 Jane" })).toBeUndefined();
+  });
+
+  it("are never read from or written to localStorage", () => {
+    const storage = memoryStorage();
+    vi.stubGlobal("window", { localStorage: storage, location: { href: "https://topchoicehvac.ca/" } });
+    vi.stubGlobal("document", { referrer: "" });
+    storage.setItem(
+      ATTRIBUTION_STORAGE_KEY,
+      JSON.stringify({
+        value: { utm_source: "google", ga_client_id: "1.2" },
+        expires: Date.now() + 60_000,
+      })
+    );
+    expect(readAttribution()).toEqual({ utm_source: "google" });
+  });
+
+  it("are not taken from the URL", () => {
+    expect(
+      parseAttribution("https://topchoicehvac.ca/?ga_client_id=1.2&ga_session_id=3", "", now)
+    ).not.toHaveProperty("ga_client_id");
   });
 });

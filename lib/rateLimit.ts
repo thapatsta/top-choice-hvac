@@ -22,7 +22,15 @@ export interface RateLimiter {
 
 export interface RateLimitEnv {
   LEAD_RATE_LIMITER?: RateLimiter;
+  /**
+   * POST /api/call-intent. A separate namespace on
+   * purpose: call taps must never use up the lead forms' budget (tap three
+   * times, then submit the emergency form, and the form would get a 429).
+   */
+  CALL_RATE_LIMITER?: RateLimiter;
 }
+
+export type RateLimiterBinding = keyof RateLimitEnv;
 
 export interface RateLimitDeps {
   /** Defaults to the Cloudflare request env (bindings). Injected in tests. */
@@ -59,17 +67,27 @@ export async function checkLeadRateLimit(
   request: Request,
   deps: RateLimitDeps = {}
 ): Promise<NextResponse | null> {
+  return checkRateLimit(request, "LEAD_RATE_LIMITER", RATE_LIMITED_ERROR, deps);
+}
+
+/** Same as checkLeadRateLimit, against any rate-limit binding. Fails open. */
+export async function checkRateLimit(
+  request: Request,
+  binding: RateLimiterBinding,
+  error: string,
+  deps: RateLimitDeps = {}
+): Promise<NextResponse | null> {
   const key = rateLimitKey(request);
   let limiter: RateLimiter | undefined;
   try {
-    limiter = (await resolveEnv(deps)).LEAD_RATE_LIMITER;
+    limiter = (await resolveEnv(deps))[binding];
   } catch (err) {
     console.error(`[ratelimit:env:FAILED] ${key} — allowing request`, err);
     return null;
   }
   if (!limiter || typeof limiter.limit !== "function") {
     console.error(
-      `[ratelimit:UNCONFIGURED] LEAD_RATE_LIMITER binding missing — check ratelimits in wrangler.jsonc; allowing request`
+      `[ratelimit:UNCONFIGURED] ${binding} binding missing — check ratelimits in wrangler.jsonc; allowing request`
     );
     return null;
   }
@@ -83,6 +101,6 @@ export async function checkLeadRateLimit(
   }
   if (success) return null;
 
-  console.warn(`[ratelimit:BLOCKED] ${key}`);
-  return NextResponse.json({ ok: false, error: RATE_LIMITED_ERROR }, { status: 429 });
+  console.warn(`[ratelimit:BLOCKED] ${binding} ${key}`);
+  return NextResponse.json({ ok: false, error }, { status: 429 });
 }

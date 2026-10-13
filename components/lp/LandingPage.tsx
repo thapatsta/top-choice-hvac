@@ -27,6 +27,7 @@ import {
 } from "@/lib/landing-pages";
 import type { LpContext } from "@/lib/landingPage";
 import { GOOGLE_REVIEWS, site } from "@/lib/site";
+import { PhoneLink, PhoneText, TextWithPhone } from "@/components/Phone";
 
 // The shared template for every Google Ads landing page under /lp/*. All
 // copy comes from the page's entry in lib/landing-pages.ts; the strings in
@@ -171,7 +172,9 @@ export function LandingPage({ config }: { config: LandingPageConfig }) {
             <h1 className="lp-black text-[33px] leading-[1.02] tracking-[-0.02em] text-white sm:text-5xl lg:text-[56px]">
               {config.h1}
             </h1>
-            <p className="text-base text-(--lp-hero-sub) sm:text-lg">{config.subhead}</p>
+            <p className="text-base text-(--lp-hero-sub) sm:text-lg">
+              <TextWithPhone text={config.subhead} />
+            </p>
             {heroPriceNote && (
               <p className="border-l-2 border-ember pl-3 text-sm text-white/85">{heroPriceNote}</p>
             )}
@@ -271,18 +274,17 @@ export function LandingPage({ config }: { config: LandingPageConfig }) {
       <section className="lp-dark bg-navy py-12 text-white sm:py-20" data-track-location="lp_closing_cta">
         <Container className="flex flex-col items-start sm:items-center sm:text-center">
           <h2 className={sectionHeading}>{config.bottomCta}</h2>
-          <p className="mt-3 max-w-xl text-lg text-(--lp-hero-sub)">{config.bottomCtaText}</p>
+          <p className="mt-3 max-w-xl text-lg text-(--lp-hero-sub)">
+            <TextWithPhone text={config.bottomCtaText} />
+          </p>
           <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             <a href="#quote" className={orangeButton}>
               {config.formButton}
             </a>
-            <a
-              href={site.phone.href}
-              className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border-2 border-white/80 px-6 font-display text-lg font-extrabold text-white transition-colors duration-150 hover:bg-white hover:text-navy"
-            >
+            <PhoneLink className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border-2 border-white/80 px-6 font-display text-lg font-extrabold text-white transition-colors duration-150 hover:bg-white hover:text-navy">
               <Phone size={20} aria-hidden="true" />
-              Call {site.phone.display}
-            </a>
+              Call <PhoneText />
+            </PhoneLink>
           </div>
         </Container>
       </section>

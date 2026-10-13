@@ -21,6 +21,11 @@ const sizeClasses: Record<Size, string> = {
 const base =
   "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors duration-150 min-h-[44px]";
 
+/** The button look without the element, for links that aren't <Button> (e.g. PhoneLink). */
+export function buttonClasses(variant: Variant = "primary", size: Size = "md", className = ""): string {
+  return `${base} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
+}
+
 interface CommonProps {
   variant?: Variant;
   size?: Size;
@@ -48,10 +53,12 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
-  const classes = `${base} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
+  const classes = buttonClasses(variant, size, className);
 
   if ("href" in props && props.href) {
     const { href } = props;
+    // Our own number goes through <PhoneLink> (components/Phone.tsx) so it is
+    // tracked and swappable; a tel: here is someone else's number.
     const isExternalLike = href.startsWith("tel:") || href.startsWith("mailto:");
     if (isExternalLike) {
       return (

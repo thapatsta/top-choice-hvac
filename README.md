@@ -236,12 +236,178 @@ Tests live in `tests/`:
 - `handlers.test.ts`: one test per form confirming its route handler
   actually calls `sendLeadNotification()`, returns 500 instead of "ok" when
   nothing was delivered, and rejects invalid submissions.
+- Call tracking: `callIntent.test.ts` (payload allowlist, bot filter, de-dupe,
+  beacon), `callTracking.test.ts` (the click listener in a DOM, including after
+  a simulated number swap), `callIntentRoute.test.ts` (the route, rate limit,
+  email caps, kill switch, no PII), `callReport.test.ts` (Toronto day bounds),
+  `phoneFormat.test.ts`, `cspReport.test.ts`, `deployConfig.test.ts`.
+- `tests-built/call-tracking.test.ts` (with `npm run test:built`): the Google
+  tag in the raw `<head>`, phone link markers and number format on every page,
+  JSON-LD, CSP.
 
 The deploy workflow runs this suite before deploying and blocks on failure.
 
 > This pipeline is designed to be reused by the planned voice receptionist
 > work, so keep `lib/notify.ts`'s function signatures backward-compatible
 > where reasonable.
+
+## Call tracking
+
+At the end of the day we want to know who called from the site, and for
+Google Ads traffic whether a real call connected, from which campaign and
+landing page, and for how long. There are three layers. **A tap is intent,
+not a connected call**: the visitor can cancel the dialer.
+
+| Layer | What it measures | Who | Where it lives |
+| --- | --- | --- | --- |
+| 1. Call intent | A tap on one of our "Call" links | Every visitor, every device | GA4 `click_to_call`; Google Ads "Call tap" (secondary); KV `calls:*` + an email |
+| 2. Connected calls from ads | A real call to the Google forwarding number, with duration, campaign, ad group | Google Ads visitors only | Google Ads → Conversions → "Calls from website" (primary) |
+| 3. Full call log | Every call, all sources (organic, direct, GBP) | Everyone | **Not built.** See [Future: full call log](#future-full-call-log) |
+
+### Layer 1: call taps
+
+- **One source of truth for the number.** `lib/phone.ts` holds
+  `PHONE.display` = `(647) 763-2970`, the only format the number may appear in
+  (Google's swap needs an exact match; `tests/phoneFormat.test.ts` and
+  `tests-built/call-tracking.test.ts` fail on any other format). Every link to
+  it is `<PhoneLink>` and every printed number is `<PhoneText>`
+  (`components/Phone.tsx`). `<PhoneLink>` marks the link `data-call-link`.
+  Third-party numbers (the gas utility, 911) must never use these.
+- **The listener** (`lib/callTracking.ts`, installed by
+  `components/AnalyticsListeners.tsx`) counts a click on any
+  `[data-call-link]` (falling back to the real number's or the forwarding
+  number's digits), so taps still count after the number swap.
+- **Per tap** it sends GA4 `click_to_call` with `link_location`, `lp_slug` /
+  `lp_region` / `lp_service` on `/lp/*`, `device_class` (`touch` = coarse
+  primary pointer, or `pointer`), `intent` (`emergency` inside a
+  `data-call-intent="emergency"` container: the emergency page and the
+  emergency thank-you button; else `general`), `post_lead` (on `/thank-you`, or
+  after a lead was sent from this tab) and `swapped` (the link showed a
+  forwarding number).
+- **Google Ads "Call tap"** fires only when `device_class` is `touch`, `post_lead`
+  is false and the browser isn't automated. It is **secondary (observation
+  only)** in Google Ads, so a person who taps and then calls isn't counted
+  twice.
+- **De-dupe**: a second tap on the same location within 5 s does nothing.
+- **Server log**: the tap is also sent with `navigator.sendBeacon` (text/plain
+  JSON, fetch keepalive fallback) to `POST /api/call-intent`, so it survives ad
+  blockers and the hand-off to the dialer. Only from the production host and
+  local dev, never preview hosts, never automation. The route checks, in
+  order: per-IP rate limit (`CALL_RATE_LIMITER`, 10/min, separate from the lead
+  forms' budget), same-site `Origin`, a bot user-agent filter (quiet 204), a
+  4 KB size cap and a strict allowlist (unknown keys are rejected; attribution
+  values that look like an email or phone number are dropped). Nothing
+  personal is ever sent.
+- **KV**: `calls:<ISO timestamp>:<random>` with a 90-day TTL. The KV metadata
+  holds the report fields, so the report needs only `kv key list`.
+- **Email** to `LEAD_NOTIFY_EMAIL` via Resend, e.g. `Call tap: furnace-repair
+  (mobile) [Google Ads]` (🚨 prefix for emergency intent, "(after a form lead)"
+  for post-lead taps). Never SMS (SMS stays for emergency form leads).
+- **Caps** (`CALL_INTENT_CAPS` in `lib/notify.ts`, counted in KV doc
+  `callcap:<UTC date>`): at most 20 emails per hour, 40 per day and 300 KV
+  records per day. These are for the free plans: Resend allows 100
+  emails/day and KV 1,000 writes/day, and form leads share both, so call taps
+  can never use up the form leads' room. Over a cap, the tap is KV-only (or
+  Worker-log only past 300). If the counter can't be read or written, no email
+  is sent.
+- **Kill switch**: `CALL_INTENT_NOTIFY` under `vars` in `wrangler.jsonc`,
+  `email` (default) or `off` (KV only). It ships with every deploy; a
+  dashboard edit is overwritten by the next deploy, so change it in the file.
+- Form leads (`sendLeadNotification()`) are untouched: call taps use their own
+  `logCallIntent()` and only share read-only formatting helpers.
+
+### Layer 2: connected calls from ads (Google forwarding number)
+
+- `app/layout.tsx` renders the Google tag as plain `<script>` tags in the
+  server-rendered `<head>` (Google's tag checks need it in the raw HTML;
+  `next/script` can't do that in this Next version). On the production host it
+  configures GA4 (`send_page_view: false`), Google Ads (`AW-18478339536`) and
+  Google's phone snippet:
+  `gtag('config', 'AW-18478339536/<callFromWebsite label>', { phone_conversion_number: '(647) 763-2970', phone_conversion_callback })`.
+- For a Google Ads visitor Google calls `phone_conversion_callback` with a
+  forwarding number. The callback stores it (`lib/phoneSwap.ts`) and React
+  re-renders every `<PhoneLink>` / `<PhoneText>` with it. Nothing else can
+  change: JSON-LD, metadata and `NAP_JSON_LD` keep the real number, and the
+  footer and contact-page NAP blocks are `swap={false}`. The server HTML always
+  has the real number, for crawlers and organic visitors.
+- We don't use `phone_conversion_css_class` (Google rewriting the DOM React owns
+  breaks on hydration and client navigation) or `phone_conversion_options`
+  (Google's defaults; its keys couldn't be checked against Google's docs).
+- Google logs each call (time, duration, campaign, ad group) and counts a
+  conversion above the minimum call length set in the account (30 s). Primary.
+- Every Ads conversion is gated like the tag: no-op off production, without
+  gtag, or while its ID/label in `lib/googleTag.ts` is a `"[PLACEHOLDER..."`
+  value.
+
+> **AI receptionist / phone tree caveat.** Google documents forwarding numbers
+> as incompatible with phone trees that use "early media" (audio played before
+> the call is answered): calls can be mis-reported as missed. Before putting an
+> IVR or the planned AI voice receptionist in front of (647) 763-2970, test a
+> call through the forwarding number and check it is reported correctly, or
+> move layer 2 to our own tracking number (layer 3).
+
+### Other conversions and GA4
+
+- **Form lead** (`lead` label, primary): fired by `lib/submitLead.ts` right
+  after `generate_lead`, only on a delivered lead, with a random
+  `transaction_id`. Don't also import GA4 `generate_lead` into Ads as a primary
+  conversion, or form leads count twice.
+- **Page views**: `components/PageViewTracker.tsx` sends one GA4 `page_view`
+  per pathname change, with `page_location` as the full URL (GA4 reads utm and
+  gclid from it; without it ad traffic shows as Direct) and our own `page_path`
+  pathname-only. **In GA4 → Admin → Data streams → Enhanced measurement, turn
+  OFF "Page changes based on browser history events"**, or client navigations
+  count twice.
+- All GA4 events go with `send_to: G-NVWFCHZ8S3`, so they don't leak into the
+  Ads destination.
+- **Join keys**: the GA4 `client_id` / `session_id` ride along with each lead's
+  attribution (`ga_client_id`, `ga_session_id`: KV record and email only, never
+  GA params), so a lead can be matched to its GA4 session.
+- **CSP**: `next.config.ts` allows the Google Ads hosts (each commented) and
+  sends violations to `/api/csp-report`, which logs
+  `[csp:BLOCKED] directive=… blocked=<origin>` in Workers Logs. After a deploy,
+  search the logs for `csp:BLOCKED` to find any host still missing.
+
+### End-of-day report
+
+```bash
+node scripts/call-report.mjs              # today, America/Toronto
+node scripts/call-report.mjs 2026-10-13   # a given Toronto day
+node scripts/call-report.mjs --local      # wrangler dev's local KV
+```
+
+It prints call taps by landing page/button, device, intent and source; form
+leads by form and source; and mobile new-intent taps per form lead. Keys are
+UTC, so a Toronto day spans two UTC dates; DST days are 23 and 25 hours
+(tested in `tests/callReport.test.ts`). It prints counts only, never a lead's
+details. Connected calls (layer 2) are in Google Ads, not KV.
+
+**Emailing it at ~8pm ET** (not built): a Cloudflare cron needs a `scheduled`
+handler, and the OpenNext worker (`.open-next/worker.js`) only exports
+`fetch`. Adding one means a custom worker entry that wraps OpenNext's and
+re-exports its Durable Objects: a risky change to the deploy path. The safer
+option is a separate small Worker with its own `wrangler.jsonc`, a cron trigger
+(`0 0 * * *` UTC = 8pm EDT / 7pm EST; there is no TZ in Workers crons) and a
+binding to the same `LEADS_KV` namespace, reusing the report logic.
+
+### Call tracking env vars
+
+| Name | Kind | Notes |
+| --- | --- | --- |
+| `CALL_INTENT_NOTIFY` | `vars` in `wrangler.jsonc` | `email` (default) or `off` |
+| `CALL_RATE_LIMITER` | rate-limit binding in `wrangler.jsonc` | 10 taps/min per IP, namespace 1002 |
+| `LEAD_NOTIFY_EMAIL`, `RESEND_API_KEY` | existing secrets | reused for call-tap emails; already passed by `deploy.yml` (`tests/deployConfig.test.ts` checks) |
+
+No new secrets.
+
+### Future: full call log
+
+Layer 3 (every call, including organic, direct and Google Business Profile)
+needs our own tracking number: a Twilio number (Twilio is already in the
+stack) that forwards to the real line and logs each call to KV, or the AI
+receptionist platform's own call log. Sequencing: decide this together with the
+AI voice receptionist, since that changes what answers the line (see the
+phone-tree caveat above).
 
 ## Project structure
 

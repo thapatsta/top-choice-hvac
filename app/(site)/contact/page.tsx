@@ -5,6 +5,7 @@ import { ContactForm } from "@/components/contact/ContactForm";
 import { GoogleMapEmbed } from "@/components/GoogleMapEmbed";
 import { site, NAP_JSON_LD } from "@/lib/site";
 import { pageMetadata } from "@/lib/metadata";
+import { PhoneLink, PhoneText } from "@/components/Phone";
 
 export const metadata: Metadata = pageMetadata({
   title: "Contact Us",
@@ -43,9 +44,10 @@ export default function ContactPage() {
               <ul className="flex flex-col gap-4">
                 <li className="flex items-center gap-3">
                   <Phone size={20} className="text-ember" aria-hidden="true" />
-                  <a href={site.phone.href} className="font-semibold text-navy hover:text-ember">
-                    {site.phone.display}
-                  </a>
+                  {/* Next to the address: the NAP block keeps the real number. */}
+                  <PhoneLink swap={false} className="font-semibold text-navy hover:text-ember">
+                    <PhoneText swap={false} />
+                  </PhoneLink>
                 </li>
                 <li className="flex items-center gap-3">
                   <Mail size={20} className="text-ember" aria-hidden="true" />

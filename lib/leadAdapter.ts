@@ -11,6 +11,7 @@ import {
 import {
   ATTRIBUTION_KEYS,
   cleanAttributionValue,
+  isAllowedAttributionValue,
   type LeadAttribution,
 } from "@/lib/attribution";
 
@@ -106,7 +107,7 @@ export function normalizeAttribution(raw: unknown): LeadAttribution | undefined 
     const value = input[key];
     if (typeof value !== "string") continue;
     const clean = cleanAttributionValue(value);
-    if (clean) out[key] = clean;
+    if (clean && isAllowedAttributionValue(key, clean)) out[key] = clean;
   }
   return Object.keys(out).length ? out : undefined;
 }
