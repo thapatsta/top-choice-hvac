@@ -3,12 +3,13 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, DollarSign, Gift, Phone, Tag } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { Button } from "@/components/ui/Button";
+import { Button, buttonClasses } from "@/components/ui/Button";
 import { ServiceIcon } from "@/components/ui/ServiceIcon";
 import { FAQAccordion } from "@/components/FAQAccordion";
 import { CTABand } from "@/components/CTABand";
 import { services, getServiceBySlug } from "@/data/services";
 import { site } from "@/lib/site";
+import { PhoneLink, PhoneText } from "@/components/Phone";
 
 export function generateStaticParams() {
   return services.map((s) => ({ slug: s.slug }));
@@ -91,10 +92,10 @@ export default async function ServiceDetailPage({
                     Get a Free Quote
                   </Button>
                   <div data-track-location="service_offer">
-                    <Button href={site.phone.href} variant="outline-light" size="lg">
+                    <PhoneLink className={buttonClasses("outline-light", "lg")}>
                       <Phone size={20} aria-hidden="true" />
-                      {site.phone.display}
-                    </Button>
+                      <PhoneText />
+                    </PhoneLink>
                   </div>
                 </div>
                 <p className="mt-6 max-w-2xl text-lg text-white/80">{service.heroTagline}</p>

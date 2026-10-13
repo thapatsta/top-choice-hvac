@@ -3,7 +3,10 @@ import Script from "next/script";
 import { Archivo, Inter } from "next/font/google";
 import "./globals.css";
 import { AnalyticsListeners } from "@/components/AnalyticsListeners";
+import { PageViewTracker } from "@/components/PageViewTracker";
 import { PRODUCTION_HOST_RE } from "@/lib/analytics";
+import { isRealTagValue } from "@/lib/googleTag";
+import { PHONE_CONVERSION_CALLBACK_JS } from "@/lib/phoneSwap";
 import { site } from "@/lib/site";
 
 const archivo = Archivo({
@@ -27,6 +30,46 @@ export const metadata: Metadata = {
     "Licensed HVAC contractor serving Brampton and the greater GTA. Furnace and AC repair, installation, heat pumps, and more. Upfront pricing, fast response.",
 };
 
+/**
+ * The inline gtag bootstrap. gtag() is defined on every host so track() in
+ * lib/analytics.ts stays safe, but only production hosts configure anything
+ * (PRODUCTION_HOST_RE, the same regex isProductionHost() uses). Each Google
+ * Ads part is skipped while its ID/label is a "[PLACEHOLDER" value.
+ *
+ * - GA4: send_page_view false; components/PageViewTracker.tsx sends page_view.
+ * - Google Ads: plain config (conversion linker, gclid cookie) with Google's
+ *   default page view.
+ * - Calls from website: Google's phone snippet, config 'AW-ID/label' with
+ *   phone_conversion_number set to the number exactly as the page shows it.
+ *   No phone_conversion_css_class: the callback hands the forwarding number
+ *   to React (lib/phoneSwap.ts), which renders it in <PhoneLink>/<PhoneText>
+ *   only. phone_conversion_options is left at Google's defaults: its keys
+ *   could not be verified against Google's docs (see the PR).
+ */
+function googleTagSnippet(): string {
+  const { adsId, adsConversionLabels: labels, ga4Id } = site;
+  const lines = [
+    "window.dataLayer = window.dataLayer || [];",
+    "function gtag(){dataLayer.push(arguments);}",
+    `if (${PRODUCTION_HOST_RE}.test(location.hostname)) {`,
+    "gtag('js', new Date());",
+    `gtag('config', ${JSON.stringify(ga4Id)}, { send_page_view: false });`,
+  ];
+  if (isRealTagValue(adsId)) {
+    lines.push(`gtag('config', ${JSON.stringify(adsId)});`);
+    if (isRealTagValue(labels.callFromWebsite)) {
+      lines.push(
+        `gtag('config', ${JSON.stringify(`${adsId}/${labels.callFromWebsite}`)}, {`,
+        `'phone_conversion_number': ${JSON.stringify(site.phone.display)},`,
+        `'phone_conversion_callback': ${PHONE_CONVERSION_CALLBACK_JS}`,
+        "});"
+      );
+    }
+  }
+  lines.push("}");
+  return lines.join("\n");
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -34,14 +77,29 @@ export default function RootLayout({
 }>) {
   const gtmId = site.gtmId;
   const ga4Id = site.ga4Id;
-  const hasRealGtm = !gtmId.startsWith("[PLACEHOLDER");
-  const hasRealGa4 = !ga4Id.startsWith("[PLACEHOLDER");
+  const hasRealGtm = isRealTagValue(gtmId);
+  const hasRealGa4 = isRealTagValue(ga4Id);
 
   return (
     <html
       lang="en"
       className={`${archivo.variable} ${inter.variable} h-full antialiased`}
     >
+      {/* Google tag (GA4 + Google Ads) as plain <script> tags in the
+          server-rendered <head>: Google's tag checks need it in the raw HTML.
+          next/script can't do that here: afterInteractive only ships it in
+          the RSC payload, and beforeInteractive emits a <link rel=preload>
+          plus a self.__next_s queue that Next's runtime injects later.
+          tests-built/call-tracking.test.ts asserts the served HTML. */}
+      {hasRealGa4 && (
+        <head>
+          <script
+            id="gtag-init"
+            dangerouslySetInnerHTML={{ __html: googleTagSnippet() }}
+          />
+          <script async src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`} />
+        </head>
+      )}
       <body className="flex min-h-full flex-col">
         {/* Google Tag Manager: replace site.gtmId in lib/site.ts with the real container ID to activate */}
         {hasRealGtm && (
@@ -49,28 +107,6 @@ export default function RootLayout({
             {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`}
           </Script>
         )}
-        {/* Google Analytics 4: replace site.ga4Id in lib/site.ts with the real measurement ID to activate */}
-        {hasRealGa4 && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}
-              strategy="afterInteractive"
-            />
-            {/* gtag() is defined on every host so track() in lib/analytics.ts
-                stays safe, but only production hosts send page views. The
-                hostname regex is PRODUCTION_HOST_RE from lib/analytics.ts —
-                it must stay in sync with isProductionHost() there. */}
-            <Script id="ga4" strategy="afterInteractive">
-              {`window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-if (${PRODUCTION_HOST_RE}.test(location.hostname)) {
-gtag('js', new Date());
-gtag('config', '${ga4Id}');
-}`}
-            </Script>
-          </>
-        )}
-
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-ember focus:px-4 focus:py-2 focus:text-white"
@@ -83,8 +119,8 @@ gtag('config', '${ga4Id}');
             layout (app/lp/layout.tsx) and never render or ship the site
             chrome, so its address and claims stay out of their HTML. */}
         {children}
-        {/* Phone passed as a prop so this client component doesn't bundle lib/site.ts. */}
-        <AnalyticsListeners phoneHref={site.phone.href} />
+        <AnalyticsListeners />
+        <PageViewTracker />
       </body>
     </html>
   );

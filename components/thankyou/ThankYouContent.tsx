@@ -2,7 +2,8 @@
 
 import { useSyncExternalStore } from "react";
 import { CheckCircle2, Phone } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button, buttonClasses } from "@/components/ui/Button";
+import { PhoneLink, PhoneText } from "@/components/Phone";
 import { getEstimateFraming } from "@/lib/estimate";
 import { CALLBACK_PROMISE } from "@/lib/landingPage";
 import { site } from "@/lib/site";
@@ -18,13 +19,25 @@ export function ThankYouContent() {
   return <ThankYouCard params={parseThankYouParams(new URLSearchParams(stored ?? ""))} />;
 }
 
-function CallButton({ location, large = false }: { location: string; large?: boolean }) {
+function CallButton({
+  location,
+  large = false,
+  emergency = false,
+}: {
+  location: string;
+  large?: boolean;
+  emergency?: boolean;
+}) {
   return (
-    <div className="mt-6" data-track-location={location}>
-      <Button href={site.phone.href} size="lg" className={large ? "w-full text-xl" : ""}>
+    <div
+      className="mt-6"
+      data-track-location={location}
+      {...(emergency ? { "data-call-intent": "emergency" } : {})}
+    >
+      <PhoneLink className={buttonClasses("primary", "lg", large ? "w-full text-xl" : "")}>
         <Phone size={large ? 24 : 20} aria-hidden="true" />
-        Call {site.phone.display}
-      </Button>
+        Call <PhoneText />
+      </PhoneLink>
     </div>
   );
 }
@@ -46,7 +59,7 @@ export function ThankYouCard({ params }: { params: ThankYouParams }) {
               ? "Since this is an emergency, please call us now for the fastest response:"
               : "A member of our team will reach out shortly to confirm details and book your free in-home assessment."}
           </p>
-          <CallButton location="thank_you_quote" />
+          <CallButton location="thank_you_quote" emergency={urgency === "emergency"} />
         </div>
       );
     }
@@ -57,10 +70,9 @@ export function ThankYouCard({ params }: { params: ThankYouParams }) {
           <CheckCircle2 size={48} className="mx-auto text-success" aria-hidden="true" />
           <h1 className={headingClass}>Got it, thanks!</h1>
           <p className="mt-3 text-navy">
-            We&apos;ll call you back shortly. For the fastest response, call{" "}
-            {site.phone.display} now.
+            We&apos;ll call you back shortly. For the fastest response, call <PhoneText /> now.
           </p>
-          <CallButton location="thank_you_emergency" large />
+          <CallButton location="thank_you_emergency" large emergency />
         </div>
       );
 
@@ -71,7 +83,7 @@ export function ThankYouCard({ params }: { params: ThankYouParams }) {
           <h1 className={headingClass}>Got it, thanks!</h1>
           <p className="mt-3 text-navy">
             A Top Choice expert will call you back, {CALLBACK_PROMISE}. Need us sooner? Call{" "}
-            {site.phone.display}, {site.hours.emergency}.
+            <PhoneText />, {site.hours.emergency}.
           </p>
           <CallButton location="thank_you_landing" />
         </div>

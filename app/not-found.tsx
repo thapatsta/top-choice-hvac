@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
-import { site } from "@/lib/site";
+import { PhoneLink, PhoneText } from "@/components/Phone";
 
 // Rendered under the root layout only. Next embeds this boundary in every
 // page's payload, the /lp/* ad landing pages included, so it deliberately
@@ -17,9 +17,9 @@ export default function NotFound() {
             <Link href="/" className="font-semibold text-ember hover:underline">
               Back to home
             </Link>
-            <a href={site.phone.href} className="font-semibold text-navy hover:underline">
-              Call {site.phone.display}
-            </a>
+            <PhoneLink swap={false} className="font-semibold text-navy hover:underline">
+              Call <PhoneText swap={false} />
+            </PhoneLink>
           </p>
         </Container>
       </section>

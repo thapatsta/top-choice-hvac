@@ -1,7 +1,7 @@
 import { Phone } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { Button } from "@/components/ui/Button";
-import { site } from "@/lib/site";
+import { Button, buttonClasses } from "@/components/ui/Button";
+import { PhoneLink, PhoneText } from "@/components/Phone";
 
 export function CTABand({
   heading = "Ready to get this fixed?",
@@ -19,10 +19,10 @@ export function CTABand({
           <Button href="/get-quote" size="lg">
             Get a Free Quote
           </Button>
-          <Button href={site.phone.href} variant="outline-light" size="lg">
+          <PhoneLink className={buttonClasses("outline-light", "lg")}>
             <Phone size={20} aria-hidden="true" />
-            {site.phone.display}
-          </Button>
+            <PhoneText />
+          </PhoneLink>
         </div>
       </Container>
     </section>

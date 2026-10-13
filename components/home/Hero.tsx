@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { Phone, ShieldCheck } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { Button } from "@/components/ui/Button";
+import { Button, buttonClasses } from "@/components/ui/Button";
 import { GoogleGIcon } from "@/components/icons/GoogleGIcon";
 import { HeroVisual } from "@/components/home/HeroVisual";
 import { site } from "@/lib/site";
+import { PhoneLink } from "@/components/Phone";
 
 export function Hero() {
   return (
@@ -35,10 +36,10 @@ export function Hero() {
             <Button href="/get-quote" size="lg">
               Get a Free Quote
             </Button>
-            <Button href={site.phone.href} variant="outline-light" size="lg">
+            <PhoneLink className={buttonClasses("outline-light", "lg")}>
               <Phone size={20} aria-hidden="true" />
               Call Now
-            </Button>
+            </PhoneLink>
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-2 text-sm">

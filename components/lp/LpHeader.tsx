@@ -1,6 +1,6 @@
 import { Flame, Phone } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { site } from "@/lib/site";
+import { PhoneLink } from "@/components/Phone";
 
 /** Logo and Call now only: no site navigation on the ad landing pages. */
 export function LpHeader() {
@@ -15,14 +15,13 @@ export function LpHeader() {
             Top Choice <span className="text-(--lp-hero-sub)">HVAC</span>
           </span>
         </div>
-        <a
-          href={site.phone.href}
-          aria-label={`Call now, ${site.phone.display}`}
+        <PhoneLink
+          ariaLabelPrefix="Call now, "
           className="inline-flex min-h-[44px] items-center gap-2 whitespace-nowrap rounded-full bg-ember px-3.5 font-display text-base font-extrabold text-white transition-colors duration-150 hover:bg-ember-dark min-[400px]:px-4"
         >
           <Phone size={18} aria-hidden="true" />
           Call now
-        </a>
+        </PhoneLink>
       </Container>
     </header>
   );

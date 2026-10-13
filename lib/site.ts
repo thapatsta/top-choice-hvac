@@ -1,3 +1,6 @@
+import { ADS_CONVERSION_LABELS, ADS_ID, GA4_ID } from "@/lib/googleTag";
+import { PHONE } from "@/lib/phone";
+
 // Central site configuration. NAP (Name/Address/Phone) values here must stay
 // identical everywhere they render and must match the Google Business Profile
 // once one exists. Every value marked with a TODO below is a plausible fake
@@ -30,10 +33,8 @@ export const site = {
   domain: "topchoicehvac.ca",
   url: "https://topchoicehvac.ca",
 
-  phone: {
-    display: "(647) 763-2970",
-    href: "tel:+16477632970",
-  },
+  // The single display format: see lib/phone.ts.
+  phone: PHONE,
   // TODO: real email address
   email: "info@topchoicehvac.ca",
 
@@ -103,8 +104,14 @@ export const site = {
   // checks for that exact prefix to decide whether to inject the GTM script
   // tag, so swapping in a fake ID here would make the site start firing
   // real requests to Google's servers referencing an ID that doesn't exist.
-  ga4Id: "G-NVWFCHZ8S3",
+  ga4Id: GA4_ID,
   gtmId: "[PLACEHOLDER: GTM_ID]",
+
+  // Google Ads (see lib/googleTag.ts, which holds the values so client code
+  // can import them without this file's NAP). Same placeholder rule as
+  // above: a "[PLACEHOLDER..." value switches that conversion off.
+  adsId: ADS_ID,
+  adsConversionLabels: ADS_CONVERSION_LABELS,
 } as const;
 
 // TODO: name mismatch on hold (2026-09-22) — the Google Business Profile is

@@ -4,9 +4,9 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { PhoneText } from "@/components/Phone";
 import { ChoiceCard } from "@/components/ui/ChoiceCard";
 import { StepShell } from "@/components/ui/StepShell";
-import { site } from "@/lib/site";
 import { resolveLeadSource } from "@/lib/leadAdapter";
 import { submitLead } from "@/lib/submitLead";
 import { prepareThankYou } from "@/lib/thankYou";
@@ -241,7 +241,7 @@ export function QuoteForm({
         >
           {form.urgency === "emergency" && (
             <p className="rounded-xl bg-ember-light p-4 text-sm font-semibold text-ember-dark">
-              For fastest emergency response, call {site.phone.display} directly after submitting.
+              For fastest emergency response, call <PhoneText /> directly after submitting.
             </p>
           )}
           <form

@@ -3,6 +3,7 @@ import { Phone, Mail, MapPin, Flame } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { services } from "@/data/services";
 import { site } from "@/lib/site";
+import { PhoneLink, PhoneText } from "@/components/Phone";
 
 // lucide-react doesn't ship a brand Instagram icon; inline the classic
 // glyph instead of pulling in a new icon dependency for one usage.
@@ -125,10 +126,11 @@ export function Footer() {
           </h3>
           <ul className="mt-4 space-y-3 text-sm">
             <li>
-              <a href={site.phone.href} className="flex items-center gap-2 hover:text-ember">
+              {/* The NAP block: always the real number (swap off). */}
+              <PhoneLink swap={false} className="flex items-center gap-2 hover:text-ember">
                 <Phone size={16} aria-hidden="true" />
-                {site.phone.display}
-              </a>
+                <PhoneText swap={false} />
+              </PhoneLink>
             </li>
             <li>
               <a href={`mailto:${site.email}`} className="flex items-center gap-2 hover:text-ember">

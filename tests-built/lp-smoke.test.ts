@@ -103,7 +103,10 @@ describe("ad landing pages (production build)", () => {
 
       it("loads no JavaScript that contains the business address", async () => {
         const html = htmlCache.get(path) ?? (await page(path)).html;
-        const scripts = [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map((m) => m[1]);
+        // Our own bundles only: gtag.js (googletagmanager.com) is Google's code.
+        const scripts = [...html.matchAll(/<script[^>]+src="([^"]+)"/g)]
+          .map((m) => m[1])
+          .filter((src) => src.startsWith("/"));
         expect(scripts.length).toBeGreaterThan(0);
         for (const src of scripts) {
           const js = await (await fetch(new URL(src, BASE))).text();

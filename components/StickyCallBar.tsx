@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Phone, ClipboardList } from "lucide-react";
-import { site } from "@/lib/site";
+import { PhoneLink } from "@/components/Phone";
 
 const SCROLL_THRESHOLD = 480;
 
@@ -40,14 +40,13 @@ export function StickyCallBar() {
           : "pointer-events-none translate-y-4 opacity-0"
       }`}
     >
-      <a
-        href={site.phone.href}
+      <PhoneLink
         tabIndex={visible ? undefined : -1}
         className="flex flex-1 items-center justify-center gap-2 py-3 text-base font-bold text-white active:bg-navy-light"
       >
         <Phone size={18} aria-hidden="true" />
         Call Now
-      </a>
+      </PhoneLink>
       <div className="w-px bg-white/15" aria-hidden="true" />
       <a
         href="/get-quote"

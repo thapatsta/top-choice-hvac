@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Phone, AlertTriangle } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { Button } from "@/components/ui/Button";
+import { buttonClasses } from "@/components/ui/Button";
 import { EmergencyForm } from "@/components/emergency/EmergencyForm";
 import { site } from "@/lib/site";
 import { pageMetadata } from "@/lib/metadata";
+import { PhoneLink, PhoneText } from "@/components/Phone";
 
 export const metadata: Metadata = pageMetadata({
   title: "24/7 Emergency HVAC Service in Brampton & the GTA",
@@ -29,11 +30,11 @@ export default function EmergencyServicePage() {
             submit an emergency request below and we’ll call you back right
             away.
           </p>
-          <div className="mt-6 w-full sm:w-auto" data-track-location="emergency_page">
-            <Button href={site.phone.href} size="lg" className="w-full text-xl sm:w-auto">
+          <div className="mt-6 w-full sm:w-auto" data-track-location="emergency_page" data-call-intent="emergency">
+            <PhoneLink className={buttonClasses("primary", "lg", "w-full text-xl sm:w-auto")}>
               <Phone size={24} aria-hidden="true" />
-              Call Now: {site.phone.display}
-            </Button>
+              Call Now: <PhoneText />
+            </PhoneLink>
           </div>
         </div>
 

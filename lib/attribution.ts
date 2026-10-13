@@ -20,6 +20,9 @@ export interface LeadAttribution {
   landing_path?: string;
   referrer_host?: string;
   first_seen?: string;
+  /** GA4 join keys, added by lib/submitLead.ts at submit time (never stored, never sent to GA). */
+  ga_client_id?: string;
+  ga_session_id?: string;
 }
 
 export type AttributionKey = keyof LeadAttribution;
@@ -36,13 +39,39 @@ const QUERY_KEYS = [
   "utm_content",
 ] as const;
 
+/** GA4 join keys: read from gtag at submit time, not from the URL or storage. */
+export const GA_JOIN_KEYS = ["ga_client_id", "ga_session_id"] as const;
+
 /** Every allowed key, in display order. */
 export const ATTRIBUTION_KEYS: readonly AttributionKey[] = [
   ...QUERY_KEYS,
   "landing_path",
   "referrer_host",
   "first_seen",
+  ...GA_JOIN_KEYS,
 ];
+
+/** GA4 client_id is "<random>.<first-visit epoch seconds>"; session_id is an epoch. */
+const GA_CLIENT_ID_RE = /^\d{1,20}\.\d{1,20}$/;
+const GA_SESSION_ID_RE = /^\d{1,20}$/;
+
+export function isGaClientId(value: unknown): value is string {
+  return typeof value === "string" && GA_CLIENT_ID_RE.test(value);
+}
+
+export function isGaSessionId(value: unknown): value is string {
+  return typeof value === "string" && GA_SESSION_ID_RE.test(value);
+}
+
+/**
+ * Per-key format rule on top of cleanAttributionValue(): the GA join keys must
+ * be plain numeric IDs, anything else is dropped.
+ */
+export function isAllowedAttributionValue(key: AttributionKey, clean: string): boolean {
+  if (key === "ga_client_id") return isGaClientId(clean);
+  if (key === "ga_session_id") return isGaSessionId(clean);
+  return true;
+}
 
 export const ATTRIBUTION_MAX_LENGTH = 200;
 
@@ -109,6 +138,8 @@ function pickAttribution(raw: unknown): LeadAttribution | undefined {
   const source = raw as Record<string, unknown>;
   const out: LeadAttribution = {};
   for (const key of ATTRIBUTION_KEYS) {
+    // The GA join keys are never stored; ignore them if something put them there.
+    if ((GA_JOIN_KEYS as readonly string[]).includes(key)) continue;
     const value = source[key];
     if (typeof value === "string") set(out, key, value);
   }

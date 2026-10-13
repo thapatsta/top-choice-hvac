@@ -1,3 +1,4 @@
+import { GA4_ID } from "@/lib/googleTag";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ATTRIBUTION_STORAGE_KEY } from "@/lib/attribution";
 import { LANDING_PAGES, lpContext } from "@/lib/landing-pages";
@@ -104,7 +105,12 @@ describe("landing page submit", () => {
       [
         "event",
         "generate_lead",
-        { lead_source: "landing-page", ...repairLp, page_path: "/lp/outskirts/furnace-repair" },
+        {
+          lead_source: "landing-page",
+          ...repairLp,
+          page_path: "/lp/outskirts/furnace-repair",
+          send_to: GA4_ID,
+        },
       ],
     ]);
   });

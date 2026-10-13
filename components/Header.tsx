@@ -8,6 +8,7 @@ import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { mainNav, type NavLink } from "@/data/nav";
 import { site } from "@/lib/site";
+import { PhoneLink } from "@/components/Phone";
 
 function NavDropdown({ label, items }: { label: string; items: NavLink[] }) {
   const [open, setOpen] = useState(false);
@@ -115,13 +116,10 @@ export function Header() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-3">
-          <a
-            href={site.phone.href}
-            className="hidden items-center gap-2 font-display text-base font-bold text-navy hover:text-ember sm:flex"
-          >
+          <PhoneLink className="hidden items-center gap-2 font-display text-base font-bold text-navy hover:text-ember sm:flex">
             <Phone size={18} aria-hidden="true" />
             Call Now
-          </a>
+          </PhoneLink>
           <Button
             href="/get-quote"
             size="md"
@@ -129,13 +127,12 @@ export function Header() {
           >
             Get a Free Quote
           </Button>
-          <a
-            href={site.phone.href}
+          <PhoneLink
             className="flex h-11 w-11 items-center justify-center rounded-lg bg-ember text-white sm:hidden"
-            aria-label={`Call ${site.name} at ${site.phone.display}`}
+            ariaLabelPrefix={`Call ${site.name} at `}
           >
             <Phone size={20} />
-          </a>
+          </PhoneLink>
           <button
             type="button"
             className="flex h-11 w-11 items-center justify-center rounded-lg border border-border text-navy xl:hidden"
