@@ -179,20 +179,44 @@ export function deviceClass(win: Pick<Window, "matchMedia"> | undefined): Device
 /** sessionStorage flag: a lead was sent from this tab. A boolean, nothing personal. */
 export const LEAD_SENT_STORAGE_KEY = "tch_lead_sent";
 
+/** Dispatched on window by markLeadSent(), so mounted <PhoneLink>s stop swapping. */
+export const LEAD_SENT_EVENT = "tch:lead-sent";
+
+let leadSentFallback = false;
+
 export function markLeadSent(): void {
+  leadSentFallback = true;
   try {
     window.sessionStorage.setItem(LEAD_SENT_STORAGE_KEY, "1");
   } catch {
-    // Storage blocked: the thank-you path check still applies.
+    // Storage blocked: the in-memory flag and the thank-you path check still apply.
+  }
+  try {
+    window.dispatchEvent(new Event(LEAD_SENT_EVENT));
+  } catch {
+    // No window (tests): nothing is listening.
   }
 }
 
-function leadSentInThisTab(): boolean {
+export function subscribeLeadSent(onChange: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener(LEAD_SENT_EVENT, onChange);
+  return () => window.removeEventListener(LEAD_SENT_EVENT, onChange);
+}
+
+/** A lead was sent from this tab (sessionStorage, or in memory if storage is blocked). */
+export function leadSentInThisTab(): boolean {
+  if (leadSentFallback) return true;
   try {
     return window.sessionStorage.getItem(LEAD_SENT_STORAGE_KEY) === "1";
   } catch {
     return false;
   }
+}
+
+/** Test hook. */
+export function resetLeadSentFallback(): void {
+  leadSentFallback = false;
 }
 
 /** A tap on /thank-you, or anywhere after a lead in this tab, is not a new lead. */

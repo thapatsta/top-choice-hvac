@@ -412,7 +412,33 @@ export const CALL_INTENT_CAPS = {
   emailsPerHour: 20,
   /** Leaves at least 60 of Resend's 100/day for form leads. */
   emailsPerDay: 40,
+  /**
+   * Second guard, per Worker isolate and UTC hour, against the KV counter
+   * being stale (KV is eventually consistent across locations). Not global:
+   * a true hard cap needs a Durable Object, i.e. a custom worker entry (see
+   * README "Call tracking").
+   */
+  isolateEmailsPerHour: 20,
+  isolateRecordsPerHour: 60,
 } as const;
+
+/** Per-isolate counters for the current UTC hour. */
+const isolateCounts = { hour: "", emails: 0, records: 0 };
+
+function isolateBucket(timestamp: string) {
+  const hour = timestamp.slice(0, 13);
+  if (isolateCounts.hour !== hour) {
+    isolateCounts.hour = hour;
+    isolateCounts.emails = 0;
+    isolateCounts.records = 0;
+  }
+  return isolateCounts;
+}
+
+/** Test hook. */
+export function resetCallIntentIsolateCounts(): void {
+  isolateCounts.hour = "";
+}
 
 export interface CallIntentRecord extends CallIntentPayload {
   timestamp: string;
@@ -554,9 +580,19 @@ export async function logCallIntent(
     return { ...result, kv: "failed" };
   }
 
-  const emailOn = (env.CALL_INTENT_NOTIFY ?? "email").trim().toLowerCase() !== "off";
+  // Fails closed: only "email" (or unset) sends; "off", or a typo, doesn't.
+  const mode = (env.CALL_INTENT_NOTIFY ?? "email").trim().toLowerCase();
+  const emailOn = mode === "email" || mode === "";
+  if (!emailOn && mode !== "off") {
+    console.warn(`[call:notify:CONFIG] CALL_INTENT_NOTIFY="${mode.slice(0, 20)}" is not "email" or "off"; not emailing`);
+  }
   const capKey = callCapKey(record.timestamp);
   const hour = record.timestamp.slice(11, 13);
+  const isolate = isolateBucket(record.timestamp);
+  if (isolate.records >= CALL_INTENT_CAPS.isolateRecordsPerHour) {
+    console.warn(`[call:CAPPED] key=${key} isolate hourly record cap reached; not stored`);
+    return result;
+  }
   let emailAllowed = false;
   try {
     const caps = await readCaps(kv, capKey);
@@ -567,6 +603,7 @@ export async function logCallIntent(
     emailAllowed =
       emailOn &&
       typeof kv.get === "function" &&
+      isolate.emails < CALL_INTENT_CAPS.isolateEmailsPerHour &&
       caps.emails < CALL_INTENT_CAPS.emailsPerDay &&
       (caps.hours[hour] ?? 0) < CALL_INTENT_CAPS.emailsPerHour;
     const next: CallCapState = {
@@ -576,9 +613,14 @@ export async function logCallIntent(
     };
     await kv.put(capKey, JSON.stringify(next), { expirationTtl: 3 * 24 * 60 * 60 });
   } catch (err) {
-    emailAllowed = false;
-    console.error(`[call:cap:FAILED] key=${key} — no email`, err instanceof Error ? err.message : err);
+    // Fail closed on both: an uncounted write could otherwise slip past the
+    // daily record cap (e.g. a burst hitting KV's 1 write/s per key limit)
+    // and eat into the 1,000 writes/day that form leads also need.
+    console.error(`[call:cap:FAILED] key=${key} — not stored, no email`, err instanceof Error ? err.message : err);
+    return result;
   }
+  isolate.records += 1;
+  if (emailAllowed) isolate.emails += 1;
 
   try {
     await kv.put(key, JSON.stringify(record), {

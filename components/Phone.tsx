@@ -1,6 +1,8 @@
 "use client";
 
 import { Fragment, useSyncExternalStore, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { leadSentInThisTab, subscribeLeadSent } from "@/lib/callIntent";
 import { PHONE } from "@/lib/phone";
 import {
   getForwardingNumber,
@@ -15,18 +17,28 @@ import {
 // always has the real number: the swap happens on the client, after the
 // snippet's callback, so crawlers and organic visitors never see it.
 //
+// Never swapped once the visitor is post-lead (on /thank-you, or after a
+// lead from this tab): a call to the forwarding number then would count as a
+// second primary Ads conversion ("Calls from website") for someone already
+// counted as a form lead. They see, and call, the real number.
+//
 // Third-party numbers (gas utility, 911) must NOT use these components.
 
 const noSubscribe = () => () => {};
 const serverSnapshot = () => null;
+const serverFalse = () => false;
 
-/** The forwarding number for Ads visitors, or null (always null when swap is off). */
+/** The forwarding number for Ads visitors, or null (swap off, or post-lead). */
 function useForwardingNumber(swap: boolean): ForwardingNumber | null {
-  return useSyncExternalStore(
-    swap ? subscribeForwardingNumber : noSubscribe,
-    swap ? getForwardingNumber : serverSnapshot,
+  const pathname = usePathname();
+  const leadSent = useSyncExternalStore(subscribeLeadSent, leadSentInThisTab, serverFalse);
+  const active = swap && !leadSent && pathname !== "/thank-you";
+  const forwarding = useSyncExternalStore(
+    active ? subscribeForwardingNumber : noSubscribe,
+    active ? getForwardingNumber : serverSnapshot,
     serverSnapshot
   );
+  return active ? forwarding : null;
 }
 
 interface PhoneLinkProps {
