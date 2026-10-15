@@ -3,6 +3,7 @@ import { normalizeLead, type Lead, type LeadSource } from "@/lib/leadAdapter";
 import {
   emailBody,
   emailLead,
+  emailSubject,
   logLeadToKV,
   sendLeadNotification,
   smsBody,
@@ -75,6 +76,26 @@ describe("logLeadToKV", () => {
   it("throws loudly when the LEADS_KV binding is missing", async () => {
     const { deps } = setup({ LEADS_KV: undefined });
     await expect(logLeadToKV(makeLead("contact"), deps)).rejects.toThrow(/LEADS_KV/);
+  });
+});
+
+describe("landing page subject and rows", () => {
+  it.each([
+    ["repair", "New Ad Landing Page Lead (Repair) — Jane Doe"],
+    ["install", "New Ad Landing Page Lead (Install) — Jane Doe"],
+  ] as const)("%s", (landingPage, prefix) => {
+    const lead = { ...makeLead("landing-page"), landingPage, maintenanceInterest: landingPage === "install" };
+    expect(emailSubject(lead).startsWith(prefix)).toBe(true);
+    const { text } = emailBody(lead);
+    expect(text).toContain(`Ad landing page: ${landingPage === "repair" ? "Repair (/lp/furnace-repair)" : "Install (/lp/furnace-installation)"}`);
+    expect(text).toContain(
+      landingPage === "install" ? "Maintenance pricing: Yes, wants maintenance pricing" : "Maintenance pricing: No"
+    );
+  });
+
+  it("keeps the old subject for legacy landing pages", () => {
+    expect(emailSubject(makeLead("landing-page"))).toMatch(/^New Ad Landing Page Lead — Jane Doe/);
+    expect(emailBody(makeLead("landing-page")).text).not.toContain("Maintenance pricing");
   });
 });
 

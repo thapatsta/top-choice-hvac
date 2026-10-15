@@ -1,6 +1,7 @@
 import { hasClickId, type AttributionKey, type LeadAttribution } from "@/lib/attribution";
 import { issueOptions } from "@/lib/emergency";
 import type { CallIntentPayload } from "@/lib/callIntent";
+import { LP_PAGE_SLUGS, type LpPageKey } from "@/lib/landingPage";
 import { leadKey, randomLeadId, SOURCE_LABELS, type Lead } from "@/lib/leadAdapter";
 
 /**
@@ -140,9 +141,13 @@ export function emailSubject(lead: Lead): string {
     case "contact":
       return `New Contact Form — ${who}`;
     case "landing-page":
-      return `New Ad Landing Page Lead — ${who}`;
+      return lead.landingPage
+        ? `New Ad Landing Page Lead (${LANDING_PAGE_LABELS[lead.landingPage]}) — ${who}`
+        : `New Ad Landing Page Lead — ${who}`;
   }
 }
+
+const LANDING_PAGE_LABELS: Record<LpPageKey, string> = { repair: "Repair", install: "Install" };
 
 const FIELD_LABELS: [keyof Lead, string][] = [
   ["name", "Name"],
@@ -154,6 +159,8 @@ const FIELD_LABELS: [keyof Lead, string][] = [
   ["lp_slug", "LP page"],
   ["lp_region", "LP region"],
   ["lp_service", "LP service"],
+  ["landingPage", "Ad landing page"],
+  ["maintenanceInterest", "Maintenance pricing"],
   ["message", "Message"],
   ["need", "Need"],
   ["systemType", "System type"],
@@ -169,7 +176,14 @@ function leadRows(lead: Lead): [string, string][] {
   const rows: [string, string][] = [];
   for (const [field, label] of FIELD_LABELS) {
     const value = lead[field];
-    if (value) rows.push([label, String(value)]);
+    if (field === "landingPage" && lead.landingPage) {
+      rows.push([label, `${LANDING_PAGE_LABELS[lead.landingPage]} (/lp/${LP_PAGE_SLUGS[lead.landingPage]})`]);
+    } else if (typeof value === "boolean") {
+      // maintenanceInterest: an unticked box is still worth showing.
+      rows.push([label, value ? "Yes, wants maintenance pricing" : "No"]);
+    } else if (value) {
+      rows.push([label, String(value)]);
+    }
   }
   rows.push(["Lead key", leadKey(lead)]);
   return rows;

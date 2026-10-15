@@ -1,6 +1,8 @@
-// Shared values for the Google Ads landing pages under /lp/*. Client-safe and
+// Lead plumbing for the Google Ads landing pages under /lp/*. Client-safe and
 // React-free: lib/leadAdapter.ts validates the service choice with
-// isLandingService(), and the page and thank-you copy read CALLBACK_PROMISE.
+// isLandingService() and the landing page with isLpPageKey(). Page copy lives
+// in lib/landingPages.ts (repair / install) and lib/legacyLandingPages.ts
+// (the other four ad groups).
 
 export type LandingService =
   | "furnace-replacement"
@@ -24,15 +26,24 @@ export function isLandingService(value: unknown): value is LandingService {
 }
 
 /**
- * How soon we promise to call a landing-page lead back. Used in the form
- * intro, the "How it works" steps, the FAQ and the thank-you card, so it
- * changes in one place.
+ * The two config-driven landing pages (lib/landingPages.ts). Sent with the
+ * lead as `landingPage` and on generate_lead as `landing_page`.
  */
-export const CALLBACK_PROMISE = "typically within 30 minutes";
+export const LP_PAGE_KEYS = ["repair", "install"] as const;
+export type LpPageKey = (typeof LP_PAGE_KEYS)[number];
+
+export function isLpPageKey(value: unknown): value is LpPageKey {
+  return LP_PAGE_KEYS.some((key) => key === value);
+}
+
+/** Only a real boolean counts; "true", 1 and the like are dropped. */
+export function isMaintenanceInterest(value: unknown): value is boolean {
+  return typeof value === "boolean";
+}
 
 /**
- * The six ad landing-page variants, one per Google Ads ad group. The page
- * copy lives in lib/landing-pages.ts; these plain lists are here so the lead
+ * The six ad landing-page routes, one per Google Ads ad group. The page copy
+ * lives in lib/landingPages.ts and lib/legacyLandingPages.ts; these plain lists are here so the lead
  * adapter (server) can validate the lp_* hidden fields without importing
  * the copy.
  */
@@ -45,6 +56,12 @@ export const LP_SLUGS = [
   "outskirts/heating-cooling",
 ] as const;
 export type LpSlug = (typeof LP_SLUGS)[number];
+
+/** The route each config-driven page lives at. */
+export const LP_PAGE_SLUGS = {
+  repair: "furnace-repair",
+  install: "furnace-installation",
+} as const satisfies Record<LpPageKey, LpSlug>;
 
 export const LP_REGIONS = ["core", "outskirts"] as const;
 export type LpRegion = (typeof LP_REGIONS)[number];
@@ -75,18 +92,38 @@ export function parseLpContext(raw: Record<string, unknown>): Partial<LpContext>
   return out;
 }
 
-/** The landing-page form's JSON body: the five fields plus the lp_* hidden fields. */
+export interface LandingLeadForm {
+  service: LandingService | "";
+  name: string;
+  phone: string;
+  /** Legacy pages only; the repair and install forms don't ask. */
+  email?: string;
+  /** Legacy pages only; the repair and install forms don't ask. */
+  postalCode?: string;
+  /** The install form's optional maintenance-pricing checkbox. */
+  maintenanceInterest?: boolean;
+}
+
+/**
+ * The landing-page form's JSON body: the form fields, the lp_* hidden fields
+ * and, on the repair and install pages, which of the two sent it.
+ */
 export function buildLandingLeadBody(
-  form: { service: LandingService | ""; name: string; phone: string; email: string; postalCode: string },
-  lp: LpContext
-): Record<string, string> {
+  form: LandingLeadForm,
+  lp: LpContext,
+  landingPage?: LpPageKey
+): Record<string, string | boolean> {
   return {
     service: form.service,
     name: form.name,
     phone: form.phone,
-    email: form.email,
-    postalCode: form.postalCode,
+    ...(form.email !== undefined ? { email: form.email } : {}),
+    ...(form.postalCode !== undefined ? { postalCode: form.postalCode } : {}),
+    ...(form.maintenanceInterest !== undefined
+      ? { maintenanceInterest: form.maintenanceInterest }
+      : {}),
     source: "landing-page",
     ...lp,
+    ...(landingPage ? { landingPage } : {}),
   };
 }

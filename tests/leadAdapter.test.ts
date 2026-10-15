@@ -130,9 +130,45 @@ describe("normalizeLandingLead", () => {
     expect(findMissingField(lead)).toBe("service");
   });
 
-  it("requires a postal code", () => {
-    const lead = normalizeLandingLead({ ...landingPayload, postalCode: "  " }, opts);
-    expect(findMissingField(lead)).toBe("postalCode");
+  it("accepts a lead without postal code or email (repair / install forms)", () => {
+    const { postalCode: _p, email: _e, ...bare } = landingPayload;
+    void _p;
+    void _e;
+    const lead = normalizeLandingLead({ ...bare, service: "furnace-repair" }, opts);
+    expect(lead.postalCode).toBeUndefined();
+    expect(lead.email).toBe("");
+    expect(findMissingField(lead)).toBeNull();
+  });
+
+  it("still requires name, phone and service", () => {
+    expect(findMissingField(normalizeLandingLead({ ...landingPayload, name: " " }, opts))).toBe("name");
+    expect(findMissingField(normalizeLandingLead({ ...landingPayload, phone: "" }, opts))).toBe("phone");
+    expect(findMissingField(normalizeLandingLead({ ...landingPayload, service: "" }, opts))).toBe("service");
+  });
+
+  it("keeps a valid landingPage and maintenanceInterest", () => {
+    const lead = normalizeLandingLead(
+      { ...landingPayload, landingPage: "install", maintenanceInterest: true },
+      opts
+    );
+    expect(lead.landingPage).toBe("install");
+    expect(lead.maintenanceInterest).toBe(true);
+    const off = normalizeLandingLead({ ...landingPayload, landingPage: "repair", maintenanceInterest: false }, opts);
+    expect(off).toMatchObject({ landingPage: "repair", maintenanceInterest: false });
+  });
+
+  it.each([
+    ["landingPage", "Install"],
+    ["landingPage", "heating-cooling"],
+    ["landingPage", 1],
+    ["maintenanceInterest", "true"],
+    ["maintenanceInterest", 1],
+    ["maintenanceInterest", {}],
+  ])("drops an invalid %s (%j) instead of trusting it", (field, value) => {
+    const lead = normalizeLandingLead({ ...landingPayload, [field]: value }, opts);
+    expect(lead).not.toHaveProperty(field);
+    // The lead itself still goes through: an odd optional field never loses it.
+    expect(findMissingField(lead)).toBeNull();
   });
 });
 
