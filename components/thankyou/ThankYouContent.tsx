@@ -5,7 +5,7 @@ import { CheckCircle2, Phone } from "lucide-react";
 import { Button, buttonClasses } from "@/components/ui/Button";
 import { PhoneLink, PhoneText } from "@/components/Phone";
 import { getEstimateFraming } from "@/lib/estimate";
-import { CALLBACK_PROMISE } from "@/lib/landingPage";
+import { CALLBACK_PROMISE } from "@/lib/landingPages";
 import { site } from "@/lib/site";
 import { parseThankYouParams, readStoredThankYou, type ThankYouParams } from "@/lib/thankYou";
 
@@ -36,7 +36,9 @@ function CallButton({
     >
       <PhoneLink className={buttonClasses("primary", "lg", large ? "w-full text-xl" : "")}>
         <Phone size={large ? 24 : 20} aria-hidden="true" />
-        Call <PhoneText />
+        <span>
+          Call <PhoneText />
+        </span>
       </PhoneLink>
     </div>
   );
@@ -82,10 +84,9 @@ export function ThankYouCard({ params }: { params: ThankYouParams }) {
           <CheckCircle2 size={48} className="mx-auto text-success" aria-hidden="true" />
           <h1 className={headingClass}>Got it, thanks!</h1>
           <p className="mt-3 text-navy">
-            A Top Choice expert will call you back, {CALLBACK_PROMISE}. Need us sooner? Call{" "}
-            <PhoneText />, {site.hours.emergency}.
+            We&apos;ll call you back, {CALLBACK_PROMISE}. Rather talk now? Call <PhoneText />.
           </p>
-          <CallButton location="thank_you_landing" />
+          <CallButton location="thank_you_landing" large />
         </div>
       );
 

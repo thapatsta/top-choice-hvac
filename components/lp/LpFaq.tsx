@@ -1,8 +1,27 @@
 import { ChevronDown } from "lucide-react";
-import type { LpFaqItem } from "@/lib/landing-pages";
+import type { LpFaqItem } from "@/lib/landingPages";
 
-/** Same look as the site's FAQAccordion, plus an optional link per answer. */
-export function LpFaq({ items }: { items: LpFaqItem[] }) {
+/**
+ * Landing-page FAQ. `legacy`: the card look of the site's FAQAccordion, with
+ * an optional link per answer. `themed`: the repair / install pages' ruled
+ * list with a + / − marker (globals.css .lpt-faq).
+ */
+export function LpFaq({ items, variant = "legacy" }: { items: LpFaqItem[]; variant?: "legacy" | "themed" }) {
+  if (variant === "themed") {
+    return (
+      <div className="lpt-faq border-t border-lp-line">
+        {items.map((item) => (
+          <details key={item.question} className="border-b border-lp-line py-2.5">
+            <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-3 text-[19px] font-bold">
+              {item.question}
+            </summary>
+            <p className="mt-2 max-w-[40em] text-lp-muted">{item.answer}</p>
+          </details>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="divide-y divide-border rounded-2xl border border-border bg-card">
       {items.map((item) => (

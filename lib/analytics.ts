@@ -8,7 +8,7 @@
 
 import type { LeadSource } from "@/lib/leadAdapter";
 import type { QuoteNeed, QuoteUrgency } from "@/lib/estimate";
-import type { LpContext, LpSlug } from "@/lib/landingPage";
+import type { LpContext, LpPageKey, LpSlug } from "@/lib/landingPage";
 import { isGaClientId, isGaSessionId } from "@/lib/attribution";
 import {
   ADS_CONVERSION_LABELS,
@@ -50,7 +50,13 @@ interface LinkParams {
 export interface AnalyticsEventParams {
   // lp_slug / lp_region / lp_service: which /lp/* ad landing page, when the
   // event comes from one.
-  generate_lead: FormParams & { service_need?: QuoteNeed; urgency?: QuoteUrgency } & Partial<LpContext>;
+  // landing_page: "repair" / "install" on the two config-driven pages. Same
+  // event as every other lead (no new conversion), one extra param.
+  generate_lead: FormParams & {
+    service_need?: QuoteNeed;
+    urgency?: QuoteUrgency;
+    landing_page?: LpPageKey;
+  } & Partial<LpContext>;
   form_start: FormParams;
   form_submit_error: FormParams;
   click_to_call: LinkParams &

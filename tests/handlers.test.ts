@@ -170,12 +170,46 @@ describe("handlers never claim success for an undelivered lead", () => {
   });
 });
 
+describe("repair / install landing page leads", () => {
+  it.each([
+    ["repair", { service: "furnace-repair", name: "Jane", phone: "647-555-0100", source: "landing-page", landingPage: "repair" }],
+    [
+      "install",
+      {
+        service: "not-sure",
+        name: "Priya",
+        phone: "647-555-0142",
+        source: "landing-page",
+        landingPage: "install",
+        maintenanceInterest: true,
+      },
+    ],
+  ] as const)("%s: no postal code or email → 200, notified with landingPage", async (key, payload) => {
+    const res = await leadsPOST(post({ ...payload, attribution: { gclid: "TEST123" } }));
+    expect(res.status).toBe(200);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send.mock.calls[0][0]).toMatchObject({
+      source: "landing-page",
+      landingPage: key,
+      attribution: { gclid: "TEST123" },
+    });
+  });
+
+  it("drops an invalid landingPage but keeps the lead", async () => {
+    const res = await leadsPOST(post({ ...landingPayload, landingPage: "admin", maintenanceInterest: "yes" }));
+    expect(res.status).toBe(200);
+    const lead = send.mock.calls[0][0];
+    expect(lead.landingPage).toBeUndefined();
+    expect(lead.maintenanceInterest).toBeUndefined();
+  });
+});
+
 describe("invalid submissions are rejected before notifying", () => {
   it.each([
     ["get-quote", leadsPOST, { ...quotePayload, postalCode: "" }],
     ["emergency-service", leadsPOST, { ...emergencyPayload, issue: undefined }],
     ["landing-page (no service)", leadsPOST, { ...landingPayload, service: undefined }],
-    ["landing-page (no postal code)", leadsPOST, { ...landingPayload, postalCode: "" }],
+    ["landing-page (no phone)", leadsPOST, { ...landingPayload, phone: "" }],
     ["contact", contactPOST, { ...contactPayload, message: "" }],
   ] as const)("%s with a missing field → 400, no notification", async (_name, handler, payload) => {
     const res = await handler(post(payload));

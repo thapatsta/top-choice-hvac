@@ -2,8 +2,11 @@ import type { QuoteNeed, QuoteSystemType, QuoteUrgency } from "@/lib/estimate";
 import type { EmergencyIssue } from "@/lib/emergency";
 import {
   isLandingService,
+  isLpPageKey,
+  isMaintenanceInterest,
   parseLpContext,
   type LandingService,
+  type LpPageKey,
   type LpRegion,
   type LpService,
   type LpSlug,
@@ -56,6 +59,10 @@ export interface Lead {
   lp_slug?: LpSlug;
   lp_region?: LpRegion;
   lp_service?: LpService;
+  /** The repair or install page (lib/landingPages.ts). Absent on the legacy pages. */
+  landingPage?: LpPageKey;
+  /** The install form's "also tell me about maintenance pricing" checkbox. */
+  maintenanceInterest?: boolean;
 
   /** Where the visitor came from (ad click, UTMs, landing page). Optional. */
   attribution?: LeadAttribution;
@@ -181,6 +188,10 @@ export function normalizeLandingLead(raw: RawLeadInput, opts: NormalizeOptions =
     postalCode: optStr(raw.postalCode),
     // Allowlisted values only; anything else is dropped.
     ...parseLpContext(raw),
+    ...(isLpPageKey(raw.landingPage) ? { landingPage: raw.landingPage } : {}),
+    ...(isMaintenanceInterest(raw.maintenanceInterest)
+      ? { maintenanceInterest: raw.maintenanceInterest }
+      : {}),
   };
 }
 
@@ -218,8 +229,9 @@ export const REQUIRED_FIELDS: Record<LeadSource, (keyof Lead)[]> = {
   ],
   "emergency-service": ["name", "phone", "issue"],
   contact: ["name", "phone", "message"],
-  // Email is optional on the ad landing page form.
-  "landing-page": ["name", "phone", "service", "postalCode"],
+  // Email and postal code are optional: the repair and install forms ask for
+  // name and phone only (the service is fixed or picked from a list).
+  "landing-page": ["name", "phone", "service"],
 };
 
 /** Returns the first missing required field, or null if the lead is complete. */

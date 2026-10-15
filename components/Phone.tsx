@@ -49,9 +49,18 @@ interface PhoneLinkProps {
   /** aria-label = prefix + the displayed number, e.g. "Call now, ". */
   ariaLabelPrefix?: string;
   tabIndex?: number;
+  /** data-track-location on the link itself (click_to_call's link_location). */
+  trackLocation?: string;
 }
 
-export function PhoneLink({ className, children, swap = true, ariaLabelPrefix, tabIndex }: PhoneLinkProps) {
+export function PhoneLink({
+  className,
+  children,
+  swap = true,
+  ariaLabelPrefix,
+  tabIndex,
+  trackLocation,
+}: PhoneLinkProps) {
   const forwarding = useForwardingNumber(swap);
   const display = forwarding?.display ?? PHONE.display;
   return (
@@ -63,6 +72,7 @@ export function PhoneLink({ className, children, swap = true, ariaLabelPrefix, t
       {...(forwarding ? { "data-swapped": "true" } : {})}
       aria-label={ariaLabelPrefix ? `${ariaLabelPrefix}${display}` : undefined}
       tabIndex={tabIndex}
+      data-track-location={trackLocation}
     >
       {children}
     </a>

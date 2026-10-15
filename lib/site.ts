@@ -1,30 +1,23 @@
 import { ADS_CONVERSION_LABELS, ADS_ID, GA4_ID } from "@/lib/googleTag";
+import {
+  GOOGLE_REVIEWS,
+  REVIEW_COUNT,
+  googleListingName,
+  googleMapsUrl,
+  googlePlaceId,
+} from "@/lib/googleReviews";
 import { PHONE } from "@/lib/phone";
+import { SERVICE_AREAS } from "@/lib/serviceAreas";
 
 // Central site configuration. NAP (Name/Address/Phone) values here must stay
 // identical everywhere they render and must match the Google Business Profile
 // once one exists. Every value marked with a TODO below is a plausible fake
 // placeholder — see CONTENT-NEEDED.md for the full list.
 
-/**
- * Google review rating and count: the single source of truth for every page
- * that shows them (the /lp/* ad landing pages, /reviews, and everything that
- * reads data/reviews.ts's aggregateRating, which is derived from this).
- *
- * Update these from the live Google Business Profile, and bump `asOf` when
- * you do. Never hardcode the rating or count anywhere else;
- * tests/lp-content.test.ts fails the build if a landing page does.
- */
-export const GOOGLE_REVIEWS = {
-  rating: 4.9,
-  count: 66,
-  asOf: "2026-10-08",
-} as const;
-
-// Verified 2026-09-22 against the live Google Business Profile listing.
-const googlePlaceId = "ChIJyRbRXAn8kaYRzRKD7SJFXMs";
-const googleListingName = "Top Choice Air System Inc";
-const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(googleListingName)}&query_place_id=${googlePlaceId}`;
+// GOOGLE_REVIEWS and the listing links live in lib/googleReviews.ts, and the
+// service areas in lib/serviceAreas.ts: both are NAP-free, so client code
+// (the /lp/* pages) can import them without bundling the address below.
+export { GOOGLE_REVIEWS, REVIEW_COUNT };
 
 export const site = {
   name: "Top Choice HVAC",
@@ -68,7 +61,8 @@ export const site = {
 
   // Sourced from GOOGLE_REVIEWS above, so the rating/count can't drift.
   rating: GOOGLE_REVIEWS.rating as number | undefined,
-  reviewCount: GOOGLE_REVIEWS.count as number | undefined,
+  /** Shown on pages: "100+" (REVIEW_COUNT), never the exact count. */
+  reviewCount: REVIEW_COUNT as string | undefined,
 
   social: {
     // Confirmed: no Facebook page exists yet.
@@ -88,16 +82,7 @@ export const site = {
   // the section shows only the heading, copy, and follow button.
   instagramPosts: [] as string[],
 
-  serviceAreas: [
-    "Brampton",
-    "Mississauga",
-    "Vaughan",
-    "Caledon",
-    "Etobicoke",
-    "Georgetown",
-    "Bolton",
-    // TODO: confirm full list of GTA cities actually served
-  ],
+  serviceAreas: SERVICE_AREAS,
 
   // GA4 measurement ID is now live. GTM container ID is still a TODO — left
   // as a literal "[PLACEHOLDER..." string on purpose, since app/layout.tsx

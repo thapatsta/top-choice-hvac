@@ -1,6 +1,8 @@
-// Copy and settings for the six Google Ads landing pages under /lp/*, one
-// per ad group. components/lp/LandingPage.tsx renders any of them; each
-// app/lp/**/page.tsx route just picks its entry by slug.
+// Copy and settings for the four Google Ads landing pages that have not moved
+// to the config-driven template yet (/lp/heating-cooling and the three
+// /lp/outskirts/* pages). components/lp/LegacyLandingPage.tsx renders them;
+// each route just picks its entry by slug. /lp/furnace-repair and
+// /lp/furnace-installation live in lib/landingPages.ts.
 //
 // Claims rules (enforced by tests/lp-content.test.ts, which runs in CI before
 // deploy): only the facts below may appear on these pages. No credential-type
@@ -9,8 +11,8 @@
 // cooling pages, and round-the-clock wording on the repair pages only.
 
 import type { Metadata } from "next";
+import { CALLBACK_PROMISE, PRICE_FROM, type LpFaqItem } from "@/lib/landingPages";
 import {
-  CALLBACK_PROMISE,
   type LandingService,
   type LpContext,
   type LpRegion,
@@ -24,12 +26,7 @@ export interface LpBenefit {
   title: string;
 }
 
-export interface LpFaqItem {
-  question: string;
-  answer: string;
-  /** Optional link rendered after the answer. */
-  link?: { href: string; label: string };
-}
+export type { LpFaqItem };
 
 /** A link to another landing page, carrying the visitor's query string. */
 export interface LpCrosslinkTarget {
@@ -89,7 +86,7 @@ export interface LandingPageConfig {
 // Shared facts
 // ---------------------------------------------------------------------------
 
-export const INSTALL_PRICE = "$2,199";
+export const INSTALL_PRICE = PRICE_FROM;
 
 /**
  * Open around the clock, read from site.hours (confirmed against the Google
@@ -311,53 +308,10 @@ function heatingCoolingFaq(areaItem?: LpFaqItem): LpFaqItem[] {
 const outskirtsAreaAnswer = `Yes. We're based in Brampton and serve ${OUTSKIRTS_LIST}, with no travel fee. Enter your postal code and we'll confirm we can get to you.`;
 
 // ---------------------------------------------------------------------------
-// The six pages
+// The four pages
 // ---------------------------------------------------------------------------
 
-export const LANDING_PAGES: readonly LandingPageConfig[] = [
-  {
-    ...installPage("core"),
-    slug: "furnace-installation",
-    region: "core",
-    towns: CORE_TOWNS,
-    metaTitle: `Furnace Installation in Brampton & Mississauga | From ${INSTALL_PRICE}`,
-    metaDescription: `New gas furnace installed from ${INSTALL_PRICE} for a base-tier model in Brampton & Mississauga. Free in-home quote, price in writing, 10-year labour warranty.`,
-    eyebrow: "Furnace installation · Brampton & Mississauga",
-    subhead:
-      "Free in-home quote. Your price in writing before any work starts. Same-day installs available in many cases.",
-    faq: [
-      {
-        question: "How much does a new furnace cost in Brampton and Mississauga?",
-        answer: INSTALL_COST_ANSWER,
-      },
-      {
-        question: "Can you install it the same day?",
-        answer:
-          "In many cases, yes. Timing depends on the model and your home, so we confirm it when we quote.",
-      },
-      FAQ_WARRANTY,
-      FAQ_FREE_QUOTE,
-      {
-        question: "Which areas do you serve?",
-        answer: `Brampton and Mississauga, plus ${coreNearbyList}.`,
-      },
-    ],
-    serviceAreaLine: CORE_AREA_LINE,
-  },
-  {
-    ...repairPage("core"),
-    slug: "furnace-repair",
-    region: "core",
-    towns: CORE_TOWNS,
-    metaTitle: "Furnace Repair in Brampton & Mississauga | Free Quote",
-    metaDescription: `Furnace not working? Request a repair callback from a local Brampton team, ${CALLBACK_PROMISE}. Free quote, price in writing before work begins.`,
-    eyebrow: "Furnace repair · Brampton & Mississauga",
-    faq: repairFaq({
-      question: "How soon can someone come?",
-      answer: "We'll tell you on the callback how soon we can get there.",
-    }),
-    serviceAreaLine: CORE_AREA_LINE,
-  },
+export const LEGACY_LANDING_PAGES: readonly LandingPageConfig[] = [
   {
     ...heatingCoolingPage("core"),
     slug: "heating-cooling",
@@ -426,8 +380,8 @@ export const LANDING_PAGES: readonly LandingPageConfig[] = [
   },
 ];
 
-export function getLandingPage(slug: LpSlug): LandingPageConfig {
-  const config = LANDING_PAGES.find((page) => page.slug === slug);
+export function getLegacyLandingPage(slug: LpSlug): LandingPageConfig {
+  const config = LEGACY_LANDING_PAGES.find((page) => page.slug === slug);
   if (!config) throw new Error(`No landing page config for "${slug}"`);
   return config;
 }

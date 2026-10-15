@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { LandingPage } from "@/components/lp/LandingPage";
-import { getLandingPage, lpMetadata } from "@/lib/landing-pages";
+import { LegacyLandingPage } from "@/components/lp/LegacyLandingPage";
+import { getLegacyLandingPage, lpMetadata } from "@/lib/legacyLandingPages";
 
-// Google Ads landing page. Copy lives in lib/landing-pages.ts.
-const config = getLandingPage("outskirts/heating-cooling");
+// Google Ads landing page. Copy lives in lib/legacyLandingPages.ts.
+const config = getLegacyLandingPage("outskirts/heating-cooling");
 
 export const metadata: Metadata = lpMetadata(config);
 
 export default function Page() {
-  return <LandingPage config={config} />;
+  return <LegacyLandingPage config={config} />;
 }

@@ -2,7 +2,7 @@ import { Star } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { GoogleGIcon } from "@/components/icons/GoogleGIcon";
 import { reviews } from "@/data/reviews";
-import { GOOGLE_REVIEWS, site } from "@/lib/site";
+import { GOOGLE_REVIEWS, REVIEW_COUNT, site } from "@/lib/site";
 
 // Longest reviews first so the one-liners sit at the end of the wall.
 const reviewsByLength = [...reviews].sort((a, b) => b.text.length - a.text.length);
@@ -10,7 +10,7 @@ const reviewsByLength = [...reviews].sort((a, b) => b.text.length - a.text.lengt
 /**
  * Every review in data/reviews.ts as a masonry wall: the landing page's
  * brand proof. Review text is shown exactly as posted on Google; the rating
- * and count come from GOOGLE_REVIEWS only.
+ * comes from GOOGLE_REVIEWS, the count label from REVIEW_COUNT ("100+").
  */
 export function GoogleReviewsCollage() {
   return (
@@ -19,7 +19,7 @@ export function GoogleReviewsCollage() {
         <div className="flex flex-col gap-3">
           <h2 className="lp-black flex flex-wrap items-center gap-x-3 gap-y-2 text-2xl leading-tight tracking-[-0.02em] text-navy sm:text-4xl">
             <GoogleGIcon size={28} />
-            {GOOGLE_REVIEWS.rating.toFixed(1)} from {GOOGLE_REVIEWS.count} Google reviews
+            {GOOGLE_REVIEWS.rating.toFixed(1)} from {REVIEW_COUNT} Google reviews
           </h2>
           <span className="flex" role="img" aria-label="5 stars">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -58,7 +58,7 @@ export function GoogleReviewsCollage() {
             rel="noopener noreferrer"
             className="inline-flex min-h-[44px] items-center font-semibold text-navy underline underline-offset-4 hover:no-underline"
           >
-            Read all {GOOGLE_REVIEWS.count} reviews on Google →
+            Read our {REVIEW_COUNT} reviews on Google →
           </a>
         </p>
       </Container>

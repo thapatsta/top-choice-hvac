@@ -24,14 +24,16 @@ import {
   lpContext,
   type LandingPageConfig,
   type LpCrossSell,
-} from "@/lib/landing-pages";
+} from "@/lib/legacyLandingPages";
 import type { LpContext } from "@/lib/landingPage";
-import { GOOGLE_REVIEWS, site } from "@/lib/site";
+import { GOOGLE_REVIEWS, REVIEW_COUNT, site } from "@/lib/site";
 import { PhoneLink, PhoneText, TextWithPhone } from "@/components/Phone";
 
-// The shared template for every Google Ads landing page under /lp/*. All
-// copy comes from the page's entry in lib/landing-pages.ts; the strings in
-// this file are layout labels only (tests/lp-content.test.ts scans both).
+// The template for the four ad landing pages that have not moved to the
+// config-driven template (components/lp/LpTemplate.tsx) yet:
+// /lp/heating-cooling and /lp/outskirts/*. All copy comes from the page's
+// entry in lib/legacyLandingPages.ts; the strings in this file are layout
+// labels only (tests/lp-content.test.ts scans both).
 //
 // The site header, footer and sticky bar never render on /lp/* (they live in
 // app/(site)/layout.tsx); this template brings its own minimal versions. Pages are
@@ -65,7 +67,7 @@ function RatingLine() {
           <Star key={i} size={18} className="fill-(--lp-star) text-(--lp-star)" aria-hidden="true" />
         ))}
       </span>
-      <span className="text-sm text-(--lp-hero-sub)">from {GOOGLE_REVIEWS.count} Google reviews</span>
+      <span className="text-sm text-(--lp-hero-sub)">from {REVIEW_COUNT} Google reviews</span>
     </a>
   );
 }
@@ -135,7 +137,7 @@ function CrossSell({
   );
 }
 
-export function LandingPage({ config }: { config: LandingPageConfig }) {
+export function LegacyLandingPage({ config }: { config: LandingPageConfig }) {
   const lp = lpContext(config);
   // On the repair pages the price only appears in the repair-or-replace
   // panel, so its note sits there; elsewhere it sits under the headline.
@@ -152,7 +154,7 @@ export function LandingPage({ config }: { config: LandingPageConfig }) {
       data-lp-region={lp.lp_region}
       data-lp-service={lp.lp_service}
     >
-      <LpHeader />
+      <LpHeader variant="legacy" />
 
       {/* Phones: the headline block carries a full-bleed navy band (box-shadow
           + clip-path, so no horizontal scroll) with extra bottom padding, and
@@ -291,7 +293,7 @@ export function LandingPage({ config }: { config: LandingPageConfig }) {
 
       <LpFooter />
 
-      <LpStickyBar />
+      <LpStickyBar variant="legacy" />
     </div>
   );
 }

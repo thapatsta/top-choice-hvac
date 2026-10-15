@@ -5,7 +5,7 @@
 
 import { spawn, type ChildProcess } from "node:child_process";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { LANDING_PAGES } from "@/lib/landing-pages";
+import { LP_SLUGS } from "@/lib/landingPage";
 import { ADS_CONVERSION_LABELS, ADS_ID, GA4_ID } from "@/lib/googleTag";
 import { PHONE } from "@/lib/phone";
 
@@ -51,7 +51,7 @@ const PAGES = [
   "/services/furnace-repair",
   "/thank-you",
   "/this-page-does-not-exist",
-  ...LANDING_PAGES.map((c) => `/lp/${c.slug}`),
+  ...LP_SLUGS.map((slug) => `/lp/${slug}`),
 ];
 
 const headOf = (html: string) => html.slice(0, html.indexOf("</head>"));
@@ -104,8 +104,8 @@ describe("phone links and number format", () => {
   }
 
   it("landing pages render the number in swappable spans and swappable links", async () => {
-    for (const c of LANDING_PAGES) {
-      const { html } = await get(`/lp/${c.slug}`);
+    for (const slug of LP_SLUGS) {
+      const { html } = await get(`/lp/${slug}`);
       expect(html).toMatch(/<span class="js-swap-phone" data-phone-text="">\(647\) 763-2970<\/span>/);
       expect(html).toContain('data-swappable="true"');
       expect(telAnchors(html).length).toBeGreaterThanOrEqual(4); // header, closing CTA, footer, sticky bar

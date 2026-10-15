@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Lock } from "lucide-react";
+import { CALLBACK_PROMISE } from "@/lib/landingPages";
 import {
   buildLandingLeadBody,
-  CALLBACK_PROMISE,
   landingServiceOptions,
   type LandingService,
   type LpContext,
