@@ -73,7 +73,9 @@ export function LpHero({ config, promoActive }: { config: LpPageConfig; promoAct
             <div className="mb-2 mt-6 max-w-[480px]" data-sticky-avoid="">
               <PhoneLink trackLocation={config.heroCall.trackId} className={`${lpXlButtonClass} flex w-full`}>
                 <Phone size={26} aria-hidden="true" />
-                <TextWithPhone text={config.heroCall.label} />
+                <span>
+                  <TextWithPhone text={config.heroCall.label} />
+                </span>
               </PhoneLink>
             </div>
           )}

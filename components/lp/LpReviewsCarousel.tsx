@@ -180,7 +180,7 @@ export function LpReviewsCarousel({
         className="lpt-track relative flex snap-x snap-mandatory gap-4 overflow-x-auto px-0.5 pb-2.5 pt-1"
       >
         {visible.map(({ review, colour }, i) => (
-          <article
+          <div
             key={review.firstName}
             data-review=""
             data-active={i === active ? "true" : "false"}
@@ -218,7 +218,7 @@ export function LpReviewsCarousel({
               </span>
             </div>
             <p className="text-[17px]">{review.text}</p>
-          </article>
+          </div>
         ))}
       </div>
 
@@ -273,7 +273,7 @@ export function LpReviewsCarousel({
           href={googleUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-[44px] items-center font-bold text-lp-cta-dark underline-offset-4 hover:underline"
+          className="inline-flex min-h-[44px] items-center font-bold text-lp-cta-dark underline underline-offset-4 hover:decoration-2"
         >
           {googleLinkLabel}
         </a>

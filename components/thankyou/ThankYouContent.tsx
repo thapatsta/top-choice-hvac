@@ -36,7 +36,9 @@ function CallButton({
     >
       <PhoneLink className={buttonClasses("primary", "lg", large ? "w-full text-xl" : "")}>
         <Phone size={large ? 24 : 20} aria-hidden="true" />
-        Call <PhoneText />
+        <span>
+          Call <PhoneText />
+        </span>
       </PhoneLink>
     </div>
   );

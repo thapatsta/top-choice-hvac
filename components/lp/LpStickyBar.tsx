@@ -11,9 +11,10 @@ import { PHONE } from "@/lib/phone";
  *
  * - `legacy`: the navy bar of the four legacy pages, always visible.
  * - `themed`: the repair / install bar (Call + a jump to the form). It slides
- *   away while a form, a form field or a button marked data-sticky-avoid is
- *   in the strip it covers, or while a field has focus (the on-screen
- *   keyboard is up), so it never sits on top of something to tap.
+ *   away while a form field, a form button or a button marked
+ *   data-sticky-avoid is in the strip it covers, or while a field has focus
+ *   (the on-screen keyboard is up), so it never sits on top of something to
+ *   tap.
  */
 export function LpStickyBar(
   props:
@@ -58,9 +59,11 @@ export function LpStickyBar(
         className="inline-flex min-h-[52px] flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-lp-cta px-2 text-[19px] font-bold text-white no-underline hover:bg-lp-cta-dark"
       >
         <Phone size={19} aria-hidden="true" />
-        {before}
-        {after !== undefined && <PhoneText />}
-        {after}
+        <span>
+          {before}
+          {after !== undefined && <PhoneText />}
+          {after}
+        </span>
       </PhoneLink>
       <a
         href={props.alt.href}
@@ -93,7 +96,9 @@ function useCoversControls(enabled: boolean): boolean {
       // Shrink the root to the bottom `bar` pixels of the viewport.
       { rootMargin: `${bar - window.innerHeight}px 0px 0px 0px`, threshold: 0 }
     );
-    document.querySelectorAll("[data-sticky-avoid]").forEach((el) => observer.observe(el));
+    document
+      .querySelectorAll("[data-sticky-avoid], .lpt form input, .lpt form select, .lpt form button")
+      .forEach((el) => observer.observe(el));
 
     const isField = (t: EventTarget | null) =>
       t instanceof HTMLElement && t.matches("input, select, textarea");

@@ -39,7 +39,7 @@ function TextWithCallLink({ text, trackLocation }: { text: string; trackLocation
   return (
     <>
       {before}
-      <PhoneLink trackLocation={trackLocation} className="font-bold text-lp-ink underline-offset-2 hover:underline">
+      <PhoneLink trackLocation={trackLocation} className="font-bold text-lp-ink underline underline-offset-2 hover:decoration-2">
         <PhoneText />
       </PhoneLink>
       {after}
@@ -144,7 +144,7 @@ export function LpForm({
 
   if (config.variant === "callback") {
     return (
-      <div id="quote" className="max-w-[480px] min-[560px]:max-w-[620px]" data-sticky-avoid="">
+      <div id="quote" className="max-w-[480px] min-[560px]:max-w-[620px]">
         <p className="mb-2.5 mt-[18px] max-w-[480px] text-[16px] text-lp-muted">{config.intro}</p>
         <form {...formProps} className="grid gap-2.5 min-[560px]:grid-cols-[1fr_1fr_auto]">
           {hidden}
@@ -193,7 +193,6 @@ export function LpForm({
     <form
       {...formProps}
       id="quote"
-      data-sticky-avoid=""
       aria-labelledby={id("heading")}
       className="rounded-lg border border-lp-line bg-lp-panel p-[22px]"
     >

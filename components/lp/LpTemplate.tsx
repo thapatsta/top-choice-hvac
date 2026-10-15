@@ -183,7 +183,9 @@ export function LpTemplate({ config }: { config: LpPageConfig }) {
           {config.closing.cta.kind === "call" ? (
             <PhoneLink trackLocation={config.closing.cta.trackId} className={`${lpXlButtonClass} flex w-full`}>
               <Phone size={26} aria-hidden="true" />
-              <TextWithPhone text={config.closing.cta.label} />
+              <span>
+                <TextWithPhone text={config.closing.cta.label} />
+              </span>
             </PhoneLink>
           ) : (
             <a href={config.closing.cta.href} className={`${lpXlButtonClass} flex w-full`}>
@@ -194,7 +196,7 @@ export function LpTemplate({ config }: { config: LpPageConfig }) {
         {config.closing.fine && (
           <p className="mt-2.5 text-[17px] text-lp-muted">
             {config.closing.fine.split(PHONE.display)[0]}
-            <PhoneLink trackLocation={config.closing.cta.trackId} className="font-bold text-lp-ink underline-offset-2 hover:underline">
+            <PhoneLink trackLocation={config.closing.cta.trackId} className="font-bold text-lp-ink underline underline-offset-2 hover:decoration-2">
               <PhoneText />
             </PhoneLink>
           </p>

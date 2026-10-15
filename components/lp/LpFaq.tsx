@@ -11,7 +11,7 @@ export function LpFaq({ items, variant = "legacy" }: { items: LpFaqItem[]; varia
     return (
       <div className="lpt-faq border-t border-lp-line">
         {items.map((item) => (
-          <details key={item.question} className="border-b border-lp-line py-4">
+          <details key={item.question} className="border-b border-lp-line py-2.5">
             <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-3 text-[19px] font-bold">
               {item.question}
             </summary>
