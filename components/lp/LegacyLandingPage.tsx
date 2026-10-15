@@ -26,7 +26,7 @@ import {
   type LpCrossSell,
 } from "@/lib/legacyLandingPages";
 import type { LpContext } from "@/lib/landingPage";
-import { GOOGLE_REVIEWS, site } from "@/lib/site";
+import { GOOGLE_REVIEWS, REVIEW_COUNT, site } from "@/lib/site";
 import { PhoneLink, PhoneText, TextWithPhone } from "@/components/Phone";
 
 // The template for the four ad landing pages that have not moved to the
@@ -67,7 +67,7 @@ function RatingLine() {
           <Star key={i} size={18} className="fill-(--lp-star) text-(--lp-star)" aria-hidden="true" />
         ))}
       </span>
-      <span className="text-sm text-(--lp-hero-sub)">from {GOOGLE_REVIEWS.count} Google reviews</span>
+      <span className="text-sm text-(--lp-hero-sub)">from {REVIEW_COUNT} Google reviews</span>
     </a>
   );
 }

@@ -1,4 +1,4 @@
-import { GOOGLE_REVIEWS } from "@/lib/googleReviews";
+import { GOOGLE_REVIEWS, REVIEW_COUNT } from "@/lib/googleReviews";
 
 // Real, publicly-posted Google reviews for "Top choice air system inc"
 // (3 Lloyd Cres, Brampton, ON), pulled from the Google Business Profile on
@@ -70,9 +70,10 @@ export const reviews: Review[] = [
 
 // The Google Business Profile's overall rating. Derived from GOOGLE_REVIEWS
 // in lib/site.ts (the single source of truth); update it there, not here.
-export const aggregateRating: { ratingValue: number; reviewCount: number } | undefined = {
+// reviewCount is the display label ("100+"), the only count pages show.
+export const aggregateRating: { ratingValue: number; reviewCount: string } | undefined = {
   ratingValue: GOOGLE_REVIEWS.rating,
-  reviewCount: GOOGLE_REVIEWS.count,
+  reviewCount: REVIEW_COUNT,
 };
 
 /**

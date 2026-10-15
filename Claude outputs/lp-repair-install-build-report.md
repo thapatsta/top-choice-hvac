@@ -121,7 +121,12 @@ Screenshots of the built pages, at 390×844 and 1440×900, are in `Claude output
 
 ## 3. Unconfirmed items (please confirm before or soon after launch)
 1. **Review star ratings:** all nine are stored as `rating: 5` with `// TODO verify against Google` in `data/reviews.ts`. They are first names only, copied word for word from the mockups. I did not check that each review exists on the listing or what its stars are.
-2. **"100+ reviews" next to a Google listing that showed 66.** `GOOGLE_REVIEWS.count` is still 66 (as of 2026-10-08). `REVIEW_COUNT_LABEL = "100+ reviews"` is the owner's figure and sits right beside the Google logo and rating. If the listing still shows fewer than 100, this is a claim a visitor or Google Ads review can check. It is one constant to change.
+2. **"100+ reviews" is now the only count shown, site-wide.** On request, every visible review count reads "100+":
+   - the homepage hero, trust bar and reviews section
+   - the map embed and `/reviews`
+   - all six ad pages
+
+   It comes from one constant, `REVIEW_COUNT` / `REVIEW_COUNT_LABEL` in `lib/googleReviews.ts`. `tests/reviewCount.test.ts` and the built-HTML test fail if a page shows the exact count again. The exact count, `GOOGLE_REVIEWS.count` (66 as of 2026-10-08), now feeds only the JSON-LD `aggregateRating`, which needs a real number and should match the listing. Still unconfirmed: whether the Google listing itself shows 100+. If it shows fewer, the label beside the Google logo can be checked by visitors and Google Ads review. Update `GOOGLE_REVIEWS.count` and `asOf` when the listing passes 100.
 3. **Repair price promise:** "You will know the price before we start any repair" appears in the repair hero, the repair card ("You know the repair price before work starts") and the FAQ. The wording is kept from the mockup.
 4. **Diagnostic / service-call fee:** unconfirmed. The pages say nothing about a fee, and the promise above could be read as free diagnosis.
 5. **Nov 1 maintenance pricing terms:** only "Preferred maintenance pricing" / "preferred pricing on maintenance" is stated, with no price, discount or conditions. Is there an actual offer staff can quote when someone ticks the box?

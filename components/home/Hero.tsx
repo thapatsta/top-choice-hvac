@@ -43,7 +43,7 @@ export function Hero() {
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-2 text-sm">
-            {typeof site.rating === "number" && typeof site.reviewCount === "number" && (
+            {typeof site.rating === "number" && typeof site.reviewCount === "string" && (
               <a
                 href={site.googleReviewsUrl}
                 target="_blank"

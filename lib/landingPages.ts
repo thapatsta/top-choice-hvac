@@ -20,7 +20,7 @@ import {
   type LpContext,
   type LpPageKey,
 } from "@/lib/landingPage";
-import { GOOGLE_REVIEWS, googleMapsUrl } from "@/lib/googleReviews";
+import { GOOGLE_REVIEWS, REVIEW_COUNT_LABEL, googleMapsUrl } from "@/lib/googleReviews";
 import { PHONE } from "@/lib/phone";
 import { SERVICE_AREAS } from "@/lib/serviceAreas";
 
@@ -38,12 +38,8 @@ export const PRICE_FROM = "$2,199";
  */
 export const CALLBACK_PROMISE = "usually within 15 minutes";
 
-/**
- * TODO confirm: the Google listing showed 66 reviews on 2026-10-08
- * (GOOGLE_REVIEWS.count). This label is the owner's figure and is NOT
- * verified against the listing it sits next to.
- */
-export const REVIEW_COUNT_LABEL = "100+ reviews";
+/** "100+ reviews": defined in lib/googleReviews.ts, shared with the whole site. */
+export { REVIEW_COUNT_LABEL };
 
 /** From GOOGLE_REVIEWS (lib/site.ts), the one source of truth. */
 export const GOOGLE_RATING = GOOGLE_REVIEWS.rating.toFixed(1);

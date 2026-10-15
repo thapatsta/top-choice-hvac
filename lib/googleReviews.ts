@@ -16,6 +16,16 @@ export const GOOGLE_REVIEWS = {
   asOf: "2026-10-08",
 } as const;
 
+/**
+ * The review count as shown on every page: "100+", never the exact number.
+ * The owner's figure (2026-10-15); GOOGLE_REVIEWS.count above is what the
+ * listing itself showed and is used only in structured data (JSON-LD needs
+ * an exact number). Never print GOOGLE_REVIEWS.count on a page;
+ * tests/reviewCount.test.ts fails the build if a page does.
+ */
+export const REVIEW_COUNT = "100+";
+export const REVIEW_COUNT_LABEL = `${REVIEW_COUNT} reviews`;
+
 // Verified 2026-09-22 against the live Google Business Profile listing.
 export const googlePlaceId = "ChIJyRbRXAn8kaYRzRKD7SJFXMs";
 export const googleListingName = "Top Choice Air System Inc";

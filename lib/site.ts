@@ -1,5 +1,11 @@
 import { ADS_CONVERSION_LABELS, ADS_ID, GA4_ID } from "@/lib/googleTag";
-import { GOOGLE_REVIEWS, googleListingName, googleMapsUrl, googlePlaceId } from "@/lib/googleReviews";
+import {
+  GOOGLE_REVIEWS,
+  REVIEW_COUNT,
+  googleListingName,
+  googleMapsUrl,
+  googlePlaceId,
+} from "@/lib/googleReviews";
 import { PHONE } from "@/lib/phone";
 import { SERVICE_AREAS } from "@/lib/serviceAreas";
 
@@ -11,7 +17,7 @@ import { SERVICE_AREAS } from "@/lib/serviceAreas";
 // GOOGLE_REVIEWS and the listing links live in lib/googleReviews.ts, and the
 // service areas in lib/serviceAreas.ts: both are NAP-free, so client code
 // (the /lp/* pages) can import them without bundling the address below.
-export { GOOGLE_REVIEWS };
+export { GOOGLE_REVIEWS, REVIEW_COUNT };
 
 export const site = {
   name: "Top Choice HVAC",
@@ -55,7 +61,8 @@ export const site = {
 
   // Sourced from GOOGLE_REVIEWS above, so the rating/count can't drift.
   rating: GOOGLE_REVIEWS.rating as number | undefined,
-  reviewCount: GOOGLE_REVIEWS.count as number | undefined,
+  /** Shown on pages: "100+" (REVIEW_COUNT), never the exact count. */
+  reviewCount: REVIEW_COUNT as string | undefined,
 
   social: {
     // Confirmed: no Facebook page exists yet.

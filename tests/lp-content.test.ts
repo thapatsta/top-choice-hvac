@@ -189,11 +189,9 @@ describe("Google reviews", () => {
   it("has one source of truth", () => {
     expect(GOOGLE_REVIEWS).toEqual({ rating: 4.9, count: 66, asOf: "2026-10-08" });
     expect(site.rating).toBe(GOOGLE_REVIEWS.rating);
-    expect(site.reviewCount).toBe(GOOGLE_REVIEWS.count);
-    expect(aggregateRating).toEqual({
-      ratingValue: GOOGLE_REVIEWS.rating,
-      reviewCount: GOOGLE_REVIEWS.count,
-    });
+    // Pages show "100+", never the exact count.
+    expect(site.reviewCount).toBe("100+");
+    expect(aggregateRating).toEqual({ ratingValue: GOOGLE_REVIEWS.rating, reviewCount: "100+" });
   });
 
   it("is never hardcoded on the landing pages or /reviews", () => {
@@ -209,9 +207,9 @@ describe("Google reviews", () => {
       const code = stripSource(readSource(file));
       expect(code.match(/(?<![\w./-])(60|66|4\.9)(?![\w%.])/g), file).toBeNull();
     }
-    expect(readSource("components/lp/GoogleReviewsCollage.tsx")).toContain("GOOGLE_REVIEWS.count");
-    expect(readSource("components/lp/LegacyLandingPage.tsx")).toContain("GOOGLE_REVIEWS.count");
+    expect(readSource("components/lp/GoogleReviewsCollage.tsx")).toContain("REVIEW_COUNT");
+    expect(readSource("components/lp/LegacyLandingPage.tsx")).toContain("REVIEW_COUNT");
     expect(readSource("lib/landingPages.ts")).toContain("GOOGLE_REVIEWS.rating");
-    expect(readSource("app/(site)/reviews/page.tsx")).toContain("GOOGLE_REVIEWS.count");
+    expect(readSource("app/(site)/reviews/page.tsx")).toContain("REVIEW_COUNT");
   });
 });

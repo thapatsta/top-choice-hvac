@@ -53,7 +53,7 @@ export function ReviewsSection() {
             rel="noopener"
             className="font-semibold text-ember hover:underline"
           >
-            Read all {aggregateRating?.reviewCount} reviews on Google
+            Read our {aggregateRating?.reviewCount} reviews on Google
           </a>
         </p>
       </Container>

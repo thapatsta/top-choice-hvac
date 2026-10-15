@@ -68,6 +68,27 @@ function textOf(html: string): string {
 const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/'/g, "&#x27;");
 const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+// Every page shows the review count as "100+", never the listing's exact
+// number (which only appears in JSON-LD, inside <script>).
+describe("review count on the built pages", () => {
+  const paths = [
+    "/",
+    "/reviews",
+    "/contact",
+    ...LANDING_PAGES.map((c) => `/lp/${c.slug}`),
+    ...Object.values(LP_PAGES).map((c) => `/lp/${c.slug}`),
+  ];
+  for (const path of paths) {
+    it(`${path}: shows 100+ reviews and never the exact count`, async () => {
+      const { status, html } = await page(path);
+      expect(status).toBe(200);
+      const text = textOf(html);
+      expect(text).not.toMatch(new RegExp(`\\b${GOOGLE_REVIEWS.count}\\b`));
+      expect(text).toMatch(/100\+ (Google )?[Rr]eviews/);
+    });
+  }
+});
+
 describe("ad landing pages (production build)", () => {
   it("the live ad URL /lp/furnace-installation still returns 200", async () => {
     const { status, html } = await page("/lp/furnace-installation");
@@ -145,7 +166,7 @@ describe("ad landing pages (production build)", () => {
         expect(html).toContain(`name="lp_service" value="${config.service}"`);
         expect(html).toContain(`href="${site.phone.href}"`);
         expect(textOf(html)).toContain(
-          `${GOOGLE_REVIEWS.rating.toFixed(1)} from ${GOOGLE_REVIEWS.count} Google reviews`
+          `${GOOGLE_REVIEWS.rating.toFixed(1)} from 100+ Google reviews`
         );
       });
 
