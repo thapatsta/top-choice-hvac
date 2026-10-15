@@ -32,8 +32,10 @@ export const SUPERLATIVE_TERMS: RegExp[] = [
   /\d+\+?\s(years|homes|customers|jobs|installs)\b/i,
   // Only the satisfaction guarantee is a confirmed guarantee.
   /(?<!satisfaction )guarantee/i,
-  // Response times: only "typically within 30 minutes" is allowed.
-  /(?<!typically )within \d+\s?(minutes|mins|hours|hrs)/i,
+  // Response times: only the callback promise ("usually within 15
+  // minutes", CALLBACK_PROMISE) is allowed.
+  /(?<!usually )within \d+\s?(minutes|mins|hours|hrs)/i,
+  /within (?!15 minutes)\d+\s?(minutes|mins|hours|hrs)/i,
 ];
 
 /** Round-the-clock wording: repair pages only, and only with showEmergency247. */
@@ -127,4 +129,24 @@ export function listFiles(dir: string, ext: RegExp): string[] {
 
 export function readSource(path: string): string {
   return readFileSync(path, "utf8");
+}
+
+/**
+ * Strings that must never appear on /lp/furnace-repair or
+ * /lp/furnace-installation (config, rendered HTML or visible text).
+ */
+export const FORBIDDEN_LP_STRINGS: RegExp[] = [
+  /24\s*\/\s*7/,
+  /licensed/i,
+  /insured/i,
+  /Lloyd/i,
+  /base-tier/i,
+  /66 reviews/i,
+  /30 minutes/i,
+  // Duct cleaning (and ducts at all). \b so "production" doesn't match.
+  /\bduct/i,
+];
+
+export function forbiddenHits(text: string): string[] {
+  return FORBIDDEN_LP_STRINGS.filter((re) => re.test(text)).map((re) => `${re} in: ${text.slice(0, 160)}`);
 }

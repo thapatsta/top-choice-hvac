@@ -1,9 +1,34 @@
 import { Flame, Phone } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { PhoneLink } from "@/components/Phone";
+import { PhoneLink, PhoneText } from "@/components/Phone";
 
-/** Logo and Call now only: no site navigation on the ad landing pages. */
-export function LpHeader() {
+/**
+ * Logo (not a link) and tap-to-call only: no site navigation on the ad
+ * landing pages. `legacy` is the navy header of the four legacy pages;
+ * `themed` follows the repair / install tokens (navy or white), with the
+ * number in the header from 760px up, as in the mockups (phones get the
+ * sticky bar).
+ */
+export function LpHeader({ variant }: { variant: "legacy" | "themed" }) {
+  if (variant === "themed") {
+    return (
+      <header className="border-b border-lp-line bg-lp-head text-lp-head-ink" data-track-location="lp_header">
+        <div className="mx-auto flex h-16 max-w-[1080px] items-center justify-between gap-3 px-5">
+          <span className="lpt-display text-[23px] tracking-[0.01em]">
+            Top Choice <span className="text-lp-accent">HVAC</span>
+          </span>
+          <PhoneLink
+            ariaLabelPrefix="Call "
+            className="hidden min-h-[44px] items-center gap-2 whitespace-nowrap text-[22px] font-bold no-underline hover:underline min-[760px]:inline-flex"
+          >
+            <Phone size={20} aria-hidden="true" />
+            <PhoneText />
+          </PhoneLink>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header className="lp-dark bg-navy" data-track-location="lp_header">
       <Container className="flex h-16 items-center justify-between gap-2 sm:h-20">

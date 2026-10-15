@@ -3,12 +3,13 @@ import { describe, expect, it } from "vitest";
 import { aggregateRating } from "@/data/reviews";
 import {
   HOW_IT_WORKS,
-  LANDING_PAGES,
+  LEGACY_LANDING_PAGES as LANDING_PAGES,
   TRUST_ITEMS,
-  getLandingPage,
+  getLegacyLandingPage,
   lpMetadata,
   type LandingPageConfig,
-} from "@/lib/landing-pages";
+} from "@/lib/legacyLandingPages";
+import { LP_PAGES } from "@/lib/landingPages";
 import { LP_SLUGS, isLandingService } from "@/lib/landingPage";
 import { GOOGLE_REVIEWS, site } from "@/lib/site";
 import robots from "@/app/robots";
@@ -48,21 +49,20 @@ const componentFiles = listFiles("components/lp", /\.tsx?$/);
 const routeFiles = listFiles("app/lp", /\.tsx?$/);
 const sharedCopy = [...collectStrings(TRUST_ITEMS), ...collectStrings(HOW_IT_WORKS)];
 
-describe("landing page config", () => {
-  it("has exactly the six ad-group pages, with unique slugs", () => {
+// The four legacy pages (lib/legacyLandingPages.ts). The repair and install
+// pages (lib/landingPages.ts) have their own rules in tests/lpPages.test.ts.
+describe("legacy landing page config", () => {
+  it("has the four legacy ad-group pages; with the two config-driven pages, all six routes", () => {
     const slugs = LANDING_PAGES.map((p) => p.slug);
-    expect(new Set(slugs).size).toBe(6);
-    expect([...slugs].sort()).toEqual([...LP_SLUGS].sort());
+    expect(new Set(slugs).size).toBe(4);
+    const all = [...slugs, ...Object.values(LP_PAGES).map((p) => p.slug)];
+    expect(all.sort()).toEqual([...LP_SLUGS].sort());
   });
 
   it("has unique meta titles, and unique h1s within each campaign region", () => {
-    // The install h1 ("New Furnace Installed From $2,199") is the same in
-    // both regions by design; within a campaign every h1 differs.
-    expect(new Set(LANDING_PAGES.map((p) => p.metaTitle)).size).toBe(6);
-    for (const region of ["core", "outskirts"] as const) {
-      const h1s = LANDING_PAGES.filter((p) => p.region === region).map((p) => p.h1);
-      expect(new Set(h1s).size).toBe(3);
-    }
+    expect(new Set(LANDING_PAGES.map((p) => p.metaTitle)).size).toBe(4);
+    const outskirts = LANDING_PAGES.filter((p) => p.region === "outskirts").map((p) => p.h1);
+    expect(new Set(outskirts).size).toBe(3);
   });
 
   it("matches region and service to the slug", () => {
@@ -79,10 +79,9 @@ describe("landing page config", () => {
     for (const page of LANDING_PAGES) {
       const file = `app/lp/${page.slug}/page.tsx`;
       expect(existsSync(file), file).toBe(true);
-      expect(readSource(file)).toContain(`getLandingPage("${page.slug}")`);
+      expect(readSource(file)).toContain(`getLegacyLandingPage("${page.slug}")`);
     }
-    // The live ad URL keeps its route.
-    expect(getLandingPage("furnace-installation").h1).toBe("New Furnace Installed From $2,199");
+    expect(getLegacyLandingPage("heating-cooling").service).toBe("heating-cooling");
   });
 
   it("has a price note on every page that shows a price", () => {
@@ -163,7 +162,7 @@ describe("banned-terms scan", () => {
     expect(scanCopy("Price includes $2,199 install", { noPrices: true })).not.toEqual([]);
     // ...and lets the allowed facts through.
     expect(scanCopy("Same-day installs available in many cases.")).toEqual([]);
-    expect(scanCopy("Callback typically within 30 minutes. Satisfaction guarantee.")).toEqual([]);
+    expect(scanCopy("Callback usually within 15 minutes. Satisfaction guarantee.")).toEqual([]);
     expect(scanCopy("Call any time, we're open 24/7", { allowAlwaysOpen: true })).toEqual([]);
   });
 });
@@ -178,7 +177,7 @@ describe("address scan", () => {
   });
 
   it("never reads the address or the address JSON-LD in /lp code", () => {
-    for (const file of [...componentFiles, ...routeFiles, "lib/landing-pages.ts"]) {
+    for (const file of [...componentFiles, ...routeFiles, "lib/legacyLandingPages.ts", "lib/landingPages.ts"]) {
       const source = readSource(file);
       expect(source, file).not.toMatch(/site\.address|NAP_JSON_LD|application\/ld\+json/);
       for (const re of ADDRESS_TERMS) expect(source, file).not.toMatch(re);
@@ -201,7 +200,8 @@ describe("Google reviews", () => {
     const files = [
       ...componentFiles,
       ...routeFiles,
-      "lib/landing-pages.ts",
+      "lib/legacyLandingPages.ts",
+      "lib/landingPages.ts",
       "app/(site)/reviews/page.tsx",
       "data/reviews.ts",
     ];
@@ -210,7 +210,8 @@ describe("Google reviews", () => {
       expect(code.match(/(?<![\w./-])(60|66|4\.9)(?![\w%.])/g), file).toBeNull();
     }
     expect(readSource("components/lp/GoogleReviewsCollage.tsx")).toContain("GOOGLE_REVIEWS.count");
-    expect(readSource("components/lp/LandingPage.tsx")).toContain("GOOGLE_REVIEWS.count");
+    expect(readSource("components/lp/LegacyLandingPage.tsx")).toContain("GOOGLE_REVIEWS.count");
+    expect(readSource("lib/landingPages.ts")).toContain("GOOGLE_REVIEWS.rating");
     expect(readSource("app/(site)/reviews/page.tsx")).toContain("GOOGLE_REVIEWS.count");
   });
 });

@@ -1,12 +1,14 @@
-// Smoke test of the six ad landing pages against the production build.
+// Smoke test of the six ad landing pages against the production build: the
+// four legacy pages and the config-driven repair / install pages.
 // Run `npm run build` first, then `npm run test:built`. CI runs both before
 // deploy (see .github/workflows/deploy.yml).
 
 import { spawn, type ChildProcess } from "node:child_process";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { LANDING_PAGES } from "@/lib/landing-pages";
+import { LP_PAGES, REVIEW_COUNT_LABEL, GOOGLE_RATING } from "@/lib/landingPages";
+import { LEGACY_LANDING_PAGES as LANDING_PAGES } from "@/lib/legacyLandingPages";
 import { GOOGLE_REVIEWS, site } from "@/lib/site";
-import { ADDRESS_TERMS, CREDENTIAL_TERMS, scanCopy } from "../tests/lpScan";
+import { ADDRESS_TERMS, CREDENTIAL_TERMS, forbiddenHits, scanCopy } from "../tests/lpScan";
 
 const PORT = 3217;
 const BASE = `http://127.0.0.1:${PORT}`;
@@ -70,8 +72,65 @@ describe("ad landing pages (production build)", () => {
   it("the live ad URL /lp/furnace-installation still returns 200", async () => {
     const { status, html } = await page("/lp/furnace-installation");
     expect(status).toBe(200);
-    expect(html).toContain("New Furnace Installed From $2,199");
+    expect(textOf(html)).toContain("A new furnace, installed, from $2,199");
   });
+
+  for (const config of Object.values(LP_PAGES)) {
+    const path = `/lp/${config.slug}`;
+
+    describe(`${path} (${config.key})`, () => {
+      it("renders its h1, form, call links, Google row and reviews", async () => {
+        const { status, html } = await page(path);
+        expect(status).toBe(200);
+        const text = textOf(html);
+        expect(text).toContain(config.h1);
+        expect(html).toContain(`name="landingPage" value="${config.key}"`);
+        expect(html).toContain(`name="lp_slug" value="${config.slug}"`);
+        expect(html).toContain('id="quote"');
+        expect(html).toContain(`href="${site.phone.href}"`);
+        expect(text).toContain(`Google ${GOOGLE_RATING}`);
+        expect(text).toContain(REVIEW_COUNT_LABEL);
+        expect((html.match(/data-review=""/g) ?? []).length).toBe(9);
+        expect(html).toContain(`href="${site.googleReviewsUrl.replace(/&/g, "&amp;")}"`);
+        // One intent per route: no ?service= switching left over.
+        expect(html).not.toContain("data-svc");
+      });
+
+      it("is noindex, nofollow and self-canonical", async () => {
+        const html = htmlCache.get(path) ?? (await page(path)).html;
+        expect(html).toContain('<meta name="robots" content="noindex, nofollow"/>');
+        expect(html).toContain(`<link rel="canonical" href="${site.url}${path}"/>`);
+      });
+
+      it("never renders the site chrome", async () => {
+        const html = htmlCache.get(path) ?? (await page(path)).html;
+        expect(html).not.toMatch(/<nav\b/);
+      });
+
+      it("has no business address, forbidden string or banned claim anywhere", async () => {
+        const html = htmlCache.get(path) ?? (await page(path)).html;
+        for (const re of ADDRESS_TERMS) expect(html).not.toMatch(re);
+        for (const re of CREDENTIAL_TERMS) expect(textOf(html)).not.toMatch(re);
+        expect(forbiddenHits(textOf(html))).toEqual([]);
+        const problems = scanCopy(textOf(html)).filter(
+          (p) => !p.startsWith("unqualified same-day") && !p.startsWith("heat pump / AC price")
+        );
+        expect(problems).toEqual([]);
+      });
+
+      it("loads no JavaScript that contains the business address", async () => {
+        const html = htmlCache.get(path) ?? (await page(path)).html;
+        const scripts = [...html.matchAll(/<script[^>]+src="([^"]+)"/g)]
+          .map((m) => m[1])
+          .filter((src) => src.startsWith("/"));
+        expect(scripts.length).toBeGreaterThan(0);
+        for (const src of scripts) {
+          const js = await (await fetch(new URL(src, BASE))).text();
+          for (const re of ADDRESS_TERMS) expect(js, src).not.toMatch(re);
+        }
+      });
+    });
+  }
 
   for (const config of LANDING_PAGES) {
     const path = `/lp/${config.slug}`;

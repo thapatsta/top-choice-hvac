@@ -101,3 +101,142 @@ html {
 .lp .lp-faq summary svg {
   color: var(--color-navy);
 }
+
+/*
+ * The repair and install landing pages (components/lp/LpTemplate.tsx).
+ * Page-scoped tokens on the .lpt wrapper, one set per data-theme, exposed to
+ * Tailwind as lp-* colours (bg-lp-cta, text-lp-muted, …) by the @theme block
+ * below. Contrast (WCAG AA, against the surface each token sits on):
+ *   repair  white on #e8590c 3.6:1: large text only (button labels are
+ *           >= 19px bold); white on #c2410c 5.2:1 for smaller text and links.
+ *   install white on #157a3a 5.4:1, any size.
+ */
+.lpt {
+  --lpt-bg: #ffffff;
+  --lpt-ink: #111827;
+  --lpt-muted: #4b5563;
+  --lpt-line: #e3e6ea;
+  --lpt-fline: #cfd4da;
+  --lpt-cta: #e8590c;
+  --lpt-cta-dark: #c2410c;
+  --lpt-cta-darker: #9a3412;
+  --lpt-head: #111827;
+  --lpt-head-ink: #ffffff;
+  --lpt-accent: #ff8a4c;
+  --lpt-panel: #f6f7f9;
+  --lpt-promo: #fff1e6;
+  --lpt-promo-ink: #7c2d12;
+  --lpt-star: #fbbc04;
+
+  background: var(--lpt-bg);
+  color: var(--lpt-ink);
+  font-family: var(--font-lp-body), system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  font-size: 18px;
+  line-height: 1.55;
+}
+.lpt[data-theme="install"] {
+  --lpt-ink: #14231b;
+  --lpt-muted: #4d5f55;
+  --lpt-line: #dfe6e1;
+  --lpt-fline: #c9d3cc;
+  --lpt-cta: #157a3a;
+  --lpt-cta-dark: #0e5e2b;
+  --lpt-cta-darker: #0b4a22;
+  --lpt-head: #ffffff;
+  --lpt-head-ink: #14231b;
+  --lpt-accent: #157a3a;
+  --lpt-panel: #f1f6f3;
+  --lpt-promo: #e3f3e8;
+  --lpt-promo-ink: #0e5e2b;
+}
+
+@theme inline {
+  --color-lp-bg: var(--lpt-bg);
+  --color-lp-ink: var(--lpt-ink);
+  --color-lp-muted: var(--lpt-muted);
+  --color-lp-line: var(--lpt-line);
+  --color-lp-fline: var(--lpt-fline);
+  --color-lp-cta: var(--lpt-cta);
+  --color-lp-cta-dark: var(--lpt-cta-dark);
+  --color-lp-cta-darker: var(--lpt-cta-darker);
+  --color-lp-head: var(--lpt-head);
+  --color-lp-head-ink: var(--lpt-head-ink);
+  --color-lp-accent: var(--lpt-accent);
+  --color-lp-panel: var(--lpt-panel);
+  --color-lp-promo: var(--lpt-promo);
+  --color-lp-promo-ink: var(--lpt-promo-ink);
+  --color-lp-star: var(--lpt-star);
+}
+
+.lpt h1,
+.lpt h2,
+.lpt h3,
+.lpt .lpt-display {
+  font-family: var(--font-lp-display), "Arial Narrow", Arial, sans-serif;
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+.lpt :focus-visible {
+  outline-color: var(--lpt-ink);
+}
+.lpt .lpt-dark :focus-visible {
+  outline-color: #ffffff;
+}
+/* Keeps focused fields and anchor targets clear of the sticky bar. */
+html:has(.lpt) {
+  scroll-padding-bottom: 96px;
+}
+.lpt [id] {
+  scroll-margin-top: 12px;
+}
+
+/* Install checklist: the check marks pop in one after another on load. */
+@keyframes lpt-check {
+  0% { transform: scale(0.3); opacity: 0; }
+  60% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.lpt .lpt-check {
+  animation: lpt-check 0.45s cubic-bezier(0.2, 0.8, 0.3, 1.2) both;
+  animation-delay: calc(0.25s + var(--i, 0) * 0.15s);
+}
+
+/* Review carousel: stars pop on the active card. */
+@keyframes lpt-pop {
+  0% { transform: scale(0.3); opacity: 0; }
+  60% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.lpt [data-active="true"] .lpt-star {
+  animation: lpt-pop 0.4s both;
+  animation-delay: calc(var(--i, 0) * 0.08s);
+}
+.lpt .lpt-track {
+  scrollbar-width: none;
+}
+.lpt .lpt-track::-webkit-scrollbar {
+  display: none;
+}
+
+/* FAQ: + / − marker in the CTA colour. */
+.lpt .lpt-faq summary::-webkit-details-marker {
+  display: none;
+}
+.lpt .lpt-faq summary::after {
+  content: "+";
+  font-size: 26px;
+  line-height: 1;
+  color: var(--lpt-cta-dark);
+}
+.lpt .lpt-faq details[open] summary::after {
+  content: "\2212";
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lpt .lpt-check,
+  .lpt [data-active="true"] .lpt-star {
+    animation: none;
+  }
+}

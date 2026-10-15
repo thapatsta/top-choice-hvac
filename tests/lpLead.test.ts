@@ -1,7 +1,8 @@
 import { GA4_ID } from "@/lib/googleTag";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ATTRIBUTION_STORAGE_KEY } from "@/lib/attribution";
-import { LANDING_PAGES, lpContext } from "@/lib/landing-pages";
+import { LEGACY_LANDING_PAGES, lpContext } from "@/lib/legacyLandingPages";
+import { LP_PAGES } from "@/lib/landingPages";
 import { buildLandingLeadBody, parseLpContext } from "@/lib/landingPage";
 import { findMissingField, normalizeLead } from "@/lib/leadAdapter";
 import { emailBody, logLeadToKV } from "@/lib/notify";
@@ -15,18 +16,20 @@ const form = {
   postalCode: "L6Y 1A1",
 } as const;
 
-const repairLp = lpContext(LANDING_PAGES.find((p) => p.slug === "outskirts/furnace-repair")!);
+const repairLp = lpContext(LEGACY_LANDING_PAGES.find((p) => p.slug === "outskirts/furnace-repair")!);
+
+/** lp_* context of all six pages: the four legacy ones and repair / install. */
+const ALL_LP = [
+  ...LEGACY_LANDING_PAGES.map((page) => ({ slug: page.slug, lp: lpContext(page) })),
+  ...Object.values(LP_PAGES).map((page) => ({ slug: page.slug, lp: page.lp })),
+];
 
 describe("landing page lead payload", () => {
   it("includes lp_slug, lp_region and lp_service for every page", () => {
-    for (const page of LANDING_PAGES) {
-      const body = buildLandingLeadBody(form, lpContext(page));
-      expect(body).toMatchObject({
-        source: "landing-page",
-        lp_slug: page.slug,
-        lp_region: page.region,
-        lp_service: page.service,
-      });
+    expect(ALL_LP).toHaveLength(6);
+    for (const { slug, lp } of ALL_LP) {
+      const body = buildLandingLeadBody(form, lp);
+      expect(body).toMatchObject({ source: "landing-page", ...lp, lp_slug: slug });
     }
   });
 
