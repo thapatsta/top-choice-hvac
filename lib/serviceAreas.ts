@@ -8,5 +8,9 @@ export const SERVICE_AREAS = [
   "Etobicoke",
   "Georgetown",
   "Bolton",
+  "Milton",
+  "Orangeville",
+  "Barrie",
+  "Halton Hills",
   // TODO: confirm full list of GTA cities actually served
 ] as const;

@@ -10,7 +10,7 @@ export function ServiceAreaStrip() {
       <Container className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
         <div className="flex flex-col items-center gap-4 sm:items-start sm:text-left">
           <div className="flex items-center gap-3">
-            <MapPin size={22} className="text-ember" aria-hidden="true" />
+            <MapPin size={22} className="shrink-0 text-ember" aria-hidden="true" />
             <p className="text-lg">
               <span className="font-display font-bold">Proudly serving: </span>
               {site.serviceAreas.join(", ")}
