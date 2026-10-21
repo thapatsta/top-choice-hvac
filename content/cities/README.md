@@ -40,7 +40,7 @@ npm run dev
 
 ## Adding a job
 
-A job is real and supplied by Robin or Patrick. Either add it to the sheet and import it (below), or add it to the city file's `jobs` array:
+Jobs are optional: the "Recent jobs" section is hidden until a city has at least one, and nothing is made up to fill it. A job is real and supplied by Robin or Patrick. `neighbourhood` and `year` can be left out when not supplied (the card then reads "{City} homeowner" with no year). Either add it to the sheet and import it (below), or add it to the city file's `jobs` array:
 
 ```ts
 {
@@ -91,7 +91,7 @@ node scripts/import-city-content.ts --jobs jobs.csv --reviews reviews.csv
 node scripts/import-city-content.ts --jobs jobs.csv --dry-run     # check without writing
 ```
 
-The script checks every row, prints each problem with its line number, and writes nothing if any row fails. It writes `content/cities/imports/<city>.json`, which the city files read. A sheet replaces that kind of content for each city in it; cities not in the sheet are left alone. Imported rows replace the `TODO_REAL_CONTENT` placeholders; they are not merged with them. (Node prints a harmless `MODULE_TYPELESS_PACKAGE_JSON` warning.)
+The script checks every row, prints each problem with its line number, and writes nothing if any row fails. It writes `content/cities/imports/<city>.json`, which the city files read. A sheet replaces that kind of content for each city in it; cities not in the sheet are left alone. Imported jobs are listed before the jobs written in the city file. (Node prints a harmless `MODULE_TYPELESS_PACKAGE_JSON` warning.)
 
 **Jobs sheet** (header row required, column order doesn't matter):
 
@@ -137,7 +137,7 @@ No template change is needed. Never publish a customer's face, house number, lic
 3. Run `npm test`. `tests/cityContent.test.ts` runs the guard on every ready city and the duplicate-content test across ready cities. Fix everything it reports. A failing test blocks the deploy.
 4. Run `npm run build` and `npm run test:built`.
 
-The guard fails a ready city if it has a placeholder, too few verified jobs (Brampton 4, others 2), too few reviews (Brampton 3, others 2) or issues (Brampton 5, others 4), an area claim in a `general` issue, a digit or absolute in a `consultant` issue, an answer block outside 40-60 words, fewer than 5 FAQs or fewer than 3 city-specific ones, no `lastReviewed`, or banned content (street address, duct cleaning, rebate, TSSA, `aggregateRating`, filler).
+The guard fails a ready city if it has a placeholder, a job with `verified: false`, too few reviews (Brampton 3, others 2) or issues (Brampton 5, others 4), an area claim in a `general` issue, a digit or absolute in a `consultant` issue, an answer block outside 40-60 words, fewer than 5 FAQs or fewer than 3 city-specific ones, no `lastReviewed`, or banned content (street address, duct cleaning, rebate, TSSA, `aggregateRating`, filler).
 
 The duplicate-content test cuts each city's local copy (jobs, intro, answer block, issues intro, local FAQs, non-general issues) into 5-word shingles and fails any pair of ready cities that shares more than 30% of the smaller set. If it fails, the cities are too alike: write something that is true of one city and not the other, don't reword.
 

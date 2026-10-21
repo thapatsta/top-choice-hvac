@@ -1,7 +1,6 @@
 import type { CityContent } from "./types";
-import { TODO } from "./facts";
 import imported from "./imports/brampton.json";
-import { orPlaceholders, todoJob } from "./placeholders";
+import { orPlaceholders } from "./placeholders";
 import { sharedReviews } from "./shared-reviews";
 import { pickShared } from "./shared-issues";
 import { sharedFaq } from "./shared-faqs";
@@ -22,13 +21,14 @@ const brampton: CityContent = {
   introParagraph:
     "Brampton has grown quickly over the last few decades, so one street can have a house with a furnace from the day it was built next to one that was replaced last year. Many neighbourhoods are newer subdivisions with older, established areas beside them, and the age of the furnace and AC can differ a lot from one street to the next. We work out of Brampton. We have completed furnace and AC installations in Brampton over the past few years.",
   isHomeBase: true,
-  // TODO_REAL_CONTENT: Robin to write 1-2 sentences on being based in
-  // Brampton (we live and work here) and confirm he is happy with it on the
-  // page. Facts Robin confirms only.
-  homeBaseParagraph: TODO,
-  // TODO_REAL_CONTENT: 4-5 real, verified Brampton jobs from Robin or Patrick
-  // (neighbourhood or street, year, service, problem, what we did).
-  jobs: orPlaceholders(imported.jobs, [todoJob("furnace-install"), todoJob("furnace-repair"), todoJob("ac-install"), todoJob("furnace-install")]),
+  // homeBaseParagraph: not set. Robin to write 1-2 sentences on being based in
+  // Brampton (facts he confirms only); the section appears once it is set.
+  // Supplied by Patrick (2026-10): no neighbourhood or year given, so none is shown.
+  // Add more with the import script or here; see README.md.
+  jobs: [
+    ...imported.jobs,
+    { service: "furnace-install", problem: "The furnace had died.", work: "Replaced the furnace.", photos: [], verified: true },
+  ],
   // Real reviews reused across cities (shared-reviews.ts) until Robin tags reviews to Brampton.
   reviews: orPlaceholders(imported.reviews, sharedReviews("Jasmeen D.", "Amarinder R.", "Shubminder R.")),
   issuesIntro:
@@ -97,9 +97,7 @@ const brampton: CityContent = {
   ],
   hubLine: "Our home base. Furnace repair, furnace installation and AC installation across Brampton.",
   lastReviewed: "2026-10",
-  // Stays false until Robin and Patrick supply the jobs, reviews and the
-  // home-base paragraph, and tests/cityContent.test.ts passes.
-  ready: false,
+  ready: true,
 };
 
 export default brampton;

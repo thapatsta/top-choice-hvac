@@ -55,17 +55,18 @@ const decode = (s: string) => s.replace(/&amp;/g, "&").replace(/&#x27;/g, "'").r
 const textOf = (html: string) => decode(html.replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " "));
 
 describe("unready city pages", () => {
-  for (const city of ALL_CITIES.filter((c) => !c.ready)) {
-    it(`${cityPath(city)} is a 404 and not listed anywhere`, async () => {
-      expect((await get(cityPath(city))).status).toBe(404);
-      const sitemap = (await get("/sitemap.xml")).body;
-      expect(sitemap).not.toContain(cityPath(city));
+  // One test that loops, so it passes (checking nothing) once every city is ready.
+  it("404s any city that is not ready, and lists it nowhere", async () => {
+    expect((await get("/service-area/not-a-city")).status).toBe(404);
+    for (const city of ALL_CITIES.filter((c) => !c.ready)) {
+      expect((await get(cityPath(city))).status, city.slug).toBe(404);
+      expect((await get("/sitemap.xml")).body).not.toContain(cityPath(city));
       expect((await get("/service-area")).body).not.toContain(cityPath(city));
       expect((await get("/")).body).not.toContain(cityPath(city));
       expect((await get("/services/furnace-repair")).body).not.toContain(cityPath(city));
       expect((await get("/llms.txt")).body).not.toContain(cityPath(city));
-    });
-  }
+    }
+  });
 });
 
 describe("site-wide", () => {

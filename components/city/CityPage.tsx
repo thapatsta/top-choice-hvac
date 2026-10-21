@@ -96,7 +96,7 @@ function JobPhotos({ job, city }: { job: Job; city: CityContent }) {
         <li key={photo.src}>
           <Image
             src={photo.src}
-            alt={photo.alt || `${SERVICE_LABEL[job.service]} in ${job.neighbourhood}, ${city.name}`}
+            alt={photo.alt || `${SERVICE_LABEL[job.service]} in ${job.neighbourhood ?? city.name}, ${city.name}`}
             width={800}
             height={600}
             loading="lazy"
@@ -115,8 +115,8 @@ function JobCard({ job, city }: { job: Job; city: CityContent }) {
       <JobPhotos job={job} city={city} />
       <p className="text-xs font-semibold uppercase tracking-wide text-ember">{SERVICE_LABEL[job.service]}</p>
       <h3 className={`${h3} mt-1`}>
-        {job.neighbourhood}
-        <span className="font-normal text-muted"> · {job.year}</span>
+        {job.neighbourhood ?? `${city.name} homeowner`}
+        {job.year && <span className="font-normal text-muted"> · {job.year}</span>}
       </h3>
       <dl className="mt-3 space-y-3 text-sm">
         <div>
@@ -277,10 +277,12 @@ export function CityPage({ city }: { city: CityContent }) {
         </Container>
       </section>
 
+      {/* Hidden until there are real, verified jobs: nothing is invented to fill it. */}
+      {city.jobs.length > 0 && (
       <section className="bg-card py-12 sm:py-16">
         <Container className="max-w-4xl">
           <h2 className={h2}>Recent jobs in {city.name}</h2>
-          <p className="mt-3 text-navy">A few recent jobs we completed in {city.name}.</p>
+          <p className="mt-3 text-navy">Some of the jobs we have completed in {city.name}.</p>
           <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
             {city.jobs.map((job, i) => (
               <JobCard key={i} job={job} city={city} />
@@ -288,6 +290,7 @@ export function CityPage({ city }: { city: CityContent }) {
           </div>
         </Container>
       </section>
+      )}
 
       <section className="py-12 sm:py-16">
         <Container className="max-w-4xl">

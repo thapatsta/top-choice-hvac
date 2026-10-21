@@ -1,6 +1,6 @@
 import type { CityContent } from "./types";
 import imported from "./imports/vaughan.json";
-import { orPlaceholders, todoJob } from "./placeholders";
+import { orPlaceholders } from "./placeholders";
 import { sharedReviews } from "./shared-reviews";
 import { pickShared } from "./shared-issues";
 import { sharedFaq } from "./shared-faqs";
@@ -22,8 +22,13 @@ const vaughan: CityContent = {
   introParagraph:
     "Vaughan has a lot of larger, newer detached houses in subdivisions, with older village-style cores such as Woodbridge and Kleinburg alongside. Bigger floor plans make for harder heating and cooling jobs: more square footage, more floors, and more rooms for one furnace and one AC to balance. Equipment from the newer subdivisions is also getting older. We cover Vaughan from our base in Brampton. We have completed furnace and AC installations in Vaughan over the past few years.",
   isHomeBase: false,
-  // TODO_REAL_CONTENT: 2-3 real, verified Vaughan jobs from Robin or Patrick.
-  jobs: orPlaceholders(imported.jobs, [todoJob("furnace-install"), todoJob("ac-install")]),
+  // Supplied by Patrick (2026-10): no neighbourhood or year given, so none is shown.
+  // Add more with the import script or here; see README.md.
+  jobs: [
+    ...imported.jobs,
+    { service: "furnace-install", problem: "The furnace had died.", work: "Replaced the furnace.", photos: [], verified: true },
+    { service: "furnace-repair", problem: "Gunk was blocking the return vents.", work: "Removed the gunk blocking the return vents.", photos: [], verified: true },
+  ],
   // Real reviews reused across cities (shared-reviews.ts) until Robin tags reviews to Vaughan.
   reviews: orPlaceholders(imported.reviews, sharedReviews("Amarinder R.", "Shubminder R.")),
   issuesIntro:
@@ -95,9 +100,7 @@ const vaughan: CityContent = {
   ],
   hubLine: "Furnace and AC installation for larger Vaughan houses, including two-stage and variable-speed options.",
   lastReviewed: "2026-10",
-  // Stays false until Robin and Patrick supply the jobs and reviews and the
-  // guard passes.
-  ready: false,
+  ready: true,
 };
 
 export default vaughan;

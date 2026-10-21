@@ -112,6 +112,18 @@ describe("city page template", () => {
     expect(html(mississauga)).toContain("What Mississauga customers say");
   });
 
+  it("hides the jobs section when there are no jobs, and shows a supplied job without inventing a place or year", () => {
+    expect(html({ ...mississauga, jobs: [] })).not.toContain("Recent jobs in");
+    const bare: CityContent = {
+      ...mississauga,
+      jobs: [{ service: "furnace-install", problem: "The furnace had died.", work: "Replaced the furnace.", photos: [], verified: true }],
+    };
+    const markup = html(bare);
+    expect(markup).toContain("Recent jobs in Mississauga");
+    expect(markup).toContain("Mississauga homeowner");
+    expect(markup).not.toMatch(/Mississauga homeowner<span/);
+  });
+
   it("shows the home-base paragraph and a link to /about for the home base only", () => {
     expect(html(brampton)).toContain('href="/about"');
     expect(html(mississauga)).not.toContain('href="/about"');

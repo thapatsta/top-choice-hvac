@@ -1,6 +1,6 @@
 import type { CityContent } from "./types";
 import imported from "./imports/mississauga.json";
-import { orPlaceholders, todoJob } from "./placeholders";
+import { orPlaceholders } from "./placeholders";
 import { sharedReviews } from "./shared-reviews";
 import { pickShared } from "./shared-issues";
 import { sharedFaq } from "./shared-faqs";
@@ -21,8 +21,12 @@ const mississauga: CityContent = {
   introParagraph:
     "Mississauga is a mix of eras. There are established older areas, newer builds, and a lot of townhomes and condos, and each one raises different questions when a furnace or AC needs work. An older furnace may need its venting changed, a townhome may put the equipment in a small closet, and a newer build may simply be due for its first replacement. We cover Mississauga from our base in Brampton, also in Peel Region. We have completed furnace and AC installations in Mississauga over the past few years.",
   isHomeBase: false,
-  // TODO_REAL_CONTENT: 2-3 real, verified Mississauga jobs from Robin or Patrick.
-  jobs: orPlaceholders(imported.jobs, [todoJob("furnace-install"), todoJob("ac-install")]),
+  // Supplied by Patrick (2026-10): no neighbourhood or year given, so none is shown.
+  // Add more with the import script or here; see README.md.
+  jobs: [
+    ...imported.jobs,
+    { service: "furnace-install", problem: "The furnace had died.", work: "Replaced the furnace.", photos: [], verified: true },
+  ],
   // Real reviews reused across cities (shared-reviews.ts) until Robin tags reviews to Mississauga.
   reviews: orPlaceholders(imported.reviews, sharedReviews("Jasmeen D.", "Amarinder R.")),
   issuesIntro:
@@ -90,9 +94,7 @@ const mississauga: CityContent = {
   ],
   hubLine: "Furnace and AC replacements in Mississauga, including venting changes on older chimney-vented furnaces.",
   lastReviewed: "2026-10",
-  // Stays false until Robin and Patrick supply the jobs and reviews and the
-  // guard passes.
-  ready: false,
+  ready: true,
 };
 
 export default mississauga;

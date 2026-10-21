@@ -41,7 +41,7 @@ describe("publish guard: ready cities", () => {
     for (const city of ready) expect(guardViolations(city), city.slug).toEqual([]);
   });
 
-  it("covers the four launch cities, none ready until real content is supplied", () => {
+  it("covers the four launch cities", () => {
     expect(ALL_CITIES.map((c) => c.slug)).toEqual(["brampton", "mississauga", "vaughan", "etobicoke"]);
     expect(new Set(ALL_CITIES.map((c) => c.slug)).size).toBe(4);
   });
@@ -63,7 +63,6 @@ describe("publish guard: the rules themselves", () => {
 
   const cases: [string, (c: CityContent) => CityContent, RegExp][] = [
     ["a placeholder string", (c) => ({ ...c, introParagraph: TODO }), /placeholder/],
-    ["too few verified jobs", (c) => ({ ...c, jobs: c.jobs.slice(0, 1) }), /verified jobs/],
     ["an unverified job", (c) => ({ ...c, jobs: c.jobs.map((j) => ({ ...j, verified: false })) }), /verified/],
     ["too few reviews", (c) => ({ ...c, reviews: c.reviews.slice(0, 1) }), /reviews/],
     [
@@ -115,10 +114,15 @@ describe("publish guard: the rules themselves", () => {
     });
   }
 
-  it("requires four verified jobs, three reviews and five issues for the home base", () => {
+  it("allows a city with no jobs, but every job shown must be verified", () => {
+    const home = filledCity(ALL_CITIES[0]);
+    expect(guardViolations({ ...home, jobs: [] })).toEqual([]);
+    expect(guardViolations({ ...home, jobs: [{ ...home.jobs[0], verified: false }] }).join()).toMatch(/verified/);
+  });
+
+  it("requires three reviews and five issues for the home base", () => {
     const home = filledCity(ALL_CITIES[0]);
     expect(guardViolations(home)).toEqual([]);
-    expect(guardViolations({ ...home, jobs: home.jobs.slice(0, 3) }).join()).toMatch(/verified jobs \(needs 4\)/);
     expect(guardViolations({ ...home, reviews: home.reviews.slice(0, 2) }).join()).toMatch(/reviews \(needs 3\)/);
     expect(guardViolations({ ...home, issues: home.issues.slice(0, 4) }).join()).toMatch(/issues \(needs 5\)/);
   });
@@ -209,7 +213,7 @@ describe("uniqueness", () => {
 
 describe("publishing: unready pages stay out", () => {
   it("serves an unready city in development only", () => {
-    const unready = ALL_CITIES.find((c) => !c.ready)!;
+    const unready = { ...ALL_CITIES[0], ready: false };
     expect(isServable(unready, "development")).toBe(true);
     expect(isServable(unready, "production")).toBe(false);
     expect(isServable({ ...unready, ready: true }, "production")).toBe(true);

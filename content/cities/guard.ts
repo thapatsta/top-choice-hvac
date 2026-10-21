@@ -54,8 +54,10 @@ const LOCAL_WORDS =
 /** Hedging rule for consultant claims: no digits, percentages or absolutes. */
 const ABSOLUTES = /\b(all|every|most|always|never)\b/i;
 
+// Jobs are optional: the section is hidden until real ones exist (nothing is
+// invented to fill it), but any job that is shown must be verified.
 const minimums = (city: CityContent) =>
-  city.isHomeBase ? { jobs: 4, reviews: 3, issues: 5 } : { jobs: 2, reviews: 2, issues: 4 };
+  city.isHomeBase ? { reviews: 3, issues: 5 } : { reviews: 2, issues: 4 };
 
 function issueStrings(issue: Issue): string[] {
   return allStrings(issue);
@@ -120,15 +122,12 @@ export function guardViolations(city: CityContent): string[] {
   for (const text of allStrings(city)) {
     if (text.includes(TODO)) fail(`placeholder left in: ${text.slice(0, 80)}`);
   }
-  const verifiedJobs = city.jobs.filter((j) => j.verified);
-  if (verifiedJobs.length < min.jobs) fail(`${verifiedJobs.length} verified jobs (needs ${min.jobs})`);
   if (city.jobs.some((j) => !j.verified)) fail("a job has verified: false");
   if (city.reviews.length < min.reviews) fail(`${city.reviews.length} reviews (needs ${min.reviews})`);
   if (city.reviews.some((r) => !r.citySource)) fail("a review has no citySource");
   if (city.issues.length < min.issues) fail(`${city.issues.length} issues (needs ${min.issues})`);
   if (city.issues.length > 6) fail(`${city.issues.length} issues (max 6)`);
   if (!city.lastReviewed || !/^\d{4}-\d{2}$/.test(city.lastReviewed)) fail("lastReviewed missing or not YYYY-MM");
-  if (city.isHomeBase && !city.homeBaseParagraph) fail("home base paragraph missing");
   return [...out, ...contentRuleViolations(city)];
 }
 

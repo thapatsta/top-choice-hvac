@@ -7,12 +7,13 @@ export type Source = "robin" | "patrick" | "consultant" | "general";
 export type Photo = { src: string; alt: string };
 
 export type Job = {
-  /** Neighbourhood or street. Never a house number. */
-  neighbourhood: string;
+  /** Neighbourhood or street. Never a house number. Omit when not supplied (the card says "{City} homeowner"). */
+  neighbourhood?: string;
   service: "furnace-repair" | "furnace-install" | "ac-install";
   problem: string;
   work: string;
-  year: number;
+  /** Omit when not supplied; the card then shows no year. */
+  year?: number;
   /** Empty for now. Files go in public/images/cities/<city>/. */
   photos?: Photo[];
   /** True only when Robin or Patrick supplied the job. */

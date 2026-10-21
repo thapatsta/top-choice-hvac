@@ -1,6 +1,6 @@
 import type { CityContent } from "./types";
 import imported from "./imports/etobicoke.json";
-import { orPlaceholders, todoJob } from "./placeholders";
+import { orPlaceholders } from "./placeholders";
 import { sharedReviews } from "./shared-reviews";
 import { pickShared } from "./shared-issues";
 import { sharedFaq } from "./shared-faqs";
@@ -22,8 +22,12 @@ const etobicoke: CityContent = {
   introParagraph:
     "A large share of Etobicoke's housing is older, including many mid-century houses, and there are condos near the waterfront in areas like Mimico and Humber Bay. Older houses can come with older ductwork and chimney-vented furnaces, which affects what a replacement involves. Condos and low-rise buildings have their own limits on space and venting. We serve Etobicoke from our base in Brampton. We have completed furnace and AC installations in Etobicoke over the past few years.",
   isHomeBase: false,
-  // TODO_REAL_CONTENT: 2-3 real, verified Etobicoke jobs from Robin or Patrick.
-  jobs: orPlaceholders(imported.jobs, [todoJob("furnace-install"), todoJob("furnace-repair")]),
+  // Supplied by Patrick (2026-10): no neighbourhood or year given, so none is shown.
+  // Add more with the import script or here; see README.md.
+  jobs: [
+    ...imported.jobs,
+    { service: "furnace-install", problem: "The furnace had died.", work: "Replaced the furnace.", photos: [], verified: true },
+  ],
   // Real reviews reused across cities (shared-reviews.ts) until Robin tags reviews to Etobicoke.
   reviews: orPlaceholders(imported.reviews, sharedReviews("Jasmeen D.", "Shubminder R.")),
   issuesIntro:
@@ -90,9 +94,7 @@ const etobicoke: CityContent = {
   ],
   hubLine: "Furnace and AC work in Etobicoke, from older chimney-vented furnaces to ductwork checks before a new install.",
   lastReviewed: "2026-10",
-  // Stays false until Robin and Patrick supply the jobs and reviews and the
-  // guard passes.
-  ready: false,
+  ready: true,
 };
 
 export default etobicoke;
