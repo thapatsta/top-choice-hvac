@@ -8,6 +8,8 @@ import { ServiceIcon } from "@/components/ui/ServiceIcon";
 import { FAQAccordion } from "@/components/FAQAccordion";
 import { CTABand } from "@/components/CTABand";
 import { services, getServiceBySlug } from "@/data/services";
+import { cityPath, publishedCities } from "@/content/cities";
+import { SERVICE_ROUTES } from "@/content/cities/facts";
 import { site } from "@/lib/site";
 import { PhoneLink, PhoneText } from "@/components/Phone";
 
@@ -41,6 +43,10 @@ export default async function ServiceDetailPage({
   const { slug } = await params;
   const service = getServiceBySlug(slug);
   if (!service) notFound();
+
+  // "Areas we serve" line: the three services that have city pages, ready cities only.
+  const areaService = Object.values(SERVICE_ROUTES).find((r) => r.slug === service.slug);
+  const areaCities = areaService ? publishedCities() : [];
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -182,6 +188,21 @@ export default async function ServiceDetailPage({
           <div className="mt-6">
             <FAQAccordion items={service.faqs} />
           </div>
+
+          {areaCities.length > 0 && (
+            <p className="mt-10 text-sm text-muted">
+              Areas we serve:{" "}
+              {areaCities.map((city, i) => (
+                <span key={city.slug}>
+                  {i > 0 && ", "}
+                  <Link href={cityPath(city)} className="font-semibold text-ember hover:underline">
+                    {areaService?.label} in {city.name}
+                  </Link>
+                </span>
+              ))}
+              .
+            </p>
+          )}
 
           <p className="mt-10 text-sm text-muted">
             Looking for something else?{" "}

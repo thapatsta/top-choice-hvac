@@ -96,6 +96,21 @@ describe("call taps on our links", () => {
     });
   });
 
+  it("adds city_page to the GA4 event on a city page, but not to the server log", () => {
+    setPath("/service-area/vaughan");
+    page(`<div data-city-page="Vaughan"><section data-track-location="city_hero"><a id="c" data-call-link href="${PHONE.href}">Call</a></section></div>`);
+    click("#c");
+    expect(clickToCall()[0]).toMatchObject({ link_location: "city_hero", city_page: "Vaughan", page_path: "/service-area/vaughan" });
+    // The call-intent endpoint has a strict key allowlist; the page_path already names the city.
+    expect(deps.sendCallIntent.mock.calls[0][0]).not.toHaveProperty("city_page");
+  });
+
+  it("sends no city_page off the city pages", () => {
+    page(`<div data-track-location="header"><a id="c" data-call-link href="${PHONE.href}">Call</a></div>`);
+    click("#c");
+    expect(clickToCall()[0]).not.toHaveProperty("city_page");
+  });
+
   it("still counts after the forwarding-number swap (marker, not digits)", () => {
     page(`<div data-track-location="lp_sticky_bar"><a id="c" data-call-link href="${PHONE.href}">Call</a></div>`);
     simulateForwardingNumber();

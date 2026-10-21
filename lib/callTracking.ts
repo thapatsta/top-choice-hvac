@@ -50,7 +50,7 @@ export function isOurCallLink(link: Element): boolean {
 }
 
 /** Builds the call-tap params for a click on one of our links. */
-export function describeCallTap(link: Element, win: Window): CallIntentPayload {
+export function describeCallTap(link: Element, win: Window): CallIntentPayload & { city_page?: string } {
   const linkLocation =
     link.closest("[data-track-location]")?.getAttribute("data-track-location") || "body";
   const lpRoot = link.closest<HTMLElement>("[data-lp-slug]");
@@ -61,6 +61,9 @@ export function describeCallTap(link: Element, win: Window): CallIntentPayload {
         lp_service: lpRoot.dataset.lpService,
       })
     : {};
+  // Set by the city page template (components/city/CityPage.tsx). GA4 only:
+  // the server log already has the page_path, and its payload allowlist is strict.
+  const cityPage = link.closest("[data-city-page]")?.getAttribute("data-city-page") || undefined;
   const pathname = win.location.pathname;
   // Every tap on the emergency page counts as emergency (header and sticky
   // bar included), plus links inside a data-call-intent="emergency" block
@@ -80,6 +83,7 @@ export function describeCallTap(link: Element, win: Window): CallIntentPayload {
     post_lead: isPostLead(pathname),
     page_path: pathname,
     swapped,
+    ...(cityPage ? { city_page: cityPage } : {}),
   };
 }
 
@@ -128,7 +132,9 @@ export function installCallTracking(doc: Document, deps: Partial<CallTrackingDep
     }
     if (!automated && shouldLogServerSide(win.location.hostname)) {
       const attribution = readAttribution();
-      d.sendCallIntent(attribution ? { ...tap, attribution } : tap);
+      const { city_page: _cityPage, ...intent } = tap;
+      void _cityPage;
+      d.sendCallIntent(attribution ? { ...intent, attribution } : intent);
     }
   }
 
