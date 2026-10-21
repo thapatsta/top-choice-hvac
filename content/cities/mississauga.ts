@@ -19,7 +19,7 @@ const mississauga: CityContent = {
   answerBlock:
     "Top Choice HVAC is a residential HVAC contractor based in Brampton, Ontario, serving Mississauga and nearby cities. We repair furnaces and install furnaces and air conditioners. You can reach us 24/7, and when you call or request a quote we call you back, usually within 15 minutes.",
   introParagraph:
-    "Mississauga is a mix of eras. There are established older areas, newer builds, and a lot of townhomes and condos, and each one raises different questions when a furnace or AC needs work. An older furnace may need its venting changed, a townhome may put the equipment in a small closet, and a newer build may simply be due for its first replacement. We cover Mississauga from our base in Brampton, also in Peel Region.",
+    "Mississauga is a mix of eras. There are established older areas, newer builds, and a lot of townhomes and condos, and each one raises different questions when a furnace or AC needs work. An older furnace may need its venting changed, a townhome may put the equipment in a small closet, and a newer build may simply be due for its first replacement. We cover Mississauga from our base in Brampton, also in Peel Region. We have completed furnace and AC installations in Mississauga over the past few years.",
   isHomeBase: false,
   // TODO_REAL_CONTENT: 2-3 real, verified Mississauga jobs from Robin or Patrick.
   jobs: orPlaceholders(imported.jobs, [todoJob("furnace-install"), todoJob("ac-install")]),

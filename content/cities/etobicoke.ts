@@ -20,7 +20,7 @@ const etobicoke: CityContent = {
   answerBlock:
     "Top Choice HVAC is a residential HVAC contractor based in Brampton, Ontario, and we serve Etobicoke in the City of Toronto and nearby cities. We repair furnaces and install furnaces and air conditioners. Call us 24/7, and when you call or request a quote we call you back, usually within 15 minutes.",
   introParagraph:
-    "A large share of Etobicoke's housing is older, including many mid-century houses, and there are condos near the waterfront in areas like Mimico and Humber Bay. Older houses can come with older ductwork and chimney-vented furnaces, which affects what a replacement involves. Condos and low-rise buildings have their own limits on space and venting. We serve Etobicoke from our base in Brampton.",
+    "A large share of Etobicoke's housing is older, including many mid-century houses, and there are condos near the waterfront in areas like Mimico and Humber Bay. Older houses can come with older ductwork and chimney-vented furnaces, which affects what a replacement involves. Condos and low-rise buildings have their own limits on space and venting. We serve Etobicoke from our base in Brampton. We have completed furnace and AC installations in Etobicoke over the past few years.",
   isHomeBase: false,
   // TODO_REAL_CONTENT: 2-3 real, verified Etobicoke jobs from Robin or Patrick.
   jobs: orPlaceholders(imported.jobs, [todoJob("furnace-install"), todoJob("furnace-repair")]),

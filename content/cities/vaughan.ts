@@ -20,7 +20,7 @@ const vaughan: CityContent = {
   answerBlock:
     "Top Choice HVAC is a residential heating and cooling contractor based in Brampton, Ontario, and we serve Vaughan and nearby cities. We repair furnaces and install furnaces and air conditioners. We are open 24/7, and when you call or request a quote we call you back, usually within 15 minutes.",
   introParagraph:
-    "Vaughan has a lot of larger, newer detached houses in subdivisions, with older village-style cores such as Woodbridge and Kleinburg alongside. Bigger floor plans make for harder heating and cooling jobs: more square footage, more floors, and more rooms for one furnace and one AC to balance. Equipment from the newer subdivisions is also getting older. We cover Vaughan from our base in Brampton.",
+    "Vaughan has a lot of larger, newer detached houses in subdivisions, with older village-style cores such as Woodbridge and Kleinburg alongside. Bigger floor plans make for harder heating and cooling jobs: more square footage, more floors, and more rooms for one furnace and one AC to balance. Equipment from the newer subdivisions is also getting older. We cover Vaughan from our base in Brampton. We have completed furnace and AC installations in Vaughan over the past few years.",
   isHomeBase: false,
   // TODO_REAL_CONTENT: 2-3 real, verified Vaughan jobs from Robin or Patrick.
   jobs: orPlaceholders(imported.jobs, [todoJob("furnace-install"), todoJob("ac-install")]),

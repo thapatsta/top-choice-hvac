@@ -36,7 +36,7 @@ Keep this file in step with the data files: `tests/cityContent.test.ts` fails if
 
     **Intro paragraph**
 
-    > Brampton has grown quickly over the last few decades, so one street can have a house with a furnace from the day it was built next to one that was replaced last year. Many neighbourhoods are newer subdivisions with older, established areas beside them, and the age of the furnace and AC can differ a lot from one street to the next. We work out of Brampton.
+    > Brampton has grown quickly over the last few decades, so one street can have a house with a furnace from the day it was built next to one that was replaced last year. Many neighbourhoods are newer subdivisions with older, established areas beside them, and the age of the furnace and AC can differ a lot from one street to the next. We work out of Brampton. We have completed furnace and AC installations in Brampton over the past few years.
 
     **Intro to the problems section**
 
@@ -92,7 +92,7 @@ Keep this file in step with the data files: `tests/cityContent.test.ts` fails if
 
     **Intro paragraph**
 
-    > Mississauga is a mix of eras. There are established older areas, newer builds, and a lot of townhomes and condos, and each one raises different questions when a furnace or AC needs work. An older furnace may need its venting changed, a townhome may put the equipment in a small closet, and a newer build may simply be due for its first replacement. We cover Mississauga from our base in Brampton, also in Peel Region.
+    > Mississauga is a mix of eras. There are established older areas, newer builds, and a lot of townhomes and condos, and each one raises different questions when a furnace or AC needs work. An older furnace may need its venting changed, a townhome may put the equipment in a small closet, and a newer build may simply be due for its first replacement. We cover Mississauga from our base in Brampton, also in Peel Region. We have completed furnace and AC installations in Mississauga over the past few years.
 
     **Intro to the problems section**
 
@@ -148,7 +148,7 @@ Keep this file in step with the data files: `tests/cityContent.test.ts` fails if
 
     **Intro paragraph**
 
-    > Vaughan has a lot of larger, newer detached houses in subdivisions, with older village-style cores such as Woodbridge and Kleinburg alongside. Bigger floor plans make for harder heating and cooling jobs: more square footage, more floors, and more rooms for one furnace and one AC to balance. Equipment from the newer subdivisions is also getting older. We cover Vaughan from our base in Brampton.
+    > Vaughan has a lot of larger, newer detached houses in subdivisions, with older village-style cores such as Woodbridge and Kleinburg alongside. Bigger floor plans make for harder heating and cooling jobs: more square footage, more floors, and more rooms for one furnace and one AC to balance. Equipment from the newer subdivisions is also getting older. We cover Vaughan from our base in Brampton. We have completed furnace and AC installations in Vaughan over the past few years.
 
     **Intro to the problems section**
 
@@ -204,7 +204,7 @@ Keep this file in step with the data files: `tests/cityContent.test.ts` fails if
 
     **Intro paragraph**
 
-    > A large share of Etobicoke's housing is older, including many mid-century houses, and there are condos near the waterfront in areas like Mimico and Humber Bay. Older houses can come with older ductwork and chimney-vented furnaces, which affects what a replacement involves. Condos and low-rise buildings have their own limits on space and venting. We serve Etobicoke from our base in Brampton.
+    > A large share of Etobicoke's housing is older, including many mid-century houses, and there are condos near the waterfront in areas like Mimico and Humber Bay. Older houses can come with older ductwork and chimney-vented furnaces, which affects what a replacement involves. Condos and low-rise buildings have their own limits on space and venting. We serve Etobicoke from our base in Brampton. We have completed furnace and AC installations in Etobicoke over the past few years.
 
     **Intro to the problems section**
 

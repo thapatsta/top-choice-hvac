@@ -20,7 +20,7 @@ const brampton: CityContent = {
   answerBlock:
     "Top Choice HVAC is a residential heating and cooling contractor based in Brampton, Ontario. We repair furnaces and install furnaces and air conditioners for homeowners in Brampton and nearby cities. We are open 24/7, and when you call or send a quote request we call you back, usually within 15 minutes.",
   introParagraph:
-    "Brampton has grown quickly over the last few decades, so one street can have a house with a furnace from the day it was built next to one that was replaced last year. Many neighbourhoods are newer subdivisions with older, established areas beside them, and the age of the furnace and AC can differ a lot from one street to the next. We work out of Brampton.",
+    "Brampton has grown quickly over the last few decades, so one street can have a house with a furnace from the day it was built next to one that was replaced last year. Many neighbourhoods are newer subdivisions with older, established areas beside them, and the age of the furnace and AC can differ a lot from one street to the next. We work out of Brampton. We have completed furnace and AC installations in Brampton over the past few years.",
   isHomeBase: true,
   // TODO_REAL_CONTENT: Robin to write 1-2 sentences on being based in
   // Brampton (we live and work here) and confirm he is happy with it on the
