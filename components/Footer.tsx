@@ -147,13 +147,6 @@ export function Footer() {
                 {site.email}
               </a>
             </li>
-            <li className="flex items-start gap-2">
-              <MapPin size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
-              <span>
-                {site.address.street}, {site.address.city}, {site.address.region}{" "}
-                {site.address.postalCode}
-              </span>
-            </li>
             <li>
               <a
                 href={site.social.instagram}
