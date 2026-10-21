@@ -68,6 +68,8 @@ export interface AnalyticsEventParams {
       post_lead: boolean;
       /** The link showed a Google forwarding number instead of ours. */
       swapped: boolean;
+      /** City name, on /service-area/<city> pages only (data-city-page). */
+      city_page?: string;
     };
   click_email: LinkParams;
   /** A link from one landing page to another (e.g. repair → install). */

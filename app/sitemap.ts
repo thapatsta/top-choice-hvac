@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { services } from "@/data/services";
 import { blogOutlines } from "@/data/blog";
+import { cityPath, lastReviewedDate, publishedCities } from "@/content/cities";
 import { site } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -36,5 +37,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.5,
   }));
 
-  return [...staticRoutes, ...serviceRoutes, ...blogRoutes];
+  // Only ready city pages, each with the date its content was last reviewed
+  // (never the build time).
+  const cityRoutes: MetadataRoute.Sitemap = publishedCities().map((city) => ({
+    url: `${site.url}${cityPath(city)}`,
+    lastModified: lastReviewedDate(city),
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
+
+  return [...staticRoutes, ...serviceRoutes, ...cityRoutes, ...blogRoutes];
 }

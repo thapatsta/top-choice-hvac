@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Phone, Mail, MapPin, Flame } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { services } from "@/data/services";
+import { cityPath, publishedCities } from "@/content/cities";
 import { site } from "@/lib/site";
 import { PhoneLink, PhoneText } from "@/components/Phone";
 
@@ -82,6 +83,14 @@ export function Footer() {
                 Service Area
               </Link>
             </li>
+            {/* Ready city pages only; none render until a city is ready. */}
+            {publishedCities().map((city) => (
+              <li key={city.slug} className="pl-3">
+                <Link href={cityPath(city)} className="hover:text-ember">
+                  {city.name}
+                </Link>
+              </li>
+            ))}
             <li>
               <Link href="/reviews" className="hover:text-ember">
                 Reviews
@@ -137,13 +146,6 @@ export function Footer() {
                 <Mail size={16} aria-hidden="true" />
                 {site.email}
               </a>
-            </li>
-            <li className="flex items-start gap-2">
-              <MapPin size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
-              <span>
-                {site.address.street}, {site.address.city}, {site.address.region}{" "}
-                {site.address.postalCode}
-              </span>
             </li>
             <li>
               <a
