@@ -64,6 +64,8 @@ Reviews must come from the Google reviews list and be tagged to the city by Robi
 { firstName: "Nav", stars: 5, text: "…", date: "2025-11", citySource: "robin-tagged" }
 ```
 
+Until Robin tags reviews to a city, each city shows a few real Google reviews reused from `data/reviews.ts` (`shared-reviews.ts`, `citySource: "not-city-specific"`). The section is then headed "What our customers say", never "What <City> customers say". Once every review on a page is tagged, the heading switches back to the city name.
+
 `citySource` is `robin-tagged` (Robin said which city) or `address-confirmed` (the job address was checked). First name only, never a surname or initial.
 
 ## Adding or changing an issue

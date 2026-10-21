@@ -102,6 +102,16 @@ describe("city page template", () => {
     expect(markup).toContain('href="/service-area"');
   });
 
+  it("never calls reused reviews local: generic heading unless every review is tagged to the city", () => {
+    const reused: CityContent = {
+      ...mississauga,
+      reviews: mississauga.reviews.map((r) => ({ ...r, citySource: "not-city-specific" as const })),
+    };
+    expect(html(reused)).toContain("What our customers say");
+    expect(html(reused)).not.toContain("Mississauga customers");
+    expect(html(mississauga)).toContain("What Mississauga customers say");
+  });
+
   it("shows the home-base paragraph and a link to /about for the home base only", () => {
     expect(html(brampton)).toContain('href="/about"');
     expect(html(mississauga)).not.toContain('href="/about"');

@@ -1,6 +1,7 @@
 import type { CityContent } from "./types";
 import imported from "./imports/mississauga.json";
-import { orPlaceholders, todoJob, todoReview } from "./placeholders";
+import { orPlaceholders, todoJob } from "./placeholders";
+import { sharedReviews } from "./shared-reviews";
 import { pickShared } from "./shared-issues";
 import { sharedFaq } from "./shared-faqs";
 
@@ -22,8 +23,8 @@ const mississauga: CityContent = {
   isHomeBase: false,
   // TODO_REAL_CONTENT: 2-3 real, verified Mississauga jobs from Robin or Patrick.
   jobs: orPlaceholders(imported.jobs, [todoJob("furnace-install"), todoJob("ac-install")]),
-  // TODO_REAL_CONTENT: 2+ Google reviews tagged to Mississauga by Robin.
-  reviews: orPlaceholders(imported.reviews, [todoReview(), todoReview()]),
+  // Real reviews reused across cities (shared-reviews.ts) until Robin tags reviews to Mississauga.
+  reviews: orPlaceholders(imported.reviews, sharedReviews("Jasmeen D.", "Amarinder R.")),
   issuesIntro:
     "Mississauga is in Peel Region and has a wide range of housing, so the problems below start with the ones that depend on the building and then cover the ones that can happen to any system. Two of them concern venting and tight mechanical closets, which can change what a furnace or AC replacement involves.",
   issues: [

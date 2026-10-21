@@ -26,7 +26,8 @@ export type Review = {
   text: string;
   /** "2025-11" */
   date?: string;
-  citySource: "robin-tagged" | "address-confirmed";
+  /** "not-city-specific": a real review shown on every city page, never labelled as from that city. */
+  citySource: "robin-tagged" | "address-confirmed" | "not-city-specific";
 };
 
 export type Issue = {

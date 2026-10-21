@@ -1,6 +1,7 @@
 import type { CityContent } from "./types";
 import imported from "./imports/etobicoke.json";
-import { orPlaceholders, todoJob, todoReview } from "./placeholders";
+import { orPlaceholders, todoJob } from "./placeholders";
+import { sharedReviews } from "./shared-reviews";
 import { pickShared } from "./shared-issues";
 import { sharedFaq } from "./shared-faqs";
 
@@ -23,8 +24,8 @@ const etobicoke: CityContent = {
   isHomeBase: false,
   // TODO_REAL_CONTENT: 2-3 real, verified Etobicoke jobs from Robin or Patrick.
   jobs: orPlaceholders(imported.jobs, [todoJob("furnace-install"), todoJob("furnace-repair")]),
-  // TODO_REAL_CONTENT: 2+ Google reviews tagged to Etobicoke by Robin.
-  reviews: orPlaceholders(imported.reviews, [todoReview(), todoReview()]),
+  // Real reviews reused across cities (shared-reviews.ts) until Robin tags reviews to Etobicoke.
+  reviews: orPlaceholders(imported.reviews, sharedReviews("Jasmeen D.", "Shubminder R.")),
   issuesIntro:
     "Etobicoke is part of the City of Toronto, and a lot of its housing is older. The first two problems below follow from that: ductwork that is as old as the house, and furnaces that still vent through a chimney. The rest can happen to any system.",
   issues: [

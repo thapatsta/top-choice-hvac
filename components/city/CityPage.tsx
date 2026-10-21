@@ -199,6 +199,7 @@ function IssueBlock({ issue }: { issue: Issue }) {
 }
 
 export function CityPage({ city }: { city: CityContent }) {
+  const cityTagged = city.reviews.every((r) => r.citySource !== "not-city-specific");
   const others = publishedCities().filter((c) => c.slug !== city.slug);
   const services = [
     { label: "Furnace repair", href: SERVICE_PAGE_PATHS.furnaceRepair, blurb: city.serviceBlurbs.furnaceRepair },
@@ -290,9 +291,12 @@ export function CityPage({ city }: { city: CityContent }) {
 
       <section className="py-12 sm:py-16">
         <Container className="max-w-4xl">
-          <h2 className={h2}>What {city.name} customers say</h2>
+          {/* Only call them "{city} customers" when every review is tagged to the city. */}
+          <h2 className={h2}>{cityTagged ? `What ${city.name} customers say` : "What our customers say"}</h2>
           <p className="mt-3 text-navy">
-            These Google reviews come from {city.name} customers.{" "}
+            {cityTagged
+              ? `These Google reviews come from ${city.name} customers. `
+              : "These are real Google reviews from our customers. "}
             <Link href="/reviews" className="font-semibold text-ember hover:underline">
               Read more reviews
             </Link>

@@ -1,7 +1,8 @@
 import type { CityContent } from "./types";
 import { TODO } from "./facts";
 import imported from "./imports/brampton.json";
-import { orPlaceholders, todoJob, todoReview } from "./placeholders";
+import { orPlaceholders, todoJob } from "./placeholders";
+import { sharedReviews } from "./shared-reviews";
 import { pickShared } from "./shared-issues";
 import { sharedFaq } from "./shared-faqs";
 
@@ -28,8 +29,8 @@ const brampton: CityContent = {
   // TODO_REAL_CONTENT: 4-5 real, verified Brampton jobs from Robin or Patrick
   // (neighbourhood or street, year, service, problem, what we did).
   jobs: orPlaceholders(imported.jobs, [todoJob("furnace-install"), todoJob("furnace-repair"), todoJob("ac-install"), todoJob("furnace-install")]),
-  // TODO_REAL_CONTENT: 3+ Google reviews tagged to Brampton by Robin.
-  reviews: orPlaceholders(imported.reviews, [todoReview(), todoReview(), todoReview()]),
+  // Real reviews reused across cities (shared-reviews.ts) until Robin tags reviews to Brampton.
+  reviews: orPlaceholders(imported.reviews, sharedReviews("Jasmeen D.", "Amarinder R.", "Shubminder R.")),
   issuesIntro:
     "Brampton is in Peel Region. Two of the problems below follow from how the city has grown, with newer subdivisions and finished basements. The rest can happen to any furnace or AC in any city, and we've included them because they are what people search for during a cold snap or a heat wave.",
   issues: [

@@ -1,6 +1,7 @@
 import type { CityContent } from "./types";
 import imported from "./imports/vaughan.json";
-import { orPlaceholders, todoJob, todoReview } from "./placeholders";
+import { orPlaceholders, todoJob } from "./placeholders";
+import { sharedReviews } from "./shared-reviews";
 import { pickShared } from "./shared-issues";
 import { sharedFaq } from "./shared-faqs";
 
@@ -23,8 +24,8 @@ const vaughan: CityContent = {
   isHomeBase: false,
   // TODO_REAL_CONTENT: 2-3 real, verified Vaughan jobs from Robin or Patrick.
   jobs: orPlaceholders(imported.jobs, [todoJob("furnace-install"), todoJob("ac-install")]),
-  // TODO_REAL_CONTENT: 2+ Google reviews tagged to Vaughan by Robin.
-  reviews: orPlaceholders(imported.reviews, [todoReview(), todoReview()]),
+  // Real reviews reused across cities (shared-reviews.ts) until Robin tags reviews to Vaughan.
+  reviews: orPlaceholders(imported.reviews, sharedReviews("Amarinder R.", "Shubminder R.")),
   issuesIntro:
     "Vaughan is in York Region, and the first two problems below follow from the size of its houses. Comfort complaints in a big floor plan often come down to airflow and equipment choice rather than a broken part. The rest are common faults we can describe for any system.",
   issues: [
