@@ -117,7 +117,7 @@ export const services: Service[] = [
     financingNote:
       "Furnace replacements are financeable — see our /financing page for estimated monthly payments on different loan terms.",
     rebateNote:
-      "High-efficiency furnace upgrades may qualify for Ontario/federal rebate programs. See /rebates for current programs (verify amounts before purchase — they change).",
+      "We haven't found a current Ontario rebate for replacing a gas furnace with another gas furnace, and we won't promise one. If you're open to a heat pump with your furnace kept as backup, rebates up to $2,000 apply in gas homes. See /rebates.",
     faqs: [
       {
         question: `Is ${formatCAD(furnaceInstallOffer.priceFrom)} the final price?`,
@@ -196,7 +196,7 @@ export const services: Service[] = [
     process: standardProcess,
     financingNote: "AC replacements are financeable — see /financing for estimated monthly payments.",
     rebateNote:
-      "Higher-SEER systems may qualify for utility or provincial rebates. See /rebates (verify current amounts before purchase).",
+      "We haven't found a current Ontario rebate for a like-for-like AC swap. A cold-climate heat pump cools like an AC and heats too, and that version can qualify for Ontario's Home Renovation Savings rebate. See /rebates.",
     faqs: [
       {
         question: "How long does an AC installation take?",
@@ -227,7 +227,7 @@ export const services: Service[] = [
     process: standardProcess,
     financingNote: "Heat pump installations are financeable — see /financing.",
     rebateNote:
-      "Heat pumps are currently a priority category for several Ontario and federal incentive programs. See /rebates for current program details (verify before purchase — this is the fastest-changing rebate category).",
+      "Ontario's Home Renovation Savings program pays up to $7,500 for a cold-climate heat pump in homes heated by electricity, oil, propane or wood, and up to $2,000 in Enbridge gas homes. It needs written approval before install. We handle the application. See /rebates.",
     faqs: [
       {
         question: "Do heat pumps actually work in Canadian winters?",
@@ -259,7 +259,7 @@ export const services: Service[] = [
     process: standardProcess,
     financingNote: "Ductless systems are financeable — see /financing.",
     rebateNote:
-      "Ductless heat pump systems may qualify for the same incentive programs as central heat pumps. See /rebates (verify eligibility for your specific configuration).",
+      "Ductless cold-climate heat pumps can qualify for the same Home Renovation Savings rebate when they meet the program's efficiency and sizing rules. We check your configuration before you commit. See /rebates.",
     faqs: [
       {
         question: "How many indoor units can one outdoor unit support?",
@@ -292,7 +292,7 @@ export const services: Service[] = [
     process: standardProcess,
     financingNote: "Water heater installs are financeable — see /financing.",
     rebateNote:
-      "Some high-efficiency and heat-pump water heaters may qualify for rebates. See /rebates for current details.",
+      "Water heater rebates, where they exist, run through Ontario's Home Renovation Savings program and usually need a home energy assessment first. Ask us before you buy. See /rebates.",
     faqs: [
       {
         question: "Tank or tankless — which is right for me?",
@@ -324,7 +324,7 @@ export const services: Service[] = [
     process: standardProcess,
     financingNote: "IAQ equipment can be financed as a standalone install or bundled with a furnace/AC replacement — see /financing.",
     rebateNote:
-      "Some IAQ equipment (particularly HRV/ERV systems) may qualify for provincial rebate programs. See /rebates for current details.",
+      "We haven't confirmed a current rebate for this category. See /rebates for what is open in Ontario today.",
     faqs: [
       {
         question: "What's the difference between an HRV and an ERV?",

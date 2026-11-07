@@ -12,14 +12,15 @@ export function RebatesPromoTeaser() {
         >
           <Percent size={32} className="text-ember" aria-hidden="true" />
           <h3 className="font-display text-2xl font-bold text-navy">
-            Current Rebate Programs
+            Ontario Rebates: What&rsquo;s Actually Open
           </h3>
           <p className="text-muted">
-            Federal, provincial, and utility incentives can offset the cost of
-            a new furnace, AC, or heat pump. See what you may qualify for.
+            Heat pump rebates run up to $7,500 in Ontario, but many federal
+            programs have closed. Find out what applies to your home in four
+            taps.
           </p>
           <span className="mt-auto font-semibold text-ember group-hover:underline">
-            View rebates →
+            Check my rebates →
           </span>
         </Link>
         <Link

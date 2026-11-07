@@ -50,13 +50,17 @@ const emptyState: FormState = {
 
 export function QuoteForm({
   initialUrgency,
+  initialSystemType,
   source = "get-quote",
 }: {
   initialUrgency?: QuoteUrgency;
+  /** Preselects the system step, e.g. when arriving from the /rebates finder. */
+  initialSystemType?: QuoteSystemType;
   source?: string;
 }) {
   const [form, setForm] = useState<FormState>({
     ...emptyState,
+    systemType: initialSystemType ?? null,
     urgency: initialUrgency ?? null,
   });
   const [stepIndex, setStepIndex] = useState(0);
