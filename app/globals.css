@@ -240,3 +240,49 @@ html:has(.lpt) {
     animation: none;
   }
 }
+
+/* /rebates finder: result ticket reveal and stamp. Respects reduced motion via the block above. */
+@keyframes rebate-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rebate-stamp {
+  0% {
+    opacity: 0;
+    transform: rotate(-9deg) scale(1.6);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(-5deg) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-6deg) scale(1);
+  }
+}
+
+.rebate-rise {
+  animation: rebate-rise 0.45s ease-out both;
+}
+
+.rebate-stamp {
+  animation: rebate-stamp 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) 0.2s both;
+}
+
+/* Perforated ticket edge: round notches cut into both sides. */
+.rebate-ticket {
+  --notch: 12px;
+  -webkit-mask:
+    radial-gradient(circle var(--notch) at 0 var(--notch-y, 70%), transparent 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--notch) at 100% var(--notch-y, 70%), transparent 98%, #000) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle var(--notch) at 0 var(--notch-y, 70%), transparent 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--notch) at 100% var(--notch-y, 70%), transparent 98%, #000) right / 51% 100% no-repeat;
+}

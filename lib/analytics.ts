@@ -74,6 +74,17 @@ export interface AnalyticsEventParams {
   click_email: LinkParams;
   /** A link from one landing page to another (e.g. repair → install). */
   lp_crosslink: LinkParams & LpContext & { lp_destination: LpSlug };
+  /**
+   * The /rebates finder. Enums only, never anything typed by the visitor.
+   * action "answer" carries step + choice, "result" carries verdict,
+   * "cta_quote" is the quote link on the result, "restart" is "start over".
+   */
+  rebate_finder: {
+    action: "answer" | "result" | "cta_quote" | "restart";
+    step?: "heat" | "project" | "home" | "income";
+    choice?: string;
+    verdict?: string;
+  };
 }
 
 export type AnalyticsEvent = keyof AnalyticsEventParams;

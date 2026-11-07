@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { ShieldCheck, Clock, DollarSign } from "lucide-react";
 import { Container } from "@/components/ui/Container";
+import { Suspense } from "react";
 import { QuoteForm } from "@/components/quote/QuoteForm";
+import { QuoteFormWithPrefill } from "@/components/quote/QuoteFormWithPrefill";
 import { pageMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = pageMetadata({
@@ -39,7 +41,10 @@ export default function GetQuotePage() {
             ))}
           </ul>
         </div>
-        <QuoteForm source="get-quote" />
+        {/* useSearchParams needs a Suspense boundary on a statically rendered page. */}
+        <Suspense fallback={<QuoteForm source="get-quote" />}>
+          <QuoteFormWithPrefill source="get-quote" />
+        </Suspense>
       </Container>
     </section>
   );
