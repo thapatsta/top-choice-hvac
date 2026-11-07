@@ -16,6 +16,19 @@ import type { FAQ } from "@/data/faqs";
 
 export const REBATES_VERIFIED = "November 7, 2026";
 
+/**
+ * Real count of rebate applications Top Choice has handled, from the owner
+ * (2026-11-07). Update it when it changes; set to null to hide the stat.
+ * Never put a number here the owner hasn't given you.
+ */
+export const REBATES_HANDLED: number | null = 108;
+
+/** "108 rebates handled", or null when there is no real number to show. */
+export function rebatesHandledLabel(n: number | null): string | null {
+  if (n === null || !Number.isInteger(n) || n <= 0) return null;
+  return `${n} rebates handled`;
+}
+
 export type ProgramStatus = "open" | "announced" | "closed";
 export type ProgramLevel = "Provincial" | "Federal" | "Municipal";
 

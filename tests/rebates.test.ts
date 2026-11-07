@@ -5,6 +5,8 @@ import {
   heatPumpRebate,
   programsByStatus,
   rebateFaqs,
+  rebatesHandledLabel,
+  REBATES_HANDLED,
   rebatePrograms,
   REBATES_VERIFIED,
   type FinderAnswers,
@@ -97,5 +99,19 @@ describe("program data", () => {
       expect(f.question.endsWith("?")).toBe(true);
       expect(f.answer.length).toBeGreaterThan(20);
     }
+  });
+});
+
+describe("rebates handled proof", () => {
+  it("shows a real count and hides anything that isn't one", () => {
+    expect(rebatesHandledLabel(108)).toBe("108 rebates handled");
+    expect(rebatesHandledLabel(null)).toBeNull();
+    expect(rebatesHandledLabel(0)).toBeNull();
+    expect(rebatesHandledLabel(-5)).toBeNull();
+    expect(rebatesHandledLabel(12.5)).toBeNull();
+  });
+
+  it("uses the owner's confirmed figure", () => {
+    expect(REBATES_HANDLED).toBe(108);
   });
 });

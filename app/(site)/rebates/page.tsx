@@ -8,6 +8,7 @@ import { PhoneLink, PhoneText } from "@/components/Phone";
 import { RebateFinder } from "@/components/rebates/RebateFinder";
 import { ProgramBoard } from "@/components/rebates/ProgramBoard";
 import { PreApprovalTimeline } from "@/components/rebates/PreApprovalTimeline";
+import { ProofStrip } from "@/components/rebates/ProofStrip";
 import { programsByStatus, rebateFaqs, REBATES_VERIFIED } from "@/data/rebates";
 import { pageMetadata } from "@/lib/metadata";
 import { site } from "@/lib/site";
@@ -82,6 +83,8 @@ export default function RebatesPage() {
           </p>
         </Container>
       </section>
+
+      <ProofStrip />
 
       <section className="py-16 sm:py-20">
         <Container>
