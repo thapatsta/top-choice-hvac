@@ -226,6 +226,11 @@ export function heatPumpRebate(heat: HeatSource, tons: number): number {
   return Math.min(Math.round(tons * perTon), cap);
 }
 
+/** Bar length for a heating fuel, as a share of the largest cap (0 to 1). */
+export function heatPumpBarShare(heat: HeatSource): number {
+  return heatPumpRate(heat).cap / NON_GAS_RATE.cap;
+}
+
 export type LineKind = "open" | "announced" | "info";
 
 export interface ResultLine {
