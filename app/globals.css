@@ -286,3 +286,30 @@ html:has(.lpt) {
     radial-gradient(circle var(--notch) at 0 var(--notch-y, 70%), transparent 98%, #000) left / 51% 100% no-repeat,
     radial-gradient(circle var(--notch) at 100% var(--notch-y, 70%), transparent 98%, #000) right / 51% 100% no-repeat;
 }
+
+/* /rebates graphics: fan spin and bar grow. Reduced motion is handled by the global rule above. */
+@keyframes rebate-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rebate-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.rebate-fan {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: rebate-spin 2.6s linear infinite;
+}
+
+.rebate-bar {
+  transform-origin: left center;
+  animation: rebate-grow 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s both;
+}

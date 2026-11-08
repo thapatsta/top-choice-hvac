@@ -9,6 +9,8 @@ import { RebateFinder } from "@/components/rebates/RebateFinder";
 import { ProgramBoard } from "@/components/rebates/ProgramBoard";
 import { PreApprovalTimeline } from "@/components/rebates/PreApprovalTimeline";
 import { ProofStrip } from "@/components/rebates/ProofStrip";
+import { HeroIllustration } from "@/components/rebates/graphics/HeroIllustration";
+import { ApprovalArt } from "@/components/rebates/graphics/ApprovalArt";
 import { programsByStatus, rebateFaqs, REBATES_VERIFIED } from "@/data/rebates";
 import { pageMetadata } from "@/lib/metadata";
 import { site } from "@/lib/site";
@@ -31,9 +33,9 @@ export default function RebatesPage() {
   };
 
   const counts = [
-    { n: programsByStatus("open").length, label: "open" },
-    { n: programsByStatus("announced").length, label: "announced" },
-    { n: programsByStatus("closed").length, label: "closed" },
+    { n: programsByStatus("open").length, label: "open", href: "#open", dot: "bg-success" },
+    { n: programsByStatus("announced").length, label: "announced", href: "#announced", dot: "bg-ember-light" },
+    { n: programsByStatus("closed").length, label: "closed", href: "#closed", dot: "bg-white/50" },
   ];
 
   return (
@@ -45,7 +47,7 @@ export default function RebatesPage() {
 
       {/* Hero: answers the search ("rebates") in the first screen, then hands off to the finder. */}
       <section className="bg-navy pb-28 pt-12 text-white sm:pb-36 sm:pt-16">
-        <Container className="grid grid-cols-1 items-end gap-8 lg:grid-cols-[1.4fr_1fr]">
+        <Container className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[1.3fr_1fr]">
           <div>
             <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-ember-light">
               Ontario rebates · Checked {REBATES_VERIFIED}
@@ -58,18 +60,21 @@ export default function RebatesPage() {
               today, what&rsquo;s only been announced, and how to claim it without losing the money to a
               missed step.
             </p>
-          </div>
-          <dl className="grid grid-cols-3 gap-3 text-center">
-            {counts.map((c) => (
-              <div key={c.label} className="rounded-2xl border border-white/15 bg-white/5 p-4">
-                <dt className="sr-only">{c.label}</dt>
-                <dd className="font-display text-4xl font-extrabold text-ember-light">{c.n}</dd>
-                <dd className="text-xs font-bold uppercase tracking-widest text-white/70">
+            <nav aria-label="Jump to programs" className="mt-6 flex flex-wrap gap-2.5">
+              {counts.map((c) => (
+                <a
+                  key={c.label}
+                  href={c.href}
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/25 bg-white/5 px-4 text-sm font-semibold text-white hover:bg-white/15"
+                >
+                  <span aria-hidden="true" className={`h-2.5 w-2.5 rounded-full ${c.dot}`} />
+                  <span className="font-display text-lg font-extrabold">{c.n}</span>
                   {c.label}
-                </dd>
-              </div>
-            ))}
-          </dl>
+                </a>
+              ))}
+            </nav>
+          </div>
+          <HeroIllustration className="mx-auto hidden w-full max-w-md lg:block" />
         </Container>
       </section>
 
@@ -117,6 +122,7 @@ export default function RebatesPage() {
                 for you. You don&rsquo;t fill out program forms.
               </p>
             </div>
+            <ApprovalArt className="mx-auto mt-8 hidden w-full max-w-sm sm:block lg:mx-0" />
           </div>
           <PreApprovalTimeline />
         </Container>
