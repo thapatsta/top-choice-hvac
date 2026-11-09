@@ -135,7 +135,7 @@ export default function RebatesPage() {
           </PhoneLink>
           <Link
             href="/get-quote?system=heat-pump"
-            className="text-sm font-semibold text-white/80 underline underline-offset-4 hover:text-white"
+            className="inline-flex min-h-[44px] items-center text-sm font-semibold text-white/80 underline underline-offset-4 hover:text-white"
           >
             Prefer to type? Get a free quote
           </Link>

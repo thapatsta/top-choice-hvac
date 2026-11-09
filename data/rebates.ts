@@ -370,7 +370,10 @@ export function getFinderResult(a: FinderAnswers): FinderResult {
 
   return {
     verdict: "stack",
-    headline: "You likely qualify for a heat pump rebate.",
+    headline:
+      a.home === "rent"
+        ? "Your landlord would need to apply for the heat pump rebate."
+        : "You likely qualify for a heat pump rebate.",
     lead: "Here's what's open for a home like yours. The number is the program's own formula, not a guess. We confirm the final amount at your free assessment.",
     showCalculator: true,
     lines,

@@ -66,6 +66,8 @@ describe("finder results", () => {
   it("tells renters the landlord has to apply", () => {
     const r = getFinderResult({ ...base, home: "rent" });
     expect(r.lines[0].detail).toMatch(/landlord/i);
+    expect(r.headline).toMatch(/landlord/i);
+    expect(r.headline).not.toMatch(/you likely qualify/i);
   });
 
   it("only offers the income-qualified line when the household might qualify", () => {
