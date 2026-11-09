@@ -1,33 +1,18 @@
 const STEPS: { who: "You" | "Us" | "Program"; title: string; body: string }[] = [
   {
     who: "You",
-    title: "Call or request a free quote",
-    body: "Tell us your heating fuel and what you're replacing. We tell you straight away whether a rebate applies.",
-  },
-  {
-    who: "Us",
-    title: "Free in-home assessment",
-    body: "We size the system, photograph your existing equipment and nameplates, and put together the work order.",
-  },
-  {
-    who: "Us",
-    title: "We submit the pre-approval",
-    body: "Your signed participant agreement and our sizing paperwork go to the program. No work starts yet.",
+    title: "Call us before you sign anything",
+    body: "We check your heating fuel and tell you straight away whether a rebate applies, then book a free in-home assessment.",
   },
   {
     who: "Program",
-    title: "Written approval",
-    body: "Installs done before approval don't qualify. This is the step people lose their rebate on.",
+    title: "We get written approval",
+    body: "We submit the pre-approval for you. No work starts until it comes back. Installs done before approval don't qualify.",
   },
   {
     who: "Us",
-    title: "Installation, then final paperwork",
-    body: "We install, then submit the post-installation application with invoices and photos within 30 days.",
-  },
-  {
-    who: "Program",
-    title: "Cheque in the mail",
-    body: "After final approval the rebate cheque is mailed to you, within about 60 days.",
+    title: "We install and file the rest",
+    body: "We handle the post-install paperwork. The cheque is mailed to you, within about 60 days of final approval.",
   },
 ];
 

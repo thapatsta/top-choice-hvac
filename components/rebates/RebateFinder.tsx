@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Phone, RotateCcw } from "lucide-react";
 import { PhoneLink, PhoneText } from "@/components/Phone";
-import { FanIcon } from "@/components/rebates/graphics/FanIcon";
 import { buttonClasses } from "@/components/ui/Button";
 import { track } from "@/lib/analytics";
 import { formatCAD } from "@/lib/format";
@@ -259,7 +258,6 @@ function Result({
               : "Ontario rebate on today’s rules"}
           </p>
           <div className="mt-2 flex flex-wrap items-end gap-x-4 gap-y-1">
-            <FanIcon size={44} className="self-center" />
             <span className="font-display text-5xl font-extrabold leading-none sm:text-6xl">
               {formatCAD(amount)}
             </span>

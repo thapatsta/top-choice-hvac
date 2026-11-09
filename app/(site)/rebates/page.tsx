@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Mail, Phone, ClipboardList, ShieldCheck } from "lucide-react";
+import { Phone } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { CTABand } from "@/components/CTABand";
 import { FAQAccordion } from "@/components/FAQAccordion";
 import { PhoneLink, PhoneText } from "@/components/Phone";
 import { RebateFinder } from "@/components/rebates/RebateFinder";
@@ -10,10 +9,10 @@ import { ProgramBoard } from "@/components/rebates/ProgramBoard";
 import { PreApprovalTimeline } from "@/components/rebates/PreApprovalTimeline";
 import { ProofStrip } from "@/components/rebates/ProofStrip";
 import { HeroIllustration } from "@/components/rebates/graphics/HeroIllustration";
-import { ApprovalArt } from "@/components/rebates/graphics/ApprovalArt";
-import { programsByStatus, rebateFaqs, REBATES_VERIFIED } from "@/data/rebates";
+import { buttonClasses } from "@/components/ui/Button";
+import { formatCAD } from "@/lib/format";
+import { heatPumpRate, rebateFaqs, REBATES_VERIFIED } from "@/data/rebates";
 import { pageMetadata } from "@/lib/metadata";
-import { site } from "@/lib/site";
 
 export const metadata: Metadata = pageMetadata({
   title: "Ontario HVAC & Heat Pump Rebates: What's Open (2026)",
@@ -21,22 +20,24 @@ export const metadata: Metadata = pageMetadata({
   path: "/rebates",
 });
 
+// The five questions people actually ask, in the order they ask them. Shown
+// and marked up as the same list so the FAQ schema matches the page.
+const SHOWN_FAQ_QUESTIONS = [1, 2, 3, 0, 7];
+const shownFaqs = SHOWN_FAQ_QUESTIONS.map((i) => rebateFaqs[i]);
+
 export default function RebatesPage() {
   const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: rebateFaqs.map((f) => ({
+    mainEntity: shownFaqs.map((f) => ({
       "@type": "Question",
       name: f.question,
       acceptedAnswer: { "@type": "Answer", text: f.answer },
     })),
   };
 
-  const counts = [
-    { n: programsByStatus("open").length, label: "open", href: "#open", dot: "bg-success" },
-    { n: programsByStatus("announced").length, label: "announced", href: "#announced", dot: "bg-ember-light" },
-    { n: programsByStatus("closed").length, label: "closed", href: "#closed", dot: "bg-white/50" },
-  ];
+  const maxRebate = formatCAD(heatPumpRate("electric").cap);
+  const gasRebate = formatCAD(heatPumpRate("gas").cap);
 
   return (
     <>
@@ -53,26 +54,12 @@ export default function RebatesPage() {
               Ontario rebates · Checked {REBATES_VERIFIED}
             </p>
             <h1 className="mt-3 font-display text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl">
-              What Ontario will actually pay toward your heat pump.
+              Up to {maxRebate} back on a heat pump in Ontario.
             </h1>
             <p className="mt-5 max-w-2xl text-lg text-white/80">
-              Many of the rebates you&rsquo;ll find on Google have closed. Here&rsquo;s what&rsquo;s open
-              today, what&rsquo;s only been announced, and how to claim it without losing the money to a
-              missed step.
+              {gasRebate} if you heat with Enbridge gas. Most of the rebates Google shows have closed.
+              Answer four questions to see what you&rsquo;d get. We handle the approval paperwork.
             </p>
-            <nav aria-label="Jump to programs" className="mt-6 flex flex-wrap gap-2.5">
-              {counts.map((c) => (
-                <a
-                  key={c.label}
-                  href={c.href}
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/25 bg-white/5 px-4 text-sm font-semibold text-white hover:bg-white/15"
-                >
-                  <span aria-hidden="true" className={`h-2.5 w-2.5 rounded-full ${c.dot}`} />
-                  <span className="font-display text-lg font-extrabold">{c.n}</span>
-                  {c.label}
-                </a>
-              ))}
-            </nav>
           </div>
           <HeroIllustration className="mx-auto hidden w-full max-w-md lg:block" />
         </Container>
@@ -91,112 +78,69 @@ export default function RebatesPage() {
 
       <ProofStrip />
 
-      <section className="py-16 sm:py-20">
+      <section className="py-14 sm:py-16">
         <Container>
           <h2 className="font-display text-3xl font-bold text-navy sm:text-4xl">
-            Every program, by what you can use today
+            What&rsquo;s open today
           </h2>
-          <div className="mt-10">
+          <div className="mt-8">
             <ProgramBoard />
           </div>
         </Container>
       </section>
 
-      <section className="bg-card py-16 sm:py-20">
-        <Container className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_1.1fr]">
-          <div>
-            <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-ember">
-              The step that costs people money
-            </p>
-            <h2 className="mt-2 font-display text-3xl font-bold text-navy sm:text-4xl">
-              Approval comes first. Install comes second.
-            </h2>
-            <p className="mt-4 text-lg text-muted">
-              Ontario&rsquo;s heat pump rebate is only paid if the program approves your project in
-              writing before work begins. That&rsquo;s why the call comes before the purchase.
-            </p>
-            <div className="mt-6 flex items-start gap-3 rounded-2xl border border-border bg-cream p-5">
-              <ShieldCheck size={24} className="mt-0.5 shrink-0 text-ember" aria-hidden="true" />
-              <p className="text-navy">
-                We&rsquo;re a participating contractor, so we prepare and submit both applications
-                for you. You don&rsquo;t fill out program forms.
-              </p>
-            </div>
-            <ApprovalArt className="mx-auto mt-8 hidden w-full max-w-sm sm:block lg:mx-0" />
-          </div>
-          <PreApprovalTimeline />
-        </Container>
-      </section>
-
-      <section className="py-16 sm:py-20">
-        <Container className="max-w-4xl">
-          <h2 className="font-display text-3xl font-bold text-navy sm:text-4xl">
-            Three ways to get us on your rebate
+      <section className="bg-card py-14 sm:py-16">
+        <Container className="max-w-3xl">
+          <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-ember">
+            The step that costs people money
+          </p>
+          <h2 className="mt-2 font-display text-3xl font-bold text-navy sm:text-4xl">
+            Approval comes first. Install comes second.
           </h2>
-          <p className="mt-3 max-w-2xl text-lg text-muted">
-            Tell us your heating fuel and what you&rsquo;re replacing. We&rsquo;ll tell you honestly
-            whether a rebate applies, including when it doesn&rsquo;t.
+          <p className="mt-3 text-lg text-muted">
+            We&rsquo;re a participating contractor, so we prepare and submit both applications. You
+            don&rsquo;t fill out program forms.
           </p>
-          <div
-            data-track-location="rebates_contact"
-            className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3"
-          >
-            <PhoneLink className="group flex flex-col gap-2 rounded-2xl border-2 border-ember bg-ember-light/50 p-5 hover:bg-ember-light">
-              <Phone size={26} className="text-ember" aria-hidden="true" />
-              <span className="font-display text-xl font-bold text-navy">Call us</span>
-              <span className="text-sm text-navy/80">Fastest. Ask about rebate pre-approval.</span>
-              <span className="mt-auto font-display text-lg font-extrabold text-ember">
-                <PhoneText />
-              </span>
-            </PhoneLink>
-            <Link
-              href="/get-quote?system=heat-pump"
-              className="group flex flex-col gap-2 rounded-2xl border border-border bg-card p-5 hover:border-ember"
-            >
-              <ClipboardList size={26} className="text-ember" aria-hidden="true" />
-              <span className="font-display text-xl font-bold text-navy">Free quote</span>
-              <span className="text-sm text-muted">About 60 seconds. We call you back.</span>
-              <span className="mt-auto font-semibold text-ember group-hover:underline">
-                Start my quote →
-              </span>
-            </Link>
-            <a
-              href={`mailto:${site.email}?subject=Heat%20pump%20rebate%20question`}
-              className="group flex flex-col gap-2 rounded-2xl border border-border bg-card p-5 hover:border-ember"
-            >
-              <Mail size={26} className="text-ember" aria-hidden="true" />
-              <span className="font-display text-xl font-bold text-navy">Email us</span>
-              <span className="text-sm text-muted">Send your fuel type and city.</span>
-              <span className="mt-auto break-all font-semibold text-ember group-hover:underline">
-                {site.email}
-              </span>
-            </a>
+          <div className="mt-8">
+            <PreApprovalTimeline />
           </div>
-          <p className="mt-5 text-sm text-muted">
-            Buying a furnace or AC and not a heat pump?{" "}
-            <Link href="/financing" className="font-semibold text-ember hover:underline">
-              See financing
-            </Link>
-            . We don&rsquo;t pretend a rebate exists when it doesn&rsquo;t.
-          </p>
         </Container>
       </section>
 
-      <section className="bg-card py-16 sm:py-20">
+      <section className="py-14 sm:py-16">
         <Container className="max-w-3xl">
           <h2 className="font-display text-3xl font-bold text-navy sm:text-4xl">
             Rebate questions, answered
           </h2>
           <div className="mt-8">
-            <FAQAccordion items={rebateFaqs} />
+            <FAQAccordion items={shownFaqs} />
           </div>
         </Container>
       </section>
 
-      <CTABand
-        heading="Not sure what applies to you? Ask us."
-        subheading="Tell us your heating fuel and we'll tell you straight whether a rebate applies, before you spend anything."
-      />
+      <section data-track-location="rebates_contact" className="bg-navy py-14 text-white sm:py-16">
+        <Container className="flex flex-col items-center gap-5 text-center">
+          <h2 className="font-display text-3xl font-bold sm:text-4xl">
+            Call before you sign anything.
+          </h2>
+          <p className="max-w-xl text-lg text-white/80">
+            Tell us your heating fuel and what you&rsquo;re replacing. We&rsquo;ll tell you honestly
+            whether a rebate applies, including when it doesn&rsquo;t.
+          </p>
+          <PhoneLink className={buttonClasses("primary", "lg")}>
+            <Phone size={20} aria-hidden="true" />
+            <span>
+              Call <PhoneText />
+            </span>
+          </PhoneLink>
+          <Link
+            href="/get-quote?system=heat-pump"
+            className="text-sm font-semibold text-white/80 underline underline-offset-4 hover:text-white"
+          >
+            Prefer to type? Get a free quote
+          </Link>
+        </Container>
+      </section>
     </>
   );
 }

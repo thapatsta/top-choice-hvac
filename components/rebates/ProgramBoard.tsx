@@ -140,33 +140,6 @@ function ProgramCard({ program }: { program: RebateProgram }) {
   );
 }
 
-function GroupHeading({
-  id,
-  title,
-  blurb,
-  count,
-  dot,
-}: {
-  id: string;
-  title: string;
-  blurb: string;
-  count: number;
-  dot: string;
-}) {
-  return (
-    <div id={id} className="scroll-mt-24">
-      <h3 className="flex items-center gap-3 font-display text-2xl font-bold text-navy">
-        <span aria-hidden="true" className={`h-3.5 w-3.5 shrink-0 rounded-full ${dot}`} />
-        {title}
-        <span className="rounded-full bg-navy/5 px-2.5 py-0.5 text-sm font-bold text-muted">
-          {count}
-        </span>
-      </h3>
-      <p className="mt-1 max-w-2xl text-muted">{blurb}</p>
-    </div>
-  );
-}
-
 export function ProgramBoard() {
   const open = programsByStatus("open");
   const announced = programsByStatus("announced");
@@ -175,15 +148,11 @@ export function ProgramBoard() {
   const otherOpen = open.filter((p) => p.id !== "hrs");
 
   return (
-    <div className="flex flex-col gap-12">
+    <div className="flex flex-col gap-8">
       <section className="flex flex-col gap-5" aria-label="Open programs">
-        <GroupHeading
-          id="open"
-          title="Open right now"
-          blurb={`What you can actually use today. Checked against each program's own page on ${REBATES_VERIFIED}.`}
-          count={open.length}
-          dot="bg-success"
-        />
+        <p className="text-muted">
+          Checked against each program&rsquo;s own page on {REBATES_VERIFIED}.
+        </p>
         {featured && <FeaturedCard program={featured} />}
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {otherOpen.map((p) => (
@@ -192,45 +161,39 @@ export function ProgramBoard() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-5" aria-label="Announced programs">
-        <GroupHeading
-          id="announced"
-          title="Announced, not open yet"
-          blurb="In the news, but there's nothing to apply for. Don't delay a replacement you need on a promise."
-          count={announced.length}
-          dot="bg-ember"
-        />
-        <div className="grid grid-cols-1 gap-5">
+      <details className="group rounded-2xl border border-border bg-card">
+        <summary className="flex min-h-[56px] cursor-pointer list-none items-center justify-between gap-3 px-5 font-display text-lg font-bold text-navy">
+          Not open yet, and closed programs ({announced.length + closed.length})
+          <ChevronDown
+            size={20}
+            className="shrink-0 text-ember transition-transform duration-200 group-open:rotate-180"
+            aria-hidden="true"
+          />
+        </summary>
+        <div className="flex flex-col gap-5 border-t border-dashed border-border p-5">
+          <p className="text-muted">
+            These still rank on Google and turn up in old ads. None of them takes applications today.
+          </p>
           {announced.map((p) => (
             <ProgramCard key={p.id} program={p} />
           ))}
+          <ul className="divide-y divide-dashed divide-border rounded-2xl border border-border">
+            {closed.map((p) => {
+              const Icon = LEVEL_ICON[p.level];
+              return (
+                <li key={p.id} className="flex items-start gap-3 p-4 sm:items-center">
+                  <Icon size={20} className="mt-0.5 shrink-0 text-muted sm:mt-0" aria-hidden="true" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-display text-base font-bold text-navy">{p.name}</p>
+                    <p className="text-sm text-muted">{p.summary}</p>
+                  </div>
+                  <Stamp status="closed" />
+                </li>
+              );
+            })}
+          </ul>
         </div>
-      </section>
-
-      <section className="flex flex-col gap-5" aria-label="Closed programs">
-        <GroupHeading
-          id="closed"
-          title="Closed: stop searching for these"
-          blurb="These still rank on Google and still turn up in old ads and blog posts. They no longer accept new applications."
-          count={closed.length}
-          dot="bg-muted"
-        />
-        <ul className="divide-y divide-dashed divide-border rounded-2xl border border-border bg-card">
-          {closed.map((p) => {
-            const Icon = LEVEL_ICON[p.level];
-            return (
-              <li key={p.id} className="flex items-start gap-3 p-4 sm:items-center sm:p-5">
-                <Icon size={20} className="mt-0.5 shrink-0 text-muted sm:mt-0" aria-hidden="true" />
-                <div className="min-w-0 flex-1">
-                  <p className="font-display text-base font-bold text-navy sm:text-lg">{p.name}</p>
-                  <p className="text-sm text-muted">{p.summary}</p>
-                </div>
-                <Stamp status="closed" />
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+      </details>
     </div>
   );
 }
